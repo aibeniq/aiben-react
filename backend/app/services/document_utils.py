@@ -393,12 +393,14 @@ def extract_text_from_file_unified(
         return f"Failed to extract text from {filename}: {str(e)}"
 
 
-def extract_documents_from_file_unified(
+async def extract_documents_from_file_unified(
     file_content: bytes, filename: str, pdf_parsing_mode: str = None, current_user=None
 ) -> List[Document]:
     """
     Unified file extraction function that returns LangChain Document objects.
     Used by vector search and knowledge base processing.
+
+    This function is async to support non-blocking PDF processing with PyMuPDF4LLM.
 
     Args:
         file_content: Raw bytes of the file
@@ -451,7 +453,7 @@ def extract_documents_from_file_unified(
                         f"[DOCUMENT_UTILS] Using global PDF_PARSING_MODE setting: {mode}"
                     )
 
-                return load_pdf_with_pypdf(
+                return await load_pdf_with_pypdf(
                     temp_file_path,
                     filename,
                     parsing_mode=mode,

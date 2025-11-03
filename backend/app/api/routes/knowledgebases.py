@@ -584,7 +584,7 @@ def create_source_entry_from_file_data(
         # Don't raise - this shouldn't fail the entire knowledge base creation
 
 
-def load_uploaded_file(file: UploadFile, current_user=None) -> List[Any]:
+async def load_uploaded_file(file: UploadFile, current_user=None) -> List[Any]:
     """
     Load an uploaded file based on its type (e.g., PDF, text file).
 
@@ -624,7 +624,7 @@ def load_uploaded_file(file: UploadFile, current_user=None) -> List[Any]:
                 parsing_mode = settings.PDF_PARSING_MODE
                 print(f"[KB] Using global PDF_PARSING_MODE setting: {parsing_mode}")
 
-            loaded_documents = load_pdf_with_pypdf(
+            loaded_documents = await load_pdf_with_pypdf(
                 temp_file_path,
                 file.filename,
                 parsing_mode=parsing_mode,
@@ -1383,40 +1383,51 @@ async def process_knowledge_base_creation(
                         task_id, "upload", "Files uploaded successfully"
                     )
 
+                # Ensure upload stage is completed before starting processing
+                progress_tracker.complete_stage(
+                    task_id, "upload", "Files uploaded successfully"
+                )
+
                 # Start processing stage (file saving is complete, now extract text)
                 total_files = len(file_paths)
                 print(f"Processing {total_files} files from temporary storage")
 
-                # Initialize processing stage
+                # Initialize processing stage with i18n message key
+                # Use first file info if available to show immediate progress
+                first_filename = (
+                    file_paths[0]["original_filename"] if file_paths else "..."
+                )
                 progress_tracker.update_stage_progress(
                     task_id,
                     "processing",
                     0,
                     total_files,
-                    message_key="knowledgeBases.progress.processingFile",
+                    message_key="knowledgeBases.progress.processing_file",
                     message_params={
-                        "current": "0",
+                        "current": "1",
                         "total": str(total_files),
-                        "filename": "",
+                        "filename": first_filename,
                     },
+                    message=f"Processing file 1/{total_files}: {first_filename}",
                 )
 
                 # Process each file from the stored paths
                 processed_documents_count = 0
                 for i, file_info in enumerate(file_paths):
                     try:
-                        # Update processing progress for current file
+                        # Update processing progress for current file with i18n message key
                         progress_tracker.update_stage_progress(
                             task_id,
                             "processing",
                             i,
                             total_files,
-                            message_key="knowledgeBases.progress.processingFile",
+                            message_key="knowledgeBases.progress.processing_file",
                             message_params={
                                 "current": str(i + 1),
                                 "total": str(total_files),
                                 "filename": file_info["original_filename"],
                             },
+                            message=f"Processing file {i + 1}/{total_files}: {file_info['original_filename']}",
                         )
 
                         filename = file_info["original_filename"]
@@ -1435,7 +1446,7 @@ async def process_knowledge_base_creation(
                         try:
                             # Process the file based on its type
                             if filename.lower().endswith(".pdf"):
-                                loaded_documents = load_pdf_with_pypdf(
+                                loaded_documents = await load_pdf_with_pypdf(
                                     temp_file_path,
                                     filename,
                                     parsing_mode=user_pdf_preference,
@@ -1474,8 +1485,8 @@ async def process_knowledge_base_creation(
                                 message_key="knowledgeBases.progress.processed_chunks",
                                 message_params={
                                     "chunks": str(processed_documents_count),
-                                    "current": file_index,
-                                    "total": len(file_paths),
+                                    "current": str(i + 1),
+                                    "total": str(total_files),
                                 },
                             )
 
@@ -2154,7 +2165,7 @@ async def update_knowledge_base(
                 print("Adding new files to VectorDB...")
                 documents = []
                 for file in files:
-                    loaded_documents = load_uploaded_file(
+                    loaded_documents = await load_uploaded_file(
                         file, current_user=current_user
                     )
                     documents.extend(loaded_documents)

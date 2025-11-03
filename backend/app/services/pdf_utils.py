@@ -4,6 +4,7 @@ PDF processing utilities with optional PyMuPDF4LLM support for enhanced table pa
 
 import tempfile
 import os
+import asyncio
 from typing import List, Optional, Tuple
 from pathlib import Path
 
@@ -64,11 +65,31 @@ def has_tables_fast(file_path: str) -> Tuple[bool, int]:
         return True, 0
 
 
-def extract_pdf_with_pymupdf4llm(
+def _extract_pdf_with_pymupdf4llm_sync(file_path: str, filename: str = None) -> str:
+    """
+    Synchronous helper to extract PDF content using PyMuPDF4LLM.
+    This function runs the CPU-intensive extraction in a separate thread.
+
+    Args:
+        file_path: Path to the PDF file
+        filename: Optional filename for logging
+
+    Returns:
+        Markdown text extracted from the PDF
+    """
+    print(f"Using PyMuPDF4LLM for enhanced table parsing on {filename}")
+    md_text = pymupdf4llm.to_markdown(file_path)
+    return md_text
+
+
+async def extract_pdf_with_pymupdf4llm(
     file_path: str, filename: str = None, skip_table_check: bool = False
 ) -> List[Document]:
     """
     Extract PDF content using PyMuPDF4LLM for enhanced table parsing.
+
+    This function runs the CPU-intensive PyMuPDF processing in a thread pool
+    to avoid blocking the async event loop, allowing progress updates to be served.
 
     This function first performs a fast table detection check using vanilla PyMuPDF.
     If no tables are detected, it falls back to basic pypdf extraction to avoid
@@ -92,14 +113,18 @@ def extract_pdf_with_pymupdf4llm(
             print(
                 f"No tables detected in {filename}. Using fast pypdf extraction instead."
             )
-            return load_pdf_with_pypdf(file_path, filename, parsing_mode="basic")
+            # Note: load_pdf_with_pypdf is now async, so we need to await it
+            return await load_pdf_with_pypdf(file_path, filename, parsing_mode="basic")
 
     documents = []
 
     try:
-        # Extract as Markdown (preserves tables and structure)
-        print(f"Using PyMuPDF4LLM for enhanced table parsing on {filename}")
-        md_text = pymupdf4llm.to_markdown(file_path)
+        # Run the CPU-intensive extraction in a thread pool to avoid blocking
+        # the async event loop. This allows progress API requests to be served
+        # while PyMuPDF4LLM is processing the PDF.
+        md_text = await asyncio.to_thread(
+            _extract_pdf_with_pymupdf4llm_sync, file_path, filename
+        )
 
         # Split into pages if possible (PyMuPDF4LLM may return full document)
         # Common page separator in Markdown output
@@ -125,11 +150,14 @@ def extract_pdf_with_pymupdf4llm(
     return documents
 
 
-def load_pdf_with_pypdf(
+async def load_pdf_with_pypdf(
     file_path: str, filename: str = None, parsing_mode: str = "auto"
 ) -> List[Document]:
     """
     Load PDF using pypdf library with optional PyMuPDF4LLM enhancement.
+
+    This function is async to allow the CPU-intensive PyMuPDF4LLM processing
+    to run in a thread pool without blocking the event loop.
 
     Parsing modes:
     - 'auto': Automatically detect tables and use enhanced parsing if tables exist
@@ -155,7 +183,7 @@ def load_pdf_with_pypdf(
         if PYMUPDF4LLM_AVAILABLE:
             try:
                 print(f"Using enhanced parsing (forced) for {filename}")
-                return extract_pdf_with_pymupdf4llm(
+                return await extract_pdf_with_pymupdf4llm(
                     file_path, filename, skip_table_check=True
                 )
             except Exception as e:
@@ -176,7 +204,7 @@ def load_pdf_with_pypdf(
                 print(
                     f"Tables detected ({table_count}), using PyMuPDF4LLM for {filename}"
                 )
-                return extract_pdf_with_pymupdf4llm(
+                return await extract_pdf_with_pymupdf4llm(
                     file_path, filename, skip_table_check=True
                 )
             except Exception as e:
