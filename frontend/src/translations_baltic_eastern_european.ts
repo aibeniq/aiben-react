@@ -194,7 +194,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           "Analüüsi kõik dokumendid teadmusbaasis (kattuv, üksikasjalik)",
         pleaseWait: "Palun oodake, kuni vaatame teie dokumente üle",
         reviewSuccess: "Dokumendi ülevaatus lõpetati edukalt!",
-        reviewSuccessMultiple: "{{count}} faili töödeldud optimeeritud konteksti jagamisega!",
+        reviewSuccessMultiple:
+          "{{count}} faili töödeldud optimeeritud konteksti jagamisega!",
       },
       compare: {
         title: "Dokumentide võrdlus",
@@ -659,7 +660,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           "Analizējiet visus dokumentus zināšanu bāzē (visaptveroša, detalizēta)",
         pleaseWait: "Lūdzu, uzgaidiet, kamēr pārskatām jūsu dokumentus",
         reviewSuccess: "Dokumenta pārskatīšana pabeigta veiksmīgi!",
-        reviewSuccessMultiple: "{{count}} faili apstrādāti ar optimizētu konteksta koplietošanu!",
+        reviewSuccessMultiple:
+          "{{count}} faili apstrādāti ar optimizētu konteksta koplietošanu!",
       },
       compare: {
         title: "Salīdzināt dokumentus",
@@ -1120,7 +1122,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           "Analizuokite visus dokumentus žinių bazėje (išsamus, detalus)",
         pleaseWait: "Prašome palaukti, kol peržiūrime jūsų dokumentus",
         reviewSuccess: "Dokumento peržiūra sėkmingai baigta!",
-        reviewSuccessMultiple: "{{count}} failai apdoroti su optimizuotu konteksto bendrinimu!",
+        reviewSuccessMultiple:
+          "{{count}} failai apdoroti su optimizuotu konteksto bendrinimu!",
       },
       compare: {
         title: "Palyginti dokumentus",
@@ -1370,8 +1373,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       downloadDocx: "Atsisiųsti DOCX",
       downloadCsv: "Atsisiųsti CSV",
       clearReport: "Išvalyti Ataskaitą",
-      resultsPlaceholder:
-        "Rezultatai bus rodomi čia po dokumento generavimo.",
+      resultsPlaceholder: "Rezultatai bus rodomi čia po dokumento generavimo.",
       sectionsWithSources: "Skyriai su Šaltiniais",
       sectionNumber: "Skyrius {number}: {title}",
       kbGenerated: "Sugeneruota KB",
@@ -1582,7 +1584,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           "Ανάλυση όλων των εγγράφων στη βάση γνώσης (ολοκληρωμένη, λεπτομερής)",
         pleaseWait: "Παρακαλώ περιμένετε ενώ ελέγχουμε τα έγγραφά σας",
         reviewSuccess: "Ο έλεγχος εγγράφου ολοκληρώθηκε με επιτυχία!",
-        reviewSuccessMultiple: "{{count}} αρχεία επεξεργάστηκαν με βελτιστοποιημένη κοινή χρήση περιβάλλοντος!",
+        reviewSuccessMultiple:
+          "{{count}} αρχεία επεξεργάστηκαν με βελτιστοποιημένη κοινή χρήση περιβάλλοντος!",
       },
       compare: {
         title: "Σύγκριση εγγράφων",
@@ -2273,7 +2276,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         modalTitlePositive: "Mis oli kasulik?",
         modalTitleNegative: "Mida saaks parandada?",
         descriptionPositive: "Öelge meile, mis teile selles vastuses meeldis.",
-        descriptionNegative: "Öelge meile, kuidas saame seda vastust parandada.",
+        descriptionNegative:
+          "Öelge meile, kuidas saame seda vastust parandada.",
         placeholder: "Teie kommentaarid (valikuline)",
         cancel: "Tühista",
         updateFeedback: "Uuenda tagasisidet",
@@ -2321,7 +2325,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         modalTitlePositive: "Kas bija noderīgs?",
         modalTitleNegative: "Ko varētu uzlabot?",
         descriptionPositive: "Pastāstiet mums, kas jums patika šajā atbildē.",
-        descriptionNegative: "Pastāstiet mums, kā mēs varam uzlabot šo atbildi.",
+        descriptionNegative:
+          "Pastāstiet mums, kā mēs varam uzlabot šo atbildi.",
         placeholder: "Jūsu komentāri (neobligāti)",
         cancel: "Atcelt",
         updateFeedback: "Atjaunināt atgriezenisko saiti",
@@ -2332,7 +2337,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         tooltipMarkNegative: "Atzīmēt kā nenoderīgu",
         feedbackSaved: "Atgriezeniskā saite saglabāta",
         thankYouMessage: "Paldies par jūsu atgriezenisko saiti!",
-        submitErrorMessage: "Neizdevās iesniegt atgriezenisko saiti. Mēģiniet vēlreiz.",
+        submitErrorMessage:
+          "Neizdevās iesniegt atgriezenisko saiti. Mēģiniet vēlreiz.",
       },
       emptyMessages: {
         review: "Nav pārskata vēstures",
@@ -2369,7 +2375,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         modalTitlePositive: "Kas buvo naudinga?",
         modalTitleNegative: "Ką galima būtų patobulinti?",
         descriptionPositive: "Pasakykite mums, kas jums patiko šiame atsakyme.",
-        descriptionNegative: "Pasakykite mums, kaip galime patobulinti šį atsakymą.",
+        descriptionNegative:
+          "Pasakykite mums, kaip galime patobulinti šį atsakymą.",
         placeholder: "Jūsų komentarai (neprivaloma)",
         cancel: "Atšaukti",
         updateFeedback: "Atnaujinti atsiliepimą",
@@ -2380,7 +2387,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         tooltipMarkNegative: "Pažymėti kaip nenaudingą",
         feedbackSaved: "Atsiliepimas išsaugotas",
         thankYouMessage: "Ačiū už jūsų atsiliepimą!",
-        submitErrorMessage: "Nepavyko pateikti atsiliepimo. Bandykite dar kartą.",
+        submitErrorMessage:
+          "Nepavyko pateikti atsiliepimo. Bandykite dar kartą.",
       },
       emptyMessages: {
         review: "Kol kas nėra peržiūros istorijos",
@@ -2848,7 +2856,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       modalTitlePositive: "Τι ήταν χρήσιμο;",
       modalTitleNegative: "Τι μπορεί να βελτιωθεί;",
       descriptionPositive: "Πείτε μας τι σας άρεσε σε αυτή την απάντηση.",
-      descriptionNegative: "Πείτε μας πώς μπορούμε να βελτιώσουμε αυτή την απάντηση.",
+      descriptionNegative:
+        "Πείτε μας πώς μπορούμε να βελτιώσουμε αυτή την απάντηση.",
       placeholder: "Τα σχόλιά σας (προαιρετικά)",
       cancel: "Ακύρωση",
       updateFeedback: "Ενημέρωση σχολίων",

@@ -1,12 +1,12 @@
+import { toaster } from "@/components/ui/toaster"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate, useRouterState } from "@tanstack/react-router"
-import { toaster } from "@/components/ui/toaster"
 
-import {
-  type Body_login_access_token_api_v1_login_access_token_post as AccessToken,
-  type ApiError,
-  type UserPublic,
-  type UserRegister,
+import type {
+  Body_login_access_token_api_v1_login_access_token_post as AccessToken,
+  ApiError,
+  UserPublic,
+  UserRegister,
 } from "@/client"
 import { useHandleError } from "@/utils"
 
@@ -25,66 +25,84 @@ const useAuth = () => {
   const handleError = useHandleError()
 
   // Don't run the user query on authentication pages to prevent infinite loops
-  const isAuthPage = routerState.location.pathname.startsWith('/login') ||
-    routerState.location.pathname.startsWith('/signup') ||
-    routerState.location.pathname.startsWith('/recover-password') ||
-    routerState.location.pathname.startsWith('/reset-password')
+  const isAuthPage =
+    routerState.location.pathname.startsWith("/login") ||
+    routerState.location.pathname.startsWith("/signup") ||
+    routerState.location.pathname.startsWith("/recover-password") ||
+    routerState.location.pathname.startsWith("/reset-password")
 
   // Check if we're on a protected route (under _layout) or auth route
-  const isProtectedRoute = routerState.location.pathname.startsWith('/_layout') ||
-    (routerState.location.pathname === '/' && !isAuthPage)
+  const isProtectedRoute =
+    routerState.location.pathname.startsWith("/_layout") ||
+    (routerState.location.pathname === "/" && !isAuthPage)
 
-  const isEnabled = isProtectedRoute && typeof window !== 'undefined'
-  console.log('useAuth: isAuthPage:', isAuthPage, 'isProtectedRoute:', isProtectedRoute, 'isEnabled:', isEnabled, 'pathname:', routerState.location.pathname)
+  const isEnabled = isProtectedRoute && typeof window !== "undefined"
+  console.log(
+    "useAuth: isAuthPage:",
+    isAuthPage,
+    "isProtectedRoute:",
+    isProtectedRoute,
+    "isEnabled:",
+    isEnabled,
+    "pathname:",
+    routerState.location.pathname,
+  )
 
-  const { data: user, isLoading, isError } = useQuery<UserPublic | null, Error>({
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
     queryFn: async () => {
       // Double-check we're not on an auth page before making the request
       const currentPath = window.location.pathname
-      const isCurrentlyAuthPage = currentPath.startsWith('/login') ||
-        currentPath.startsWith('/signup') ||
-        currentPath.startsWith('/recover-password') ||
-        currentPath.startsWith('/reset-password')
+      const isCurrentlyAuthPage =
+        currentPath.startsWith("/login") ||
+        currentPath.startsWith("/signup") ||
+        currentPath.startsWith("/recover-password") ||
+        currentPath.startsWith("/reset-password")
 
       if (isCurrentlyAuthPage) {
-        console.log('useAuth: Skipping /me request on auth page:', currentPath)
-        throw new Error('Cannot fetch user on auth page')
+        console.log("useAuth: Skipping /me request on auth page:", currentPath)
+        throw new Error("Cannot fetch user on auth page")
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
       const response = await fetch(`${apiUrl}/api/v1/users/me`, {
-        credentials: 'include',
+        credentials: "include",
       })
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user')
+        throw new Error("Failed to fetch user")
       }
 
       return await response.json()
     },
     retry: false, // Don't retry on auth errors
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    enabled: isProtectedRoute && typeof window !== 'undefined', // Only run query if NOT on auth pages and in browser
+    enabled: isProtectedRoute && typeof window !== "undefined", // Only run query if NOT on auth pages and in browser
     refetchOnWindowFocus: false, // Don't refetch when window gains focus
-    refetchOnMount: isProtectedRoute && typeof window !== 'undefined', // Don't refetch on mount if on auth pages or not in browser
+    refetchOnMount: isProtectedRoute && typeof window !== "undefined", // Don't refetch on mount if on auth pages or not in browser
   })
 
   const signUpMutation = useMutation({
     mutationFn: async (data: UserRegister) => {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
       const response = await fetch(`${apiUrl}/api/v1/users/signup`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-        credentials: 'include',
+        credentials: "include",
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: 'Signup failed' }))
-        throw new Error(errorData.detail || 'Signup failed')
+        const errorData = await response
+          .json()
+          .catch(() => ({ detail: "Signup failed" }))
+        throw new Error(errorData.detail || "Signup failed")
       }
 
       return await response.json()
@@ -94,7 +112,9 @@ const useAuth = () => {
       // Show success message for pending approval
       toaster.create({
         title: "Registration Submitted",
-        description: response.message || "Your account is pending admin approval. You'll receive an email when approved.",
+        description:
+          response.message ||
+          "Your account is pending admin approval. You'll receive an email when approved.",
         type: "info",
         duration: 8000,
       })
@@ -105,7 +125,7 @@ const useAuth = () => {
       let errDetail: string
       let status: number
 
-      if ('status' in err && 'body' in err) {
+      if ("status" in err && "body" in err) {
         // It's an ApiError
         errDetail = (err.body as any)?.detail
         status = err.status
@@ -115,23 +135,31 @@ const useAuth = () => {
         status = 400 // Default status for regular errors
       }
 
-      if (status === 400 && errDetail?.includes?.("Registration pending approval")) {
+      if (
+        status === 400 &&
+        errDetail?.includes?.("Registration pending approval")
+      ) {
         toaster.create({
           title: "Registration Pending",
-          description: "Your registration is pending admin approval. Please check your email for updates.",
+          description:
+            "Your registration is pending admin approval. Please check your email for updates.",
           type: "warning",
           duration: 6000,
         })
-      } else if (status === 400 && errDetail?.includes?.("already exists in the system")) {
+      } else if (
+        status === 400 &&
+        errDetail?.includes?.("already exists in the system")
+      ) {
         toaster.create({
           title: "Account Already Exists",
-          description: "An account with this email already exists. Please try logging in or use a different email.",
+          description:
+            "An account with this email already exists. Please try logging in or use a different email.",
           type: "error",
           duration: 5000,
         })
       } else {
         // For ApiError objects, use the handleError function
-        if ('status' in err && 'body' in err) {
+        if ("status" in err && "body" in err) {
           handleError(err)
         } else {
           // For regular Error objects, show a generic error
@@ -152,22 +180,24 @@ const useAuth = () => {
   const login = async (data: AccessToken) => {
     // Use direct fetch for login to avoid client generation issues
     const formData = new URLSearchParams()
-    formData.append('username', data.username)
-    formData.append('password', data.password)
+    formData.append("username", data.username)
+    formData.append("password", data.password)
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
     const response = await fetch(`${apiUrl}/api/v1/login/access-token`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: formData,
-      credentials: 'include', // Include cookies
+      credentials: "include", // Include cookies
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Login failed' }))
-      throw new Error(errorData.detail || 'Login failed')
+      const errorData = await response
+        .json()
+        .catch(() => ({ detail: "Login failed" }))
+      throw new Error(errorData.detail || "Login failed")
     }
 
     return await response.json()
@@ -186,7 +216,7 @@ const useAuth = () => {
       let errDetail: string
       let status: number
 
-      if ('status' in err && 'body' in err) {
+      if ("status" in err && "body" in err) {
         // It's an ApiError
         errDetail = (err.body as any)?.detail
         status = err.status
@@ -199,19 +229,27 @@ const useAuth = () => {
       if (status === 403 && errDetail?.includes?.("pending")) {
         toaster.create({
           title: "Account Pending",
-          description: "Your account is awaiting admin approval. Please check your email for updates.",
+          description:
+            "Your account is awaiting admin approval. Please check your email for updates.",
           type: "warning",
           duration: 6000,
         })
-      } else if (status === 400 && errDetail?.includes?.("Incorrect email or password")) {
+      } else if (
+        status === 400 &&
+        errDetail?.includes?.("Incorrect email or password")
+      ) {
         // More user-friendly message for wrong credentials
         toaster.create({
           title: "Login Failed",
-          description: "The email or password you entered is incorrect. Please check your credentials and try again.",
+          description:
+            "The email or password you entered is incorrect. Please check your credentials and try again.",
           type: "error",
           duration: 5000,
         })
-      } else if (status === 429 && errDetail?.includes?.("Too many login attempts")) {
+      } else if (
+        status === 429 &&
+        errDetail?.includes?.("Too many login attempts")
+      ) {
         // Rate limiting due to too many attempts
         toaster.create({
           title: "Too Many Attempts",
@@ -222,13 +260,14 @@ const useAuth = () => {
       } else if (status === 400 && errDetail?.includes?.("Inactive user")) {
         toaster.create({
           title: "Account Inactive",
-          description: "Your account is not currently activated. Please contact support for assistance.",
+          description:
+            "Your account is not currently activated. Please contact support for assistance.",
           type: "error",
           duration: 6000,
         })
       } else {
         // For ApiError objects, use the handleError function
-        if ('status' in err && 'body' in err) {
+        if ("status" in err && "body" in err) {
           handleError(err)
         } else {
           // For regular Error objects, show a generic error
@@ -247,7 +286,7 @@ const useAuth = () => {
     try {
       // Call the logout endpoint to clear HTTP-only cookie
       // For now, we'll make a direct API call since the generated client may not have the logout method yet
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
       const response = await fetch(`${apiUrl}/api/v1/login/logout`, {
         method: "POST",
         credentials: "include", // Include cookies

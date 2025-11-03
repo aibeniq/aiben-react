@@ -397,8 +397,7 @@ export const addAsianTranslations = (resources: any) => {
       },
     },
     generate: {
-      pageDescription:
-        "根據用戶定義的結構和文檔數據庫生成文檔。",
+      pageDescription: "根據用戶定義的結構和文檔數據庫生成文檔。",
       generatingDocument: "正在生成文檔...",
       pleaseWait: "請稍候，我們正在生成您的報告",
       knowledgeBaseTitle: "知識庫",
@@ -418,8 +417,7 @@ export const addAsianTranslations = (resources: any) => {
       downloadDocx: "下載 DOCX",
       downloadCsv: "下載 CSV",
       clearReport: "清除報告",
-      resultsPlaceholder:
-        "生成文檔後，結果將顯示在此處。",
+      resultsPlaceholder: "生成文檔後，結果將顯示在此處。",
       sectionsWithSources: "帶來源的部分",
       sectionNumber: "第 {number} 部分：{title}",
       kbGenerated: "KB 生成",
@@ -614,7 +612,8 @@ export const addAsianTranslations = (resources: any) => {
         deleteChecklist: "ลบรายการตรวจสอบ",
         pleaseWait: "กรุณารอสักครู่ เรากำลังตรวจสอบเอกสารของคุณ",
         reviewSuccess: "การตรวจสอบเอกสารเสร็จสิ้นเรียบร้อยแล้ว!",
-        reviewSuccessMultiple: "ไฟล์ {{count}} ไฟล์ได้รับการประมวลผลด้วยการแบ่งปันบริบทที่ปรับให้เหมาะสม!",
+        reviewSuccessMultiple:
+          "ไฟล์ {{count}} ไฟล์ได้รับการประมวลผลด้วยการแบ่งปันบริบทที่ปรับให้เหมาะสม!",
       },
       compare: {
         title: "เปรียบเทียบเอกสาร",
@@ -839,8 +838,7 @@ export const addAsianTranslations = (resources: any) => {
       },
     },
     generate: {
-      pageDescription:
-        "สร้างเอกสารตามโครงสร้างที่ผู้ใช้กำหนดและฐานข้อมูลเอกสาร",
+      pageDescription: "สร้างเอกสารตามโครงสร้างที่ผู้ใช้กำหนดและฐานข้อมูลเอกสาร",
       generatingDocument: "กำลังสร้างเอกสาร...",
       pleaseWait: "กรุณารอในขณะที่เราสร้างรายงานของคุณ",
       knowledgeBaseTitle: "ฐานความรู้",
@@ -860,8 +858,7 @@ export const addAsianTranslations = (resources: any) => {
       downloadDocx: "ดาวน์โหลด DOCX",
       downloadCsv: "ดาวน์โหลด CSV",
       clearReport: "ล้างรายงาน",
-      resultsPlaceholder:
-        "ผลลัพธ์จะปรากฏที่นี่หลังจากสร้างเอกสาร",
+      resultsPlaceholder: "ผลลัพธ์จะปรากฏที่นี่หลังจากสร้างเอกสาร",
       sectionsWithSources: "ส่วนที่มีแหล่งที่มา",
       sectionNumber: "ส่วนที่ {number}: {title}",
       kbGenerated: "สร้างโดย KB",
@@ -1058,7 +1055,8 @@ export const addAsianTranslations = (resources: any) => {
         deleteChecklist: "Xóa danh sách kiểm tra",
         pleaseWait: "Vui lòng đợi, chúng tôi đang xem xét tài liệu của bạn",
         reviewSuccess: "Việc xem xét tài liệu đã hoàn thành thành công!",
-        reviewSuccessMultiple: "{{count}} tệp đã được xử lý với việc chia sẻ ngữ cảnh được tối ưu hóa!",
+        reviewSuccessMultiple:
+          "{{count}} tệp đã được xử lý với việc chia sẻ ngữ cảnh được tối ưu hóa!",
       },
       compare: {
         title: "So sánh tài liệu",
@@ -1308,8 +1306,7 @@ export const addAsianTranslations = (resources: any) => {
       downloadDocx: "Tải xuống DOCX",
       downloadCsv: "Tải xuống CSV",
       clearReport: "Xóa Báo cáo",
-      resultsPlaceholder:
-        "Kết quả sẽ xuất hiện ở đây sau khi tạo tài liệu.",
+      resultsPlaceholder: "Kết quả sẽ xuất hiện ở đây sau khi tạo tài liệu.",
       sectionsWithSources: "Các Phần có Nguồn",
       sectionNumber: "Phần {number}: {title}",
       kbGenerated: "Được tạo bởi KB",
@@ -1507,7 +1504,8 @@ export const addAsianTranslations = (resources: any) => {
         deleteChecklist: "Hapus Daftar Periksa",
         pleaseWait: "Harap tunggu, kami sedang meninjau dokumen Anda",
         reviewSuccess: "Peninjauan dokumen berhasil diselesaikan!",
-        reviewSuccessMultiple: "{{count}} file diproses dengan berbagi konteks yang dioptimalkan!",
+        reviewSuccessMultiple:
+          "{{count}} file diproses dengan berbagi konteks yang dioptimalkan!",
       },
       compare: {
         title: "Bandingkan Dokumen",
@@ -1957,7 +1955,8 @@ export const addAsianTranslations = (resources: any) => {
         deleteChecklist: "Padam Senarai Semak",
         pleaseWait: "Sila tunggu, kami sedang menyemak dokumen anda",
         reviewSuccess: "Semakan dokumen berjaya diselesaikan!",
-        reviewSuccessMultiple: "{{count}} fail diproses dengan perkongsian konteks yang dioptimumkan!",
+        reviewSuccessMultiple:
+          "{{count}} fail diproses dengan perkongsian konteks yang dioptimumkan!",
       },
       compare: {
         title: "Bandingkan Dokumen",
@@ -2405,9 +2404,11 @@ export const addAsianTranslations = (resources: any) => {
         saveChecklist: "I-save ang Checklist",
         cancel: "Kanselahin",
         deleteChecklist: "Tanggalin ang Checklist",
-        pleaseWait: "Mangyaring maghintay, sinusuri namin ang iyong mga dokumento",
+        pleaseWait:
+          "Mangyaring maghintay, sinusuri namin ang iyong mga dokumento",
         reviewSuccess: "Matagumpay na natapos ang pagsusuri sa dokumento!",
-        reviewSuccessMultiple: "{{count}} mga file ang naproseso na may na-optimize na pagbabahagi ng konteksto!",
+        reviewSuccessMultiple:
+          "{{count}} mga file ang naproseso na may na-optimize na pagbabahagi ng konteksto!",
       },
       compare: {
         title: "Ihambing ang mga Dokumento",
@@ -3343,7 +3344,8 @@ export const addAsianTranslations = (resources: any) => {
         tooltipMarkNegative: "役立たないとしてマーク",
         feedbackSaved: "フィードバックが保存されました",
         thankYouMessage: "フィードバックありがとうございます！",
-        submitErrorMessage: "フィードバックの送信に失敗しました。もう一度お試しください。",
+        submitErrorMessage:
+          "フィードバックの送信に失敗しました。もう一度お試しください。",
       },
       emptyMessages: {
         review: "レビュー履歴はまだありません",
@@ -3472,8 +3474,10 @@ export const addAsianTranslations = (resources: any) => {
       feedback: {
         modalTitlePositive: "Điều gì hữu ích?",
         modalTitleNegative: "Điều gì có thể được cải thiện?",
-        descriptionPositive: "Hãy cho chúng tôi biết bạn thích gì ở câu trả lời này.",
-        descriptionNegative: "Hãy cho chúng tôi biết chúng tôi có thể cải thiện câu trả lời này như thế nào.",
+        descriptionPositive:
+          "Hãy cho chúng tôi biết bạn thích gì ở câu trả lời này.",
+        descriptionNegative:
+          "Hãy cho chúng tôi biết chúng tôi có thể cải thiện câu trả lời này như thế nào.",
         placeholder: "Bình luận của bạn (tùy chọn)",
         cancel: "Hủy",
         updateFeedback: "Cập nhật phản hồi",
@@ -3519,8 +3523,10 @@ export const addAsianTranslations = (resources: any) => {
       feedback: {
         modalTitlePositive: "Apa yang berguna?",
         modalTitleNegative: "Apa yang dapat diperbaiki?",
-        descriptionPositive: "Beritahu kami apa yang Anda sukai dari jawaban ini.",
-        descriptionNegative: "Beritahu kami bagaimana kami dapat memperbaiki jawaban ini.",
+        descriptionPositive:
+          "Beritahu kami apa yang Anda sukai dari jawaban ini.",
+        descriptionNegative:
+          "Beritahu kami bagaimana kami dapat memperbaiki jawaban ini.",
         placeholder: "Komentar Anda (opsional)",
         cancel: "Batal",
         updateFeedback: "Perbarui umpan balik",
@@ -3566,8 +3572,10 @@ export const addAsianTranslations = (resources: any) => {
       feedback: {
         modalTitlePositive: "Apa yang berguna?",
         modalTitleNegative: "Apa yang boleh diperbaiki?",
-        descriptionPositive: "Beritahu kami apa yang anda suka tentang jawapan ini.",
-        descriptionNegative: "Beritahu kami bagaimana kami boleh memperbaiki jawapan ini.",
+        descriptionPositive:
+          "Beritahu kami apa yang anda suka tentang jawapan ini.",
+        descriptionNegative:
+          "Beritahu kami bagaimana kami boleh memperbaiki jawapan ini.",
         placeholder: "Komen anda (pilihan)",
         cancel: "Batal",
         updateFeedback: "Kemas kini maklum balas",
@@ -3613,19 +3621,23 @@ export const addAsianTranslations = (resources: any) => {
       feedback: {
         modalTitlePositive: "Ano ang kapaki-pakinabang?",
         modalTitleNegative: "Ano ang maaaring pagbutihin?",
-        descriptionPositive: "Sabihin sa amin kung ano ang nagustuhan mo sa sagot na ito.",
-        descriptionNegative: "Sabihin sa amin kung paano namin mapapabuti ang sagot na ito.",
+        descriptionPositive:
+          "Sabihin sa amin kung ano ang nagustuhan mo sa sagot na ito.",
+        descriptionNegative:
+          "Sabihin sa amin kung paano namin mapapabuti ang sagot na ito.",
         placeholder: "Ang iyong mga komento (opsyonal)",
         cancel: "Kanselahin",
         updateFeedback: "I-update ang feedback",
         submit: "Isumite",
         tooltipEditPositive: "I-edit ang iyong kapaki-pakinabang na feedback",
         tooltipMarkPositive: "Markahan bilang kapaki-pakinabang",
-        tooltipEditNegative: "I-edit ang iyong feedback para sa mga pagpapabuti",
+        tooltipEditNegative:
+          "I-edit ang iyong feedback para sa mga pagpapabuti",
         tooltipMarkNegative: "Markahan bilang hindi kapaki-pakinabang",
         feedbackSaved: "Na-save ang feedback",
         thankYouMessage: "Salamat sa iyong feedback!",
-        submitErrorMessage: "Nabigo ang pagsusumite ng feedback. Pakisubukang muli.",
+        submitErrorMessage:
+          "Nabigo ang pagsusumite ng feedback. Pakisubukang muli.",
       },
       emptyMessages: {
         review: "Walang kasaysayan ng pagsusuri pa",

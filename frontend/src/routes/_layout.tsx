@@ -2,9 +2,9 @@ import { Flex } from "@chakra-ui/react"
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
 import { Suspense, useEffect } from "react"
 
+import { UsersService } from "@/client"
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
-import { UsersService } from "@/client"
 import { addEmergencyEscapeHandlers } from "../utils/overlay-debugger"
 
 import Chatbot from "@/components/Chatbot/ChatbotMain"

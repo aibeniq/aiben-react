@@ -63,7 +63,8 @@ const OutlineModal = ({
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { t } = useTranslation()
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } =
+    useKnowledgeBases()
 
   // Note: selectedKnowledgeBase now comes from parent props
   // Internal KB selection not needed since we use parent's selection
@@ -143,12 +144,14 @@ const OutlineModal = ({
   const [suggesting, setSuggesting] = useState(false)
   const [showOptimizeModal, setShowOptimizeModal] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
-  const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
-  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
-  )
+  const [referenceMode, setReferenceMode] = useState<
+    "files" | "knowledge-base"
+  >("files")
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] =
+    useState<KnowledgeBasePublic | null>(null)
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
-  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] =
+    useState(false)
 
   const handleSuggestOutline = async () => {
     if (!outlineDescription.trim()) {
@@ -158,7 +161,9 @@ const OutlineModal = ({
 
     // Validate minimum length requirement
     if (outlineDescription.trim().length < 10) {
-      showErrorToast("Please enter a more detailed description (at least 10 characters)")
+      showErrorToast(
+        "Please enter a more detailed description (at least 10 characters)",
+      )
       return
     }
 
@@ -225,14 +230,19 @@ const OutlineModal = ({
         let successMessage = `Suggested ${suggestedSections.length} sections from description`
         if (referenceMode === "files" && exampleFiles.length > 0) {
           successMessage += ` and ${exampleFiles.length} example file(s)`
-        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+        } else if (
+          referenceMode === "knowledge-base" &&
+          referenceKnowledgeBase
+        ) {
           successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
         }
         successMessage += ` (${searchMode === "vector" ? "vector search" : "full document scan"})`
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast("No sections were suggested. Please try with a more detailed description.")
+        showErrorToast(
+          "No sections were suggested. Please try with a more detailed description.",
+        )
       }
     } catch (error: any) {
       console.error("Error generating outline:", error)
@@ -245,9 +255,13 @@ const OutlineModal = ({
       } else if (error.status === 401) {
         showErrorToast("You need to be logged in to suggest sections.")
       } else if (error.status === 500) {
-        showErrorToast("Server error. Please try again later or contact support.")
+        showErrorToast(
+          "Server error. Please try again later or contact support.",
+        )
       } else {
-        showErrorToast(`Failed to suggest sections: ${error.message || "Unknown error"}`)
+        showErrorToast(
+          `Failed to suggest sections: ${error.message || "Unknown error"}`,
+        )
       }
     } finally {
       setSuggesting(false)
@@ -267,7 +281,9 @@ const OutlineModal = ({
 
   const handleOptimizeClick = () => {
     if (!selectedKnowledgeBase) {
-      showErrorToast("Please select a knowledge base first to optimize the outline.")
+      showErrorToast(
+        "Please select a knowledge base first to optimize the outline.",
+      )
       return
     }
 
@@ -277,7 +293,9 @@ const OutlineModal = ({
     }
 
     if (!sections.trim()) {
-      showErrorToast("Please add some sections to the outline before optimizing.")
+      showErrorToast(
+        "Please add some sections to the outline before optimizing.",
+      )
       return
     }
 
@@ -344,7 +362,9 @@ const OutlineModal = ({
             <Dialog.Header>
               <HStack align="center" gap={2}>
                 <Dialog.Title>
-                  {editingOutline ? t("editOutlineModal.title") : t("editOutlineModal.createTitle")}
+                  {editingOutline
+                    ? t("editOutlineModal.title")
+                    : t("editOutlineModal.createTitle")}
                 </Dialog.Title>
                 <HelpTooltip helpKey="createOutline" />
               </HStack>
@@ -368,7 +388,9 @@ const OutlineModal = ({
                       <Input
                         value={outlineName}
                         onChange={(e) => handleNameChange(e.target.value)}
-                        placeholder={t("editOutlineModal.outlineNamePlaceholder")}
+                        placeholder={t(
+                          "editOutlineModal.outlineNamePlaceholder",
+                        )}
                       />
                     </Field>
 
@@ -384,19 +406,28 @@ const OutlineModal = ({
                     >
                       <Textarea
                         value={outlineDescription}
-                        onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder={t("editOutlineModal.descriptionPlaceholder")}
+                        onChange={(e) =>
+                          handleDescriptionChange(e.target.value)
+                        }
+                        placeholder={t(
+                          "editOutlineModal.descriptionPlaceholder",
+                        )}
                         resize="vertical"
                         rows={3}
                       />
                     </Field>
 
-                    <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+                    <SearchModeToggle
+                      searchMode={searchMode}
+                      onSearchModeChange={setSearchMode}
+                    />
 
                     <Field
                       label={
                         <HStack align="center" gap={2}>
-                          <span>{t("editOutlineModal.referenceDocuments")}</span>
+                          <span>
+                            {t("editOutlineModal.referenceDocuments")}
+                          </span>
                           <HelpTooltip helpKey="referenceDocuments" />
                         </HStack>
                       }
@@ -406,16 +437,26 @@ const OutlineModal = ({
                         <HStack gap={2}>
                           <Button
                             size="sm"
-                            variant={referenceMode === "files" ? "solid" : "outline"}
+                            variant={
+                              referenceMode === "files" ? "solid" : "outline"
+                            }
                             onClick={() => handleReferenceModeChange("files")}
                           >
                             {t("editOutlineModal.uploadFiles")}
                           </Button>
                           <Button
                             size="sm"
-                            variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
-                            onClick={() => handleReferenceModeChange("knowledge-base")}
-                            disabled={!knowledgeBases || knowledgeBases.length === 0}
+                            variant={
+                              referenceMode === "knowledge-base"
+                                ? "solid"
+                                : "outline"
+                            }
+                            onClick={() =>
+                              handleReferenceModeChange("knowledge-base")
+                            }
+                            disabled={
+                              !knowledgeBases || knowledgeBases.length === 0
+                            }
                           >
                             {t("editOutlineModal.knowledgeBase")}
                           </Button>
@@ -448,17 +489,25 @@ const OutlineModal = ({
                           <Box>
                             <Button
                               w="full"
-                              variant={referenceKnowledgeBase ? "solid" : "outline"}
-                              onClick={() => setShowReferenceKnowledgeBaseModal(true)}
+                              variant={
+                                referenceKnowledgeBase ? "solid" : "outline"
+                              }
+                              onClick={() =>
+                                setShowReferenceKnowledgeBaseModal(true)
+                              }
                               justifyContent="flex-start"
                               textAlign="left"
-                              color={referenceKnowledgeBase ? "white" : "gray.600"}
+                              color={
+                                referenceKnowledgeBase ? "white" : "gray.600"
+                              }
                             >
-                              {referenceKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
+                              {referenceKnowledgeBase?.title ||
+                                t("dropdowns.selectKnowledgeBase")}
                             </Button>
                             {!knowledgeBases || knowledgeBases.length === 0 ? (
                               <Text fontSize="sm" color="orange.600">
-                                No Knowledge Bases available. Create one first to use this feature.
+                                No Knowledge Bases available. Create one first
+                                to use this feature.
                               </Text>
                             ) : null}
                           </Box>
@@ -491,7 +540,9 @@ const OutlineModal = ({
                                   : "Suggest sections based on the description"
                               }
                             >
-                              {suggesting ? "Suggesting..." : t("editOutlineModal.suggest")}
+                              {suggesting
+                                ? "Suggesting..."
+                                : t("editOutlineModal.suggest")}
                             </Button>
                             <HelpTooltip helpKey="suggestOutlineSections" />
 
@@ -546,7 +597,9 @@ const OutlineModal = ({
                       >
                         <SectionEditor
                           sections={sections}
-                          placeholder={t("editOutlineModal.addSectionPlaceholder")}
+                          placeholder={t(
+                            "editOutlineModal.addSectionPlaceholder",
+                          )}
                           onSectionsChange={(newSections) => {
                             onSectionsChange(newSections)
                             // Clear validation error when sections are modified

@@ -49,13 +49,13 @@
     "selectKnowledgeBase": "Velg en kunnskapsbase..."
   },
   "chatbot": {
-  "title": "Chat",
+    "title": "Chat",
     "placeholder": "Still et spørsmål...",
     "sourcePopover": {
       "knowledgeBase": "Kunnskapsbase",
       "file": "Fil"
     },
-  "send": "Send",
+    "send": "Send",
     "newChat": "Ny chat",
     "clearHistory": "Tøm historikk",
     "typing": "AI skriver...",
@@ -115,7 +115,7 @@
     "newPassword": "Nytt passord",
     "confirmPassword": "Bekreft passord",
     "save": "Lagre",
-  "system": "System",
+    "system": "System",
     "lightMode": "Lys modus",
     "darkMode": "Mørk modus",
     "deleteAccountDescription": "Slett dataene dine og alt som er knyttet til kontoen din permanent.",
@@ -180,9 +180,9 @@
     "goodbye": "Ha det",
     "yes": "Ja",
     "no": "Nei",
-  "ok": "OK",
+    "ok": "OK",
     "search": "Søk",
-  "filter": "Filter",
+    "filter": "Filter",
     "sort": "Sorter",
     "view": "Vis",
     "copy": "Kopier",
@@ -221,7 +221,7 @@
       "singleDocumentSuccess": "Feltverdier hentet fra ett dokument.",
       "processing": "Behandler..."
     },
-  "error": "Noe gikk galt!"
+    "error": "Noe gikk galt!"
   },
   "usage": {
     "title": "Bruk",
@@ -233,7 +233,7 @@
     "pageDescription": "Gjennomgå et dokument basert på brukerdefinert sjekkliste og policydatabase.",
     "knowledgeBaseTitle": "Kunnskapsbase",
     "knowledgeBaseDescription": "Klikk for å velge",
-  "title": "Tittel",
+    "title": "Tittel",
     "checklistDescription": "Klikk for å velge",
     "customInstructionsTitle": "Tilpassede instruksjoner (valgfritt)",
     "customInstructionsPlaceholder": "Skriv inn tilleggsinstruksjoner som bør vurderes når sjekklistespørsmål besvares...",
@@ -339,7 +339,7 @@
     "pleaseWait": "Vennligst vent mens vi genererer rapporten din",
     "compareSuccess": "Dokumenter sammenlignet vellykket!",
     "singleDocumentSuccess": "Feltverdier hentet fra enkelt dokument.",
-  "editOutline": "Rediger disposisjon"
+    "editOutline": "Rediger disposisjon"
   },
   "modelSelection": {
     "llmManagement": "LLM-håndtering",
@@ -357,7 +357,7 @@
       "modelId": "Modell-ID",
       "provider": "Leverandør",
       "description": "Beskrivelse",
-    "status": "Status",
+      "status": "Status",
       "actions": "Handlinger"
     },
     "status": {
@@ -532,7 +532,7 @@
     "questionsAlreadyOptimized": "Allerede optimaliserte spørsmål",
     "selected": "Valgt",
     "select": "Velg",
-  "original": "Original",
+    "original": "Original",
     "suggestedImprovement": "Foreslått forbedring",
     "policyContext": "Policykontekst",
     "currentAnswer": "Nåværende svar",
@@ -541,9 +541,9 @@
     "optimizationsSelectedText": "{{s}} optimaliseringer valgt for anvendelse",
     "applying": "Anvender...",
     "applySelectedOptimizations": "Anvend valgte optimaliseringer",
-  "uploadDocumentsTitle": "Last opp dokument(er) som skal aksepteres av sjekklisten *",
-  "uploadDocumentsHelperText": "Last opp dokumenter som skal oppfylle alle sjekklistekrav for å identifisere spørsmål som kan være for strenge",
-  "customInstructionsPlaceholder": "f.eks. Vurder at dette er en pediatrisk studie ved evaluering av aldersrelaterte krav, Dette protokollen er for en lavrisiko intervensjon, osv."
+    "uploadDocumentsTitle": "Last opp dokument(er) som skal aksepteres av sjekklisten *",
+    "uploadDocumentsHelperText": "Last opp dokumenter som skal oppfylle alle sjekklistekrav for å identifisere spørsmål som kan være for strenge",
+    "customInstructionsPlaceholder": "f.eks. Vurder at dette er en pediatrisk studie ved evaluering av aldersrelaterte krav, Dette protokollen er for en lavrisiko intervensjon, osv."
   },
   "optimizeOutlineModal": {
     "title": "Optimaliser disposisjon",
@@ -662,31 +662,31 @@
       "messages": {
         "processing": "Behandler...",
         "pleaseWait": "Vent mens vi behandler filene dine...",
-  "createSuccess": "Kunnskapsbase opprettet vellykket.",
-  "updateSuccess": "Kunnskapsbase oppdatert vellykket."
+        "createSuccess": "Kunnskapsbase opprettet vellykket.",
+        "updateSuccess": "Kunnskapsbase oppdatert vellykket."
       },
       "fields": {
         "title": "Tittel",
         "description": "Beskrivelse"
       },
       "fileUpload": {
-  "currentFiles": "Nåværende filer:",
-  "newFiles": "Nye filer:",
-  "selectedFiles": "Valgte filer:",
-  "dragAndDrop": "Dra og slipp filer her eller klikk for å bla gjennom",
-  "dropFiles": "Slipp filer her...",
-  "removeFile": "Fjern fil",
-  "supportedFormats": "Støtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Nåværende filer:",
+        "newFiles": "Nye filer:",
+        "selectedFiles": "Valgte filer:",
+        "dragAndDrop": "Dra og slipp filer her eller klikk for å bla gjennom",
+        "dropFiles": "Slipp filer her...",
+        "removeFile": "Fjern fil",
+        "supportedFormats": "Støtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Avbryt",
         "create": "Opprett",
         "save": "Lagre",
-  "saving": "Lagrer...",
-  "creating": "Oppretter..."
+        "saving": "Lagrer...",
+        "creating": "Oppretter..."
       },
       "validation": {
-  "titleRequired": "Tittel er påkrevd."
+        "titleRequired": "Tittel er påkrevd."
       }
     },
     "progress": {
@@ -717,7 +717,7 @@
       "review": "Gjennomgang",
       "generate": "Generer",
       "compare": "Sammenlign",
-  "match": "Match"
+      "match": "Match"
     },
     "emptyMessages": {
       "review": "Ingen tidligere evalueringer",
@@ -776,9 +776,9 @@
       "sources": "kilder"
     },
     "feedback": {
-  "positive": "Positiv tilbakemelding",
-  "negative": "Negativ tilbakemelding",
-  "hasFeedback": "Har tilbakemelding"
+      "positive": "Positiv tilbakemelding",
+      "negative": "Negativ tilbakemelding",
+      "hasFeedback": "Har tilbakemelding"
     }
   },
   "feedback": {
@@ -790,13 +790,13 @@
     "cancel": "Avbryt",
     "updateFeedback": "Oppdater tilbakemelding",
     "submit": "Send inn",
-  "tooltipEditPositive": "Rediger din nyttige tilbakemelding",
-  "tooltipMarkPositive": "Marker som nyttig",
-  "tooltipEditNegative": "Rediger din tilbakemelding for forbedringer",
-  "tooltipMarkNegative": "Marker som ikke nyttig",
-  "feedbackSaved": "Tilbakemelding lagret",
-  "thankYouMessage": "Takk for tilbakemeldingen!",
-  "submitErrorMessage": "Kunne ikke sende tilbakemelding. Prøv igjen."
+    "tooltipEditPositive": "Rediger din nyttige tilbakemelding",
+    "tooltipMarkPositive": "Marker som nyttig",
+    "tooltipEditNegative": "Rediger din tilbakemelding for forbedringer",
+    "tooltipMarkNegative": "Marker som ikke nyttig",
+    "feedbackSaved": "Tilbakemelding lagret",
+    "thankYouMessage": "Takk for tilbakemeldingen!",
+    "submitErrorMessage": "Kunne ikke sende tilbakemelding. Prøv igjen."
   },
   "ui": {
     "results": "Resultater",

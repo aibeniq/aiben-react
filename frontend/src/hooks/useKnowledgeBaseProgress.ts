@@ -111,7 +111,10 @@ export const useKnowledgeBaseProgress = (taskId: string | null) => {
         let message: string
         if ((data as any).message_key) {
           // Use translation key with parameters
-          message = t((data as any).message_key, (data as any).message_params || {}) as string
+          message = t(
+            (data as any).message_key,
+            (data as any).message_params || {},
+          ) as string
         } else {
           // Fallback to backend message (for backwards compatibility)
           message = (data as any).message || "Processing..."
@@ -144,21 +147,28 @@ export const useKnowledgeBaseProgress = (taskId: string | null) => {
 
         // Check for stuck progress
         const currentTime = Date.now()
-        if (newProgress.percentage > 0 || newProgress.message !== "Starting knowledge base creation...") {
+        if (
+          newProgress.percentage > 0 ||
+          newProgress.message !== "Starting knowledge base creation..."
+        ) {
           lastProgressUpdate = currentTime
           stuckCount = 0
-        } else if (currentTime - lastProgressUpdate > 30000) { // 30 seconds of no progress
+        } else if (currentTime - lastProgressUpdate > 30000) {
+          // 30 seconds of no progress
           stuckCount++
-          if (stuckCount >= 3) { // 3 consecutive checks with no progress
-            console.warn("⚠️ PROGRESS STUCK: No progress updates for 90+ seconds, stopping polling")
+          if (stuckCount >= 3) {
+            // 3 consecutive checks with no progress
+            console.warn(
+              "⚠️ PROGRESS STUCK: No progress updates for 90+ seconds, stopping polling",
+            )
             isPolling = false
             if (intervalId) {
               clearInterval(intervalId)
             }
-            setProgress(prev => ({
+            setProgress((prev) => ({
               ...prev,
               error: "Upload appears to be stuck. Please try again.",
-              isActive: false
+              isActive: false,
             }))
             return
           }

@@ -1,7 +1,7 @@
-import { useTranslation } from "react-i18next"
 import { OpenAPI } from "@/client/core/OpenAPI"
 import { request as __request } from "@/client/core/request"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 interface ProgressData {
   percentage: number

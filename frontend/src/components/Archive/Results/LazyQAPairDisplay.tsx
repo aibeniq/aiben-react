@@ -16,7 +16,10 @@ interface LazyQAPairDisplayProps {
   qaPairSummary: QaPairSummary
 }
 
-const LazyQAPairDisplay: React.FC<LazyQAPairDisplayProps> = ({ reportId, qaPairSummary }) => {
+const LazyQAPairDisplay: React.FC<LazyQAPairDisplayProps> = ({
+  reportId,
+  qaPairSummary,
+}) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)

@@ -29,7 +29,8 @@ const ChangePassword = () => {
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UpdatePassword) => UsersService.updatePasswordMe({ requestBody: data }),
+    mutationFn: (data: UpdatePassword) =>
+      UsersService.updatePasswordMe({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast(t("toast.passwordUpdated"))
       reset()

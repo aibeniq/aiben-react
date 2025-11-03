@@ -31,16 +31,24 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
             {hasSelection ? <FiCheck /> : ""}
           </span>
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTableName")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTableDescription")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTableSources")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTablePages")}
         </Table.ColumnHeader>
       </Table.Row>
@@ -48,10 +56,17 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
   )
 }
 
-const TableBody = ({ knowledgeBases, selectedId, onRowSelection }: TableBodyProps) => {
+const TableBody = ({
+  knowledgeBases,
+  selectedId,
+  onRowSelection,
+}: TableBodyProps) => {
   const { t } = useTranslation()
   const rows = knowledgeBases.map((kb) => (
-    <Table.Row key={kb.id} data-selected={selectedId === kb.id ? "" : undefined}>
+    <Table.Row
+      key={kb.id}
+      data-selected={selectedId === kb.id ? "" : undefined}
+    >
       <Table.Cell>
         <Checkbox.Root
           size="sm"
@@ -67,12 +82,18 @@ const TableBody = ({ knowledgeBases, selectedId, onRowSelection }: TableBodyProp
         </Checkbox.Root>
       </Table.Cell>
       <Table.Cell>{kb.title}</Table.Cell>
-      <Table.Cell>{kb.description || t("chatbot.knowledgeBaseTable.noDescription")}</Table.Cell>
       <Table.Cell>
-        {t("chatbot.knowledgeBaseTable.sourcesCount", { count: kb.number_of_sources || 0 })}
+        {kb.description || t("chatbot.knowledgeBaseTable.noDescription")}
       </Table.Cell>
       <Table.Cell>
-        {t("chatbot.knowledgeBaseTable.pagesCount", { count: kb.total_pages || 0 })}
+        {t("chatbot.knowledgeBaseTable.sourcesCount", {
+          count: kb.number_of_sources || 0,
+        })}
+      </Table.Cell>
+      <Table.Cell>
+        {t("chatbot.knowledgeBaseTable.pagesCount", {
+          count: kb.total_pages || 0,
+        })}
       </Table.Cell>
     </Table.Row>
   ))

@@ -14,8 +14,9 @@ import {
 } from "@chakra-ui/react"
 import { Switch } from "@chakra-ui/react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FiSearch } from "react-icons/fi"
+import { FiChevronDown, FiChevronUp, FiSearch } from "react-icons/fi"
 import { z } from "zod"
 
 import { KnowledgeBaseActionsMenu } from "@/components/Common/KnowledgeBaseActionsMenu"
@@ -44,10 +45,70 @@ function KnowledgeBasesTable() {
   const { t } = useTranslation()
   const navigate = useNavigate({ from: Route.fullPath })
   const { page } = Route.useSearch()
-  const { knowledgeBases, isLoading, showAllUsers, toggleShowAllUsers } =
-    useKnowledgeBases()
+  const { knowledgeBases, isLoading, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
-  // Use pagination on the client side since useKnowledgeBases fetches all data
+  // Add sorting state
+  const [sortBy, setSortBy] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
+
+  // Sorting function
+  const sortKnowledgeBases = (kbs: any[]) => {
+    if (!sortBy) return kbs
+    return [...kbs].sort((a, b) => {
+      let aVal: any
+      let bVal: any
+      switch (sortBy) {
+        case "title":
+          aVal = (a.title || "").toLowerCase()
+          bVal = (b.title || "").toLowerCase()
+          break
+        case "description":
+          aVal = (a.description || "").toLowerCase()
+          bVal = (b.description || "").toLowerCase()
+          break
+        case "number_of_sources":
+          aVal = a.number_of_sources || 0
+          bVal = b.number_of_sources || 0
+          break
+        case "total_pages":
+          aVal = a.total_pages || 0
+          bVal = b.total_pages || 0
+          break
+        case "embedding_model_name":
+          aVal = (a.embedding_model_name || "").toLowerCase()
+          bVal = (b.embedding_model_name || "").toLowerCase()
+          break
+        case "date_created":
+          aVal = new Date(a.date_created).getTime()
+          bVal = new Date(b.date_created).getTime()
+          break
+        case "date_modified":
+          aVal = new Date(a.date_modified).getTime()
+          bVal = new Date(b.date_modified).getTime()
+          break
+        default:
+          return 0
+      }
+      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1
+      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1
+      return 0
+    })
+  }
+
+  // Handle sort click
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(column)
+      setSortOrder("asc")
+    }
+    // Reset to first page when sorting changes
+    setPage(1)
+  }
+
+  // Sort the knowledge bases before pagination
+  const sortedKnowledgeBases = sortKnowledgeBases(knowledgeBases)
   const setPage = (page: number) =>
     navigate({
       search: (prev: { [key: string]: string }) => ({ ...prev, page }),
@@ -55,8 +116,8 @@ function KnowledgeBasesTable() {
 
   const startIndex = (page - 1) * PER_PAGE
   const endIndex = startIndex + PER_PAGE
-  const items = knowledgeBases.slice(startIndex, endIndex)
-  const count = knowledgeBases.length
+  const items = sortedKnowledgeBases.slice(startIndex, endIndex)
+  const count = sortedKnowledgeBases.length
   const isPlaceholderData = false
 
   if (isLoading) {
@@ -65,11 +126,7 @@ function KnowledgeBasesTable() {
         {/* All Users Toggle - Always visible */}
         <HStack justifyContent="flex-end" mb={4}>
           <Tooltip
-            content={
-              showAllUsers
-                ? t("archive.viewingAllUsers")
-                : t("archive.viewingMyHistory")
-            }
+            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
           >
             <HStack gap={2}>
               <HStack gap={1} align="center">
@@ -94,9 +151,7 @@ function KnowledgeBasesTable() {
                     if (toggleShowAllUsers) toggleShowAllUsers()
                   }}
                 />
-                <Switch.Control
-                  data-state={showAllUsers ? "checked" : "unchecked"}
-                >
+                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
@@ -114,11 +169,7 @@ function KnowledgeBasesTable() {
         {/* All Users Toggle - Always visible */}
         <HStack justifyContent="flex-end" mb={4}>
           <Tooltip
-            content={
-              showAllUsers
-                ? t("archive.viewingAllUsers")
-                : t("archive.viewingMyHistory")
-            }
+            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
           >
             <HStack gap={2}>
               <HStack gap={1} align="center">
@@ -143,9 +194,7 @@ function KnowledgeBasesTable() {
                     if (toggleShowAllUsers) toggleShowAllUsers()
                   }}
                 />
-                <Switch.Control
-                  data-state={showAllUsers ? "checked" : "unchecked"}
-                >
+                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
@@ -158,9 +207,7 @@ function KnowledgeBasesTable() {
               <FiSearch />
             </EmptyState.Indicator>
             <VStack textAlign="center">
-              <EmptyState.Title>
-                {t("knowledgeBases.emptyStateTitle")}
-              </EmptyState.Title>
+              <EmptyState.Title>{t("knowledgeBases.emptyStateTitle")}</EmptyState.Title>
               <EmptyState.Description>
                 {t("knowledgeBases.emptyStateDescription")}
               </EmptyState.Description>
@@ -176,11 +223,7 @@ function KnowledgeBasesTable() {
       {/* All Users Toggle - Always visible */}
       <HStack justifyContent="flex-end" mb={4}>
         <Tooltip
-          content={
-            showAllUsers
-              ? t("archive.viewingAllUsers")
-              : t("archive.viewingMyHistory")
-          }
+          content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
         >
           <HStack gap={2}>
             <HStack gap={1} align="center">
@@ -198,16 +241,11 @@ function KnowledgeBasesTable() {
               <Switch.HiddenInput
                 checked={showAllUsers}
                 onChange={() => {
-                  console.log(
-                    "Knowledge Bases toggle clicked, current showAllUsers:",
-                    showAllUsers,
-                  )
+                  console.log("Knowledge Bases toggle clicked, current showAllUsers:", showAllUsers)
                   if (toggleShowAllUsers) toggleShowAllUsers()
                 }}
               />
-              <Switch.Control
-                data-state={showAllUsers ? "checked" : "unchecked"}
-              >
+              <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
                 <Switch.Thumb />
               </Switch.Control>
             </Switch.Root>
@@ -218,26 +256,76 @@ function KnowledgeBasesTable() {
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader w="sm">
+            <Table.ColumnHeader w="sm" cursor="pointer" onClick={() => handleSort("title")}>
               {t("knowledgeBases.tableHeaders.title")}
+              {sortBy === "title" &&
+                (sortOrder === "asc" ? (
+                  <FiChevronUp style={{ display: "inline", marginLeft: "4px" }} />
+                ) : (
+                  <FiChevronDown style={{ display: "inline", marginLeft: "4px" }} />
+                ))}
             </Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">
+            <Table.ColumnHeader w="sm" cursor="pointer" onClick={() => handleSort("description")}>
               {t("knowledgeBases.tableHeaders.description")}
+              {sortBy === "description" &&
+                (sortOrder === "asc" ? (
+                  <FiChevronUp style={{ display: "inline", marginLeft: "4px" }} />
+                ) : (
+                  <FiChevronDown style={{ display: "inline", marginLeft: "4px" }} />
+                ))}
             </Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">
+            <Table.ColumnHeader
+              w="sm"
+              cursor="pointer"
+              onClick={() => handleSort("number_of_sources")}
+            >
               {t("knowledgeBases.tableHeaders.numberOfSources")}
+              {sortBy === "number_of_sources" &&
+                (sortOrder === "asc" ? (
+                  <FiChevronUp style={{ display: "inline", marginLeft: "4px" }} />
+                ) : (
+                  <FiChevronDown style={{ display: "inline", marginLeft: "4px" }} />
+                ))}
             </Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">
+            <Table.ColumnHeader w="sm" cursor="pointer" onClick={() => handleSort("total_pages")}>
               {t("chatbot.knowledgeBaseTablePages")}
+              {sortBy === "total_pages" &&
+                (sortOrder === "asc" ? (
+                  <FiChevronUp style={{ display: "inline", marginLeft: "4px" }} />
+                ) : (
+                  <FiChevronDown style={{ display: "inline", marginLeft: "4px" }} />
+                ))}
             </Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">
+            <Table.ColumnHeader
+              w="sm"
+              cursor="pointer"
+              onClick={() => handleSort("embedding_model_name")}
+            >
               {t("knowledgeBases.tableHeaders.embeddingModel")}
+              {sortBy === "embedding_model_name" &&
+                (sortOrder === "asc" ? (
+                  <FiChevronUp style={{ display: "inline", marginLeft: "4px" }} />
+                ) : (
+                  <FiChevronDown style={{ display: "inline", marginLeft: "4px" }} />
+                ))}
             </Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">
+            <Table.ColumnHeader w="sm" cursor="pointer" onClick={() => handleSort("date_created")}>
               {t("knowledgeBases.tableHeaders.dateCreated")}
+              {sortBy === "date_created" &&
+                (sortOrder === "asc" ? (
+                  <FiChevronUp style={{ display: "inline", marginLeft: "4px" }} />
+                ) : (
+                  <FiChevronDown style={{ display: "inline", marginLeft: "4px" }} />
+                ))}
             </Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">
+            <Table.ColumnHeader w="sm" cursor="pointer" onClick={() => handleSort("date_modified")}>
               {t("knowledgeBases.tableHeaders.dateModified")}
+              {sortBy === "date_modified" &&
+                (sortOrder === "asc" ? (
+                  <FiChevronUp style={{ display: "inline", marginLeft: "4px" }} />
+                ) : (
+                  <FiChevronDown style={{ display: "inline", marginLeft: "4px" }} />
+                ))}
             </Table.ColumnHeader>
             <Table.ColumnHeader w="sm">
               {t("knowledgeBases.tableHeaders.actions")}
@@ -313,13 +401,7 @@ function KnowledgeBases() {
           </Heading>
           <AddKnowledgeBase />
         </Box>
-        <Box
-          border="1px solid"
-          borderColor="gray.200"
-          borderRadius="md"
-          p={4}
-          bg="bg"
-        >
+        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
           <KnowledgeBasesTable />
         </Box>
       </VStack>

@@ -1,4 +1,4 @@
-import { type SourceContentResponse, FilesService } from "@/client"
+import { FilesService, type SourceContentResponse } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useFileViewer } from "@/hooks/useFileViewer"
 import { Link, type LinkProps } from "@chakra-ui/react"
@@ -28,17 +28,22 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 }) => {
   // In Chakra UI v3, we need to manually manage this state
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer()
+  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } =
+    useFileViewer()
   const [isLoadingFile, setIsLoadingFile] = useState(false)
-  const [convertedPdfFile, setConvertedPdfFile] = useState<SourceContentResponse | null>(
-    null,
-  ) // For DOCX converted to PDF
+  const [convertedPdfFile, setConvertedPdfFile] =
+    useState<SourceContentResponse | null>(null) // For DOCX converted to PDF
   const { showErrorToast } = useCustomToast()
 
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
 
-    console.log("SourceLink clicked:", { sourceId, fileName, useModal, hasFile: !!file })
+    console.log("SourceLink clicked:", {
+      sourceId,
+      fileName,
+      useModal,
+      hasFile: !!file,
+    })
 
     // If we have a direct File object (for uploaded files), open modal directly
     if (file) {
@@ -82,13 +87,19 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 
       if (isDocx || isRtf) {
         const fileType = isDocx ? "DOCX" : "RTF"
-        console.log(`${fileType} detected! Converting to PDF for viewing:`, actualFileName)
+        console.log(
+          `${fileType} detected! Converting to PDF for viewing:`,
+          actualFileName,
+        )
 
         let pdfBlob: Blob
 
         // If sourceId is empty/null, use filename-based conversion
         if (!sourceId || sourceId.trim() === "") {
-          console.log("No sourceId provided, using filename-based conversion:", actualFileName)
+          console.log(
+            "No sourceId provided, using filename-based conversion:",
+            actualFileName,
+          )
           if (isDocx) {
             pdfBlob = (await FilesService.convertDocxToPdfByFilename({
               filename: actualFileName,
@@ -98,7 +109,10 @@ const SourceLink: React.FC<SourceLinkProps> = ({
               filename: actualFileName,
             })) as Blob
           }
-          console.log("PDF conversion by filename successful, blob size:", pdfBlob.size)
+          console.log(
+            "PDF conversion by filename successful, blob size:",
+            pdfBlob.size,
+          )
         } else {
           console.log("Using sourceId-based conversion:", sourceId)
           // Use the appropriate conversion endpoint with sourceId
@@ -199,7 +213,10 @@ const SourceLink: React.FC<SourceLinkProps> = ({
               console.log("Opened PDF/TXT in new tab using filename")
             }
           } catch (filenameError) {
-            console.error("Filename-based PDF/TXT viewing failed:", filenameError)
+            console.error(
+              "Filename-based PDF/TXT viewing failed:",
+              filenameError,
+            )
             throw filenameError // Re-throw to trigger fallback
           }
         } else {
@@ -219,12 +236,18 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 
             // For .txt files, try filename-based viewing as fallback
             if (isTxtFile) {
-              console.log("Attempting filename-based fallback for .txt file:", actualFileName)
+              console.log(
+                "Attempting filename-based fallback for .txt file:",
+                actualFileName,
+              )
               try {
                 const response = await FilesService.getSourceContentByFilename({
                   filename: actualFileName,
                 })
-                console.log("TXT file data received via filename fallback:", response)
+                console.log(
+                  "TXT file data received via filename fallback:",
+                  response,
+                )
 
                 if (useModal) {
                   setConvertedPdfFile(response)
@@ -249,7 +272,10 @@ const SourceLink: React.FC<SourceLinkProps> = ({
                   console.log("Opened TXT in new tab using filename fallback")
                 }
               } catch (filenameError) {
-                console.error("Filename-based TXT viewing also failed:", filenameError)
+                console.error(
+                  "Filename-based TXT viewing also failed:",
+                  filenameError,
+                )
                 throw sourceIdError // Re-throw the original error
               }
             } else {
@@ -273,7 +299,9 @@ const SourceLink: React.FC<SourceLinkProps> = ({
       if (isDocx || isRtf) {
         const fileType = isDocx ? "DOCX" : "RTF"
         // For DOCX/RTF files, don't fall back to original method since they can't be displayed natively
-        console.error(`${fileType} to PDF conversion failed, not attempting fallback`)
+        console.error(
+          `${fileType} to PDF conversion failed, not attempting fallback`,
+        )
         showErrorToast(
           `Failed to convert ${fileType} file "${actualFileName}" to PDF for viewing. Please try again or download the file directly.`,
         )

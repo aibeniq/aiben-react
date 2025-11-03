@@ -1,4 +1,8 @@
-import { type KnowledgeBasePublic, type VeraDocChecklist, VeradocService } from "@/client"
+import {
+  type KnowledgeBasePublic,
+  type VeraDocChecklist,
+  VeradocService,
+} from "@/client"
 import type { CancelablePromise } from "@/client/core/CancelablePromise"
 import FileUpload, { type FileItem } from "@/components/Common/FileUpload"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
@@ -28,7 +32,13 @@ import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
+import {
+  FiCheck,
+  FiCopy,
+  FiDatabase,
+  FiFileText,
+  FiTrash2,
+} from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import KnowledgeBaseSelectionModal from "../../components/Common/KnowledgeBaseSelectionModal"
@@ -71,10 +81,12 @@ const VeraDoc = () => {
   } = useResults()
 
   // Initialize form state from persisted inputs or defaults
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    reviewInputs?.selectedKnowledgeBase || null,
-  )
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] =
+    useState<KnowledgeBasePublic | null>(
+      reviewInputs?.selectedKnowledgeBase || null,
+    )
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } =
+    useKnowledgeBases() // Respect All Users toggle state
   const { registerOperation } = useOperationCancellation()
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
@@ -101,19 +113,22 @@ const VeraDoc = () => {
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   const [questions, setQuestions] = useState(reviewInputs?.questions || "")
-  const [structuredQuestions, setStructuredQuestions] = useState<QuestionData[]>([])
+  const [structuredQuestions, setStructuredQuestions] = useState<
+    QuestionData[]
+  >([])
   const [customInstructions, setCustomInstructions] = useState(
     reviewInputs?.customInstructions || "",
   )
 
-  const [fileItems, setFileItems] = useState<FileItem[]>(reviewInputs?.fileItems || [])
+  const [fileItems, setFileItems] = useState<FileItem[]>(
+    reviewInputs?.fileItems || [],
+  )
 
   const [loading, setLoading] = useState<boolean>(false)
 
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
-  const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(
-    reviewInputs?.selectedChecklist || null,
-  )
+  const [selectedChecklist, setSelectedChecklist] =
+    useState<VeraDocChecklist | null>(reviewInputs?.selectedChecklist || null)
 
   // Search mode state for main review functionality
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
@@ -121,7 +136,9 @@ const VeraDoc = () => {
   )
 
   // State to track which citations are expanded - using object instead of Set
-  const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
+  const [expandedCitations, setExpandedCitations] = useState<
+    Record<string, boolean>
+  >({})
 
   // Function to toggle citation expansion
   const toggleCitationExpansion = (
@@ -137,14 +154,23 @@ const VeraDoc = () => {
   }
 
   // Function to check if a citation is expanded
-  const isCitationExpanded = (resultIndex: number, pairIndex: number, citationIndex: number) => {
+  const isCitationExpanded = (
+    resultIndex: number,
+    pairIndex: number,
+    citationIndex: number,
+  ) => {
     const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
     return expandedCitations[citationKey] || false
   }
 
   // Handle progress completion
   useEffect(() => {
-    if (taskId && progress.completed && !hasHandledCompletionRef.current && progress.results) {
+    if (
+      taskId &&
+      progress.completed &&
+      !hasHandledCompletionRef.current &&
+      progress.results
+    ) {
       console.log("✅ Review task completed with results, processing...")
       hasHandledCompletionRef.current = true
 
@@ -166,10 +192,16 @@ const VeraDoc = () => {
         console.log(
           `✅ Processed ${data.results.total_files_processed} files with optimized context sharing`,
         )
-        console.log(`🚀 Context pre-fetch count: ${data.results.context_prefetch_count}`)
-        console.log(`🚀 Optimization applied: ${data.results.optimization_applied}`)
+        console.log(
+          `🚀 Context pre-fetch count: ${data.results.context_prefetch_count}`,
+        )
+        console.log(
+          `🚀 Optimization applied: ${data.results.optimization_applied}`,
+        )
 
-        showSuccessToast(t("review.reviewSuccessMultiple", { count: reviewData.length }))
+        showSuccessToast(
+          t("review.reviewSuccessMultiple", { count: reviewData.length }),
+        )
       } else {
         // Fallback to single file format for backward compatibility
         const interactionId = data.results.interaction_id
@@ -333,7 +365,10 @@ const VeraDoc = () => {
       console.log("Received DOCX response:", response)
       console.log("Response type:", typeof response)
       console.log("Response instanceof Blob:", response instanceof Blob)
-      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+      console.log(
+        "Response instanceof ArrayBuffer:",
+        response instanceof ArrayBuffer,
+      )
 
       let blob
       if (response instanceof Blob) {
@@ -363,7 +398,10 @@ const VeraDoc = () => {
       a.href = url
       a.download = `Evaluation_${filename}_${timestamp}.docx`
 
-      console.log("DOCX download filename:", `Evaluation_${filename}_${timestamp}.docx`)
+      console.log(
+        "DOCX download filename:",
+        `Evaluation_${filename}_${timestamp}.docx`,
+      )
       console.log("About to trigger DOCX download...")
 
       document.body.appendChild(a)
@@ -381,7 +419,11 @@ const VeraDoc = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showErrorToast(t("toast.evaluationDownloadFailed", { error: err.message || "Unknown error" }))
+      showErrorToast(
+        t("toast.evaluationDownloadFailed", {
+          error: err.message || "Unknown error",
+        }),
+      )
     } finally {
       console.log("DOCX download process completed")
       setLoadingDownload(false)
@@ -437,7 +479,9 @@ const VeraDoc = () => {
       showSuccessToast(t("toast.csvDownloaded"))
     } catch (err: any) {
       console.error("Failed to download CSV:", err)
-      showErrorToast(t("toast.csvDownloadFailed", { error: err.message || "Unknown error" }))
+      showErrorToast(
+        t("toast.csvDownloadFailed", { error: err.message || "Unknown error" }),
+      )
     } finally {
       setLoadingCsvDownload(false)
     }
@@ -447,7 +491,10 @@ const VeraDoc = () => {
   const getDisplayFileName = getCleanFileName
 
   // Helper function to format source display with page number
-  const formatSourceWithPage = (source: string, page?: number | string): string => {
+  const formatSourceWithPage = (
+    source: string,
+    page?: number | string,
+  ): string => {
     const fileName = getDisplayFileName(source)
     if (page && page !== "" && page !== 0) {
       return `${fileName} (Page ${page})`
@@ -497,7 +544,9 @@ const VeraDoc = () => {
       console.log("📋 Review task_id created by backend:", newTaskId)
       setTaskId(newTaskId)
 
-      console.log("🎯 Submitting review (synchronous with progress tracking)...")
+      console.log(
+        "🎯 Submitting review (synchronous with progress tracking)...",
+      )
       console.log("Number of files:", data.files.length)
       console.log("Search mode being sent to backend:", data.searchMode)
 
@@ -535,7 +584,9 @@ const VeraDoc = () => {
 
       // Don't process results here - let the progress hook handle it
       // The progress hook will fetch results via getVeradocResults and process them
-      console.log("✅ Review complete, waiting for progress hook to fetch and display results...")
+      console.log(
+        "✅ Review complete, waiting for progress hook to fetch and display results...",
+      )
     },
     onError: (error: any) => {
       console.log("Review onError triggered:", error)
@@ -628,7 +679,10 @@ const VeraDoc = () => {
     // 🚀 OPTIMIZATION: Send ALL files to backend for optimized processing
     console.log(`🚀 Starting optimized review for ${fileItems.length} files`)
     const requestData = {
-      questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
+      questions:
+        structuredQuestions.length > 0
+          ? JSON.stringify(structuredQuestions)
+          : questions,
       knowledgeBaseId: selectedKnowledgeBase.id,
       files: fileItems.map((item) => item.file), // Send ALL files for optimized processing
       handwrittenFiles: [],
@@ -655,9 +709,18 @@ const VeraDoc = () => {
     tbody: (props: any) => <Box as="tbody" {...props} />,
     tr: (props: any) => <Box as="tr" {...props} />,
     th: (props: any) => (
-      <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
+      <Box
+        as="th"
+        p={4}
+        textAlign="left"
+        fontWeight="bold"
+        borderBottomWidth="1px"
+        {...props}
+      />
     ),
-    td: (props: any) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
+    td: (props: any) => (
+      <Box as="td" p={4} borderBottomWidth="1px" {...props} />
+    ),
   }
 
   // Function to render results content
@@ -701,85 +764,111 @@ const VeraDoc = () => {
                     <Box flex="1" textAlign="left" fontWeight="medium">
                       <HStack>
                         <FiFileText />
-                        <Text>View Source Citations ({pair.source_citations.length})</Text>
+                        <Text>
+                          View Source Citations ({pair.source_citations.length})
+                        </Text>
                       </HStack>
                     </Box>
                   </Accordion.ItemTrigger>
                 </h2>
                 <Accordion.ItemContent pb={4} bg="surface">
-                  {pair.source_citations.map((citation: any, cIndex: number) => {
-                    const isExpanded = isCitationExpanded(resultIndex, pairIndex, cIndex)
-                    const citationText = cleanRTFFormatting(citation.content)
-                    const shouldTruncate = citationText.length > 300
-                    const displayText =
-                      shouldTruncate && !isExpanded
-                        ? `${citationText.substring(0, 300)}...`
-                        : citationText
+                  {pair.source_citations.map(
+                    (citation: any, cIndex: number) => {
+                      const isExpanded = isCitationExpanded(
+                        resultIndex,
+                        pairIndex,
+                        cIndex,
+                      )
+                      const citationText = cleanRTFFormatting(citation.content)
+                      const shouldTruncate = citationText.length > 300
+                      const displayText =
+                        shouldTruncate && !isExpanded
+                          ? `${citationText.substring(0, 300)}...`
+                          : citationText
 
-                    return (
-                      <Box
-                        key={`${resultIndex}-${pairIndex}-${cIndex}`}
-                        p={3}
-                        mb={2}
-                        borderWidth="1px"
-                        borderRadius="md"
-                        bg="bg"
-                      >
-                        {citation.metadata.source_data_id ? (
-                          <SourceLink
-                            sourceId={citation.metadata.source_data_id}
-                            fileName={formatSourceWithPage(
-                              citation.metadata.source,
-                              citation.metadata.page,
-                            )}
-                            ml={1}
-                            fontWeight="normal"
-                            color="blue.600"
-                            useModal={true}
-                            highlightSnippet={citationText}
-                          />
-                        ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
-                          <SourceLink
-                            sourceId="" // Empty sourceId, will be handled by filename fallback
-                            fileName={formatSourceWithPage(
-                              citation.metadata.source,
-                              citation.metadata.page,
-                            )}
-                            ml={1}
-                            fontWeight="normal"
-                            color="blue.600"
-                            useModal={true}
-                            highlightSnippet={citationText}
-                          />
-                        ) : (
-                          <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                            {formatSourceWithPage(citation.metadata.source, citation.metadata.page)}
-                          </Text>
-                        )}
+                      return (
                         <Box
-                          mt={2}
-                          p={2}
-                          bg="surface"
-                          borderRadius="sm"
-                          fontSize="sm"
-                          whiteSpace="pre-wrap"
+                          key={`${resultIndex}-${pairIndex}-${cIndex}`}
+                          p={3}
+                          mb={2}
+                          borderWidth="1px"
+                          borderRadius="md"
+                          bg="bg"
                         >
-                          {displayText}
-                        </Box>
-                        {shouldTruncate && (
-                          <Button
-                            size="xs"
-                            variant="ghost"
-                            mt={1}
-                            onClick={() => toggleCitationExpansion(resultIndex, pairIndex, cIndex)}
-                            colorPalette="blue"
+                          {citation.metadata.source_data_id ? (
+                            <SourceLink
+                              sourceId={citation.metadata.source_data_id}
+                              fileName={formatSourceWithPage(
+                                citation.metadata.source,
+                                citation.metadata.page,
+                              )}
+                              ml={1}
+                              fontWeight="normal"
+                              color="blue.600"
+                              useModal={true}
+                              highlightSnippet={citationText}
+                            />
+                          ) : citation.metadata.source
+                              ?.toLowerCase()
+                              .endsWith(".docx") ? (
+                            <SourceLink
+                              sourceId="" // Empty sourceId, will be handled by filename fallback
+                              fileName={formatSourceWithPage(
+                                citation.metadata.source,
+                                citation.metadata.page,
+                              )}
+                              ml={1}
+                              fontWeight="normal"
+                              color="blue.600"
+                              useModal={true}
+                              highlightSnippet={citationText}
+                            />
+                          ) : (
+                            <Text
+                              as="span"
+                              ml={1}
+                              fontWeight="normal"
+                              color="blue.600"
+                            >
+                              {formatSourceWithPage(
+                                citation.metadata.source,
+                                citation.metadata.page,
+                              )}
+                            </Text>
+                          )}
+                          <Box
+                            mt={2}
+                            p={2}
+                            bg="surface"
+                            borderRadius="sm"
+                            fontSize="sm"
+                            whiteSpace="pre-wrap"
                           >
-                            {isExpanded ? t("common.showLess") : t("common.readMore")}
-                          </Button>
-                        )}
-                      </Box>
-                    )
-                  })}
+                            {displayText}
+                          </Box>
+                          {shouldTruncate && (
+                            <Button
+                              size="xs"
+                              variant="ghost"
+                              mt={1}
+                              onClick={() =>
+                                toggleCitationExpansion(
+                                  resultIndex,
+                                  pairIndex,
+                                  cIndex,
+                                )
+                              }
+                              colorPalette="blue"
+                            >
+                              {isExpanded
+                                ? t("common.showLess")
+                                : t("common.readMore")}
+                            </Button>
+                          )}
+                        </Box>
+                      )
+                    },
+                  )}
                 </Accordion.ItemContent>
               </Accordion.Item>
             </Accordion.Root>
@@ -792,7 +881,13 @@ const VeraDoc = () => {
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
+      <Text
+        fontSize="sm"
+        color="gray.500"
+        textAlign="center"
+        mb={4}
+        fontStyle="italic"
+      >
         {t("review.pageDescription")}
       </Text>
 
@@ -814,12 +909,23 @@ const VeraDoc = () => {
           p={6}
         >
           <VStack gap={4} width="80%" maxWidth="400px">
-            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+            <Text
+              color="white"
+              fontSize="lg"
+              fontWeight="medium"
+              textAlign="center"
+            >
               {progress.message ||
-                (fileItems.length > 1 ? t("review.processingFiles") : t("review.processingFile"))}
+                (fileItems.length > 1
+                  ? t("review.processingFiles")
+                  : t("review.processingFile"))}
             </Text>
             <Box width="100%">
-              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+              <Progress.Root
+                value={progress.percentage}
+                size="lg"
+                colorPalette="blue"
+              >
                 <Progress.Track>
                   <Progress.Range />
                 </Progress.Track>
@@ -829,7 +935,10 @@ const VeraDoc = () => {
               </Text>
             </Box>
             <Text color="gray.300" fontSize="sm" textAlign="center">
-              {getTranslation("review.pleaseWait", "Please wait while we review your documents")}
+              {getTranslation(
+                "review.pleaseWait",
+                "Please wait while we review your documents",
+              )}
             </Text>
           </VStack>
         </Box>
@@ -854,7 +963,9 @@ const VeraDoc = () => {
             <SelectionCard
               title={t("review.checklistTitle")}
               description={
-                selectedChecklist ? selectedChecklist.name : t("review.checklistDescription")
+                selectedChecklist
+                  ? selectedChecklist.name
+                  : t("review.checklistDescription")
               }
               icon={<FiFileText size={24} />}
               isSelected={!!selectedChecklist}
@@ -863,7 +974,11 @@ const VeraDoc = () => {
             />
 
             {/* File Upload Component */}
-            <FileUpload files={fileItems} onFilesChange={setFileItems} helpKey="fileUpload" />
+            <FileUpload
+              files={fileItems}
+              onFilesChange={setFileItems}
+              helpKey="fileUpload"
+            />
 
             {/* Custom Instructions Text Box */}
             <Box width="100%" mt={4}>
@@ -940,9 +1055,13 @@ const VeraDoc = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={(!selectedKnowledgeBase || !selectedChecklist) && !results ? 0.3 : 1}
+          opacity={
+            (!selectedKnowledgeBase || !selectedChecklist) && !results ? 0.3 : 1
+          }
           pointerEvents={
-            (!selectedKnowledgeBase || !selectedChecklist) && !results ? "none" : "auto"
+            (!selectedKnowledgeBase || !selectedChecklist) && !results
+              ? "none"
+              : "auto"
           }
         >
           <HStack gap={4} justify="center">
@@ -976,7 +1095,10 @@ const VeraDoc = () => {
             flexDirection={{ base: "column", md: "row" }}
             gap={4}
           >
-            <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
+            <Box
+              flex="1"
+              width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}
+            >
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">{t("review.results")}</Heading>
 
@@ -986,7 +1108,9 @@ const VeraDoc = () => {
                       size="sm"
                       variant="outline"
                       onClick={handleCopyReport}
-                      colorPalette={copySuccess ? "rgba(0, 65, 72, 0.9)" : "blue"}
+                      colorPalette={
+                        copySuccess ? "rgba(0, 65, 72, 0.9)" : "blue"
+                      }
                     >
                       {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
                       {copySuccess
@@ -1054,7 +1178,9 @@ const VeraDoc = () => {
                     <Tabs.Root
                       defaultValue="0"
                       value={activeTab.toString()}
-                      onValueChange={(details) => setActiveTab(Number.parseInt(details.value))}
+                      onValueChange={(details) =>
+                        setActiveTab(Number.parseInt(details.value))
+                      }
                     >
                       <Tabs.List>
                         {results.map((result, index) => {
@@ -1062,7 +1188,9 @@ const VeraDoc = () => {
 
                           return (
                             <Tabs.Trigger key={index} value={index.toString()}>
-                              {fileName.length > 30 ? `${fileName.slice(0, 30)}...` : fileName}
+                              {fileName.length > 30
+                                ? `${fileName.slice(0, 30)}...`
+                                : fileName}
                             </Tabs.Trigger>
                           )
                         })}

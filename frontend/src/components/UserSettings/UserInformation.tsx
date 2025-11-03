@@ -1,10 +1,23 @@
-import { Box, Button, Flex, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { type ApiError, type UserPublic, type UserUpdateMe, UsersService } from "@/client"
+import {
+  type ApiError,
+  type UserPublic,
+  type UserUpdateMe,
+  UsersService,
+} from "@/client"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { emailPattern, useHandleError } from "@/utils"
@@ -37,7 +50,8 @@ const UserInformation = () => {
   }
 
   const mutation = useMutation({
-    mutationFn: (data: UserUpdateMe) => UsersService.updateUserMe({ requestBody: data }),
+    mutationFn: (data: UserUpdateMe) =>
+      UsersService.updateUserMe({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast(t("common.success"))
     },
@@ -61,11 +75,19 @@ const UserInformation = () => {
   return (
     <VStack gap={6} align="stretch" py={4}>
       <Heading size="sm">{t("settings.profile")}</Heading>
-      <Box w={{ sm: "full", md: "md" }} as="form" onSubmit={handleSubmit(onSubmit)}>
+      <Box
+        w={{ sm: "full", md: "md" }}
+        as="form"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <VStack gap={4} align="stretch">
           <Field label={t("forms.firstName")}>
             {editMode ? (
-              <Input {...register("full_name", { maxLength: 30 })} type="text" size="md" />
+              <Input
+                {...register("full_name", { maxLength: 30 })}
+                type="text"
+                size="md"
+              />
             ) : (
               <Text
                 fontSize="md"

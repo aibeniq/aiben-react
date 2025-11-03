@@ -46,7 +46,7 @@ export const confirmPasswordRules = (
 
 export const useHandleError = () => {
   const { showErrorToast } = useCustomToast()
-  
+
   return (err: ApiError) => {
     const errDetail = (err.body as any)?.detail
     let errorMessage = errDetail || "Something went wrong."

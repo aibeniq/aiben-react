@@ -58,22 +58,22 @@
     "welcome": "مرحباً! كيف يمكنني مساعدتك اليوم؟",
     "welcomeMessageWithSource": "اختر قاعدة معرفة أو ارفع ملفات، ثم اطرح سؤالاً.",
     "welcomeMessageGeneral": "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
-  "title": "دردشة",
+    "title": "دردشة",
     "sourcePopover": {
       "knowledgeBase": "قاعدة المعرفة",
       "file": "ملف"
     },
-  "searchMode": "وضع البحث:",
-  "vectorSearch": "بحث متجه",
-  "fullTextScan": "مسح كامل للنص",
-  "searchModeDescription": "البحث المتجه يوفر نتائج سريعة ومستهدفة. مسح النص الكامل يراجع كل المحتوى في قاعدة المعرفة.",
-  "askMeAnything": "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
-  "usingGeneralAI": "باستخدام مساعد الذكاء الاصطناعي العام",
-  "usingKnowledgeBase": "باستخدام قاعدة المعرفة:",
-  "usingDocuments": "باستخدام {{count}} مستند{{plural}}",
-  "usingFiles": "باستخدام {{count}} مستند{{plural}}:",
-  "remove": "إزالة",
-  "selectKnowledgeBase": "اختر قاعدة معرفة",
+    "searchMode": "وضع البحث:",
+    "vectorSearch": "بحث متجه",
+    "fullTextScan": "مسح كامل للنص",
+    "searchModeDescription": "البحث المتجه يوفر نتائج سريعة ومستهدفة. مسح النص الكامل يراجع كل المحتوى في قاعدة المعرفة.",
+    "askMeAnything": "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
+    "usingGeneralAI": "باستخدام مساعد الذكاء الاصطناعي العام",
+    "usingKnowledgeBase": "باستخدام قاعدة المعرفة:",
+    "usingDocuments": "باستخدام {{count}} مستند{{plural}}",
+    "usingFiles": "باستخدام {{count}} مستند{{plural}}:",
+    "remove": "إزالة",
+    "selectKnowledgeBase": "اختر قاعدة معرفة",
     "knowledgeBaseTable": {
       "name": "الاسم",
       "description": "الوصف",
@@ -214,7 +214,7 @@
       "processing": "جاري المعالجة...",
       "extracting": "جاري استخراج المحتوى..."
     },
-  "error": "حدث خطأ ما!"
+    "error": "حدث خطأ ما!"
   },
   "usage": {
     "title": "الاستخدام",
@@ -281,8 +281,8 @@
     "vectorSearchDescription": "يجد المحتوى ذو الصلة باستخدام بحث التشابه بالذكاء الاصطناعي (سريع، مستهدف)",
     "fullScanDescription": "يحلل جميع المستندات في قاعدة المعرفة (شامل، دقيق)",
     "pleaseWait": "يرجى الانتظار أثناء مراجعة مستنداتك",
-  "reviewSuccess": "اكتملت مراجعة المستند بنجاح!",
-  "reviewSuccessMultiple": "تمت معالجة {{count}} ملفًا باستخدام مشاركة سياق محسّنة!"
+    "reviewSuccess": "اكتملت مراجعة المستند بنجاح!",
+    "reviewSuccessMultiple": "تمت معالجة {{count}} ملفًا باستخدام مشاركة سياق محسّنة!"
   },
   "generate": {
     "pageDescription": "إنشاء مستند بناءً على مخطط محدد من قبل المستخدم وقاعدة بيانات المستندات.",
@@ -327,7 +327,7 @@
       "starting": "جاري البدء...",
       "initializing": "جاري التهيئة...",
       "generating": "جاري إنشاء التقرير...",
-    "processingSection": "معالجة القسم {{sectionNum}} من {{totalSections}}: {{sectionPreview}}"
+      "processingSection": "معالجة القسم {{sectionNum}} من {{totalSections}}: {{sectionPreview}}"
     },
     "editOutline": "تحرير المخطط"
   },
@@ -345,7 +345,7 @@
     "fieldPlaceholder": "أضف اسم حقل...",
     "cancel": "إلغاء",
     "updateFormTemplate": "تحديث قالب النموذج",
-  "pleaseWait": "الرجاء الانتظار بينما نراجع مستنداتك"
+    "pleaseWait": "الرجاء الانتظار بينما نراجع مستنداتك"
   },
   "editOutlineModal": {
     "title": "تحرير المخطط",
@@ -427,12 +427,12 @@
     "currentAnswer": "الإجابة الحالية",
     "showLess": "عرض أقل",
     "showMore": "عرض المزيد",
-  "optimizationsSelectedText": "تم تحديد {{s}} تحسين لتطبيقه",
+    "optimizationsSelectedText": "تم تحديد {{s}} تحسين لتطبيقه",
     "applying": "جاري التطبيق...",
     "applySelectedOptimizations": "تطبيق التحسينات المحددة",
-  "uploadDocumentsTitle": "ارفع المستند(ات) التي يجب أن تقبلها قائمة المراجعة *",
-  "uploadDocumentsHelperText": "قم بتحميل المستندات التي يجب أن تستوفي جميع متطلبات قائمة المراجعة للمساعدة في تحديد الأسئلة التي قد تكون صارمة للغاية",
-  "customInstructionsPlaceholder": "مثال: ضع في اعتبارك أن هذه دراسة أطفال عند تقييم المتطلبات المتعلقة بالعمر؛ أو أن هذا البروتوكول لتدخل منخفض المخاطر، إلخ."
+    "uploadDocumentsTitle": "ارفع المستند(ات) التي يجب أن تقبلها قائمة المراجعة *",
+    "uploadDocumentsHelperText": "قم بتحميل المستندات التي يجب أن تستوفي جميع متطلبات قائمة المراجعة للمساعدة في تحديد الأسئلة التي قد تكون صارمة للغاية",
+    "customInstructionsPlaceholder": "مثال: ضع في اعتبارك أن هذه دراسة أطفال عند تقييم المتطلبات المتعلقة بالعمر؛ أو أن هذا البروتوكول لتدخل منخفض المخاطر، إلخ."
   },
   "optimizeOutlineModal": {
     "title": "تحسين المخطط",

@@ -13,9 +13,10 @@ export default defineConfig({
       operationId: true,
       methodNameBuilder: (operation) => {
         // @ts-ignore
-        const summary: string = operation.summary || ''
+        const summary: string = operation.summary || ""
         // @ts-ignore
-        const operationId: string = operation.operationId || operation.name || ''
+        const operationId: string =
+          operation.operationId || operation.name || ""
 
         if (summary) {
           // Convert summary to camelCase
@@ -41,15 +42,15 @@ export default defineConfig({
         // Fallback to operationId parsing if summary is not available
         if (operationId) {
           // Simple fallback: remove common suffixes and convert to camelCase
-          let cleanId = operationId
-            .replace(/_api_v1_.*$/, '') // Remove _api_v1_... suffix
-            .replace(/^get_/, '') // Remove get_ prefix
-            .replace(/^post_/, '') // Remove post_ prefix
-            .replace(/^put_/, '') // Remove put_ prefix
-            .replace(/^delete_/, '') // Remove delete_ prefix
-            .replace(/^patch_/, '') // Remove patch_ prefix
+          const cleanId = operationId
+            .replace(/_api_v1_.*$/, "") // Remove _api_v1_... suffix
+            .replace(/^get_/, "") // Remove get_ prefix
+            .replace(/^post_/, "") // Remove post_ prefix
+            .replace(/^put_/, "") // Remove put_ prefix
+            .replace(/^delete_/, "") // Remove delete_ prefix
+            .replace(/^patch_/, "") // Remove patch_ prefix
 
-          const parts = cleanId.split('_')
+          const parts = cleanId.split("_")
           if (parts.length > 0) {
             let methodName = parts[0]
             for (let i = 1; i < parts.length; i++) {
@@ -62,7 +63,7 @@ export default defineConfig({
           }
         }
 
-        return 'unknownMethod'
+        return "unknownMethod"
       },
     },
   ],

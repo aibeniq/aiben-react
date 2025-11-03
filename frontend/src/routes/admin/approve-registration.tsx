@@ -1,6 +1,6 @@
+import { Alert, Container, Spinner, Text } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useSearch } from "@tanstack/react-router"
-import { Container, Text, Spinner, Alert } from "@chakra-ui/react"
 
 import { UsersService } from "@/client"
 
@@ -16,8 +16,7 @@ function ApproveRegistration() {
 
   const { data, isLoading, error, isSuccess } = useQuery({
     queryKey: ["approve-registration", token],
-    queryFn: () =>
-      UsersService.approveRegistration({ token }),
+    queryFn: () => UsersService.approveRegistration({ token }),
     enabled: !!token,
     retry: false,
   })
@@ -38,7 +37,8 @@ function ApproveRegistration() {
           <Alert.Indicator />
           <Alert.Title>Approval Failed</Alert.Title>
           <Alert.Description>
-            Invalid or expired approval link. The token may have expired or already been used.
+            Invalid or expired approval link. The token may have expired or
+            already been used.
           </Alert.Description>
         </Alert.Root>
       </Container>
@@ -52,7 +52,8 @@ function ApproveRegistration() {
           <Alert.Indicator />
           <Alert.Title>Registration Approved</Alert.Title>
           <Alert.Description>
-            {data.message || "The user registration has been successfully approved."}
+            {data.message ||
+              "The user registration has been successfully approved."}
             <br />
             The user will receive a welcome email shortly.
           </Alert.Description>
