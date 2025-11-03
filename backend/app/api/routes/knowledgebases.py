@@ -655,7 +655,7 @@ async def load_uploaded_file(file: UploadFile, current_user=None) -> List[Any]:
             )
 
             # First try regular document extraction (uses settings.PDF_PARSING_MODE by default)
-            loaded_documents = extract_documents_from_file_unified(
+            loaded_documents = await extract_documents_from_file_unified(
                 file_content, file.filename, current_user=current_user
             )
 
@@ -666,8 +666,10 @@ async def load_uploaded_file(file: UploadFile, current_user=None) -> List[Any]:
                 print(
                     f"No text content found in {file.filename}, trying enhanced extraction..."
                 )
-                documents, images = extract_documents_and_images_from_file_unified(
-                    file_content, file.filename
+                documents, images = (
+                    await extract_documents_and_images_from_file_unified(
+                        file_content, file.filename
+                    )
                 )
 
                 # Use resilient document creation to ensure we have something for vector search
