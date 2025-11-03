@@ -24,7 +24,7 @@ def main():
             print("Adding column 'pdf_parsing_preference'...")
             conn.execute(
                 text(
-                    "ALTER TABLE \"user\" ADD COLUMN pdf_parsing_preference VARCHAR(20) NOT NULL DEFAULT 'auto'"
+                    "ALTER TABLE \"user\" ADD COLUMN pdf_parsing_preference VARCHAR(20) NOT NULL DEFAULT 'basic'"
                 )
             )
             conn.commit()
