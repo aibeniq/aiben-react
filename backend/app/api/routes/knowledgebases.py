@@ -43,7 +43,11 @@ from app.core.config import settings
 from app.services.pdf_utils import load_pdf_with_pypdf
 import hashlib
 
-from app.services.knowledgebases import KnowledgeBaseService, estimate_tokens_for_embedding, chunk_documents_for_embedding
+from app.services.knowledgebases import (
+    KnowledgeBaseService,
+    estimate_tokens_for_embedding,
+    chunk_documents_for_embedding,
+)
 from app.utils.memory_manager import MemoryManager
 
 from sqlalchemy.sql import func
@@ -1323,7 +1327,7 @@ async def process_knowledge_base_creation(
 
             user = session.get(User, user_id)
             user_pdf_preference = (
-                getattr(user, "pdf_parsing_preference", "auto") if user else "auto"
+                getattr(user, "pdf_parsing_preference", "basic") if user else "basic"
             )
             print(
                 f"[KB BACKGROUND] User {user_id} PDF parsing preference: {user_pdf_preference}"

@@ -117,7 +117,7 @@ class User(UserBase, table=True):
 
     # PDF parsing preference - user can choose parsing mode (auto/enhanced/basic)
     pdf_parsing_preference: str = Field(
-        default="auto",
+        default="basic",
         max_length=20,
         description="PDF parsing mode preference: 'auto', 'enhanced', or 'basic'",
     )

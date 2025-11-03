@@ -11,7 +11,7 @@ const PdfParsingSettings = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [mode, setMode] = useState(user?.pdf_parsing_preference ?? "auto")
+  const [mode, setMode] = useState(user?.pdf_parsing_preference ?? "basic")
 
   // Sync local state with user data when it changes
   useEffect(() => {
@@ -76,11 +76,11 @@ const PdfParsingSettings = () => {
           <Field label={t("settings.pdfParsing.modeLabel") as string}>
             <RadioGroup value={mode} onValueChange={handleModeChange}>
               <Stack gap={4}>
-                <Radio value="auto" disabled={updateMutation.isPending}>
+                <Radio value="basic" disabled={updateMutation.isPending}>
                   <VStack align="start" gap={1}>
-                    <Text fontWeight="semibold">{t("settings.pdfParsing.autoMode")}</Text>
+                    <Text fontWeight="semibold">{t("settings.pdfParsing.basicMode")}</Text>
                     <Text fontSize="sm" color="gray.600">
-                      {t("settings.pdfParsing.autoDescription")}
+                      {t("settings.pdfParsing.basicDescription")}
                     </Text>
                   </VStack>
                 </Radio>
@@ -90,15 +90,6 @@ const PdfParsingSettings = () => {
                     <Text fontWeight="semibold">{t("settings.pdfParsing.enhancedMode")}</Text>
                     <Text fontSize="sm" color="gray.600">
                       {t("settings.pdfParsing.enhancedDescription")}
-                    </Text>
-                  </VStack>
-                </Radio>
-
-                <Radio value="basic" disabled={updateMutation.isPending}>
-                  <VStack align="start" gap={1}>
-                    <Text fontWeight="semibold">{t("settings.pdfParsing.basicMode")}</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {t("settings.pdfParsing.basicDescription")}
                     </Text>
                   </VStack>
                 </Radio>
@@ -113,14 +104,13 @@ const PdfParsingSettings = () => {
 
             <VStack align="start" gap={3}>
               <Box>
-                <Text fontWeight="semibold" color="blue.600" mb={1}>
-                  {t("settings.pdfParsing.comparison.autoTitle")}
+                <Text fontWeight="semibold" color="purple.600" mb={1}>
+                  {t("settings.pdfParsing.comparison.basicTitle")}
                 </Text>
-                <Text>✓ {t("settings.pdfParsing.comparison.autoFeature1")}</Text>
-                <Text>✓ {t("settings.pdfParsing.comparison.autoFeature2")}</Text>
-                <Text>✓ {t("settings.pdfParsing.comparison.autoFeature3")}</Text>
+                <Text>✓ {t("settings.pdfParsing.comparison.basicFeature1")}</Text>
+                <Text>✓ {t("settings.pdfParsing.comparison.basicFeature2")}</Text>
+                <Text>⚠ {t("settings.pdfParsing.comparison.basicWarning")}</Text>
               </Box>
-
               <Box>
                 <Text fontWeight="semibold" color="green.600" mb={1}>
                   {t("settings.pdfParsing.comparison.enhancedTitle")}
@@ -128,15 +118,6 @@ const PdfParsingSettings = () => {
                 <Text>✓ {t("settings.pdfParsing.comparison.enhancedFeature1")}</Text>
                 <Text>✓ {t("settings.pdfParsing.comparison.enhancedFeature2")}</Text>
                 <Text>⚠ {t("settings.pdfParsing.comparison.enhancedWarning")}</Text>
-              </Box>
-
-              <Box>
-                <Text fontWeight="semibold" color="purple.600" mb={1}>
-                  {t("settings.pdfParsing.comparison.basicTitle")}
-                </Text>
-                <Text>✓ {t("settings.pdfParsing.comparison.basicFeature1")}</Text>
-                <Text>✓ {t("settings.pdfParsing.comparison.basicFeature2")}</Text>
-                <Text>⚠ {t("settings.pdfParsing.comparison.basicWarning")}</Text>
               </Box>
             </VStack>
           </Box>

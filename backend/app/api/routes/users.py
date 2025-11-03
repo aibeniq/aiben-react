@@ -97,7 +97,7 @@ def update_pdf_parsing_preference(
     """Update current user's PDF parsing preference."""
 
     # Validate mode
-    valid_modes = ["auto", "enhanced", "basic"]
+    valid_modes = ["enhanced", "basic"]
     if parsing_update.pdf_parsing_preference not in valid_modes:
         raise HTTPException(
             status_code=400,
