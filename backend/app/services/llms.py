@@ -542,7 +542,12 @@ def invoke_llm(llm, prompt, variables=None):
         # Route through rate limiter for consistency
         from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
 
-        return execute_llm_request_safely_sync(llm, prompt_text, model_name="replicate")
+        return execute_llm_request_safely_sync(
+            llm,
+            prompt_text,
+            model_name="replicate",
+            timeout=settings.LLM_REQUEST_TIMEOUT,
+        )
 
     # BedrockWrapper: already has retry logic
     elif hasattr(llm, "__class__") and "BedrockWrapper" in llm.__class__.__name__:
@@ -555,7 +560,9 @@ def invoke_llm(llm, prompt, variables=None):
         # Route through rate limiter for consistency
         from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
 
-        return execute_llm_request_safely_sync(llm, prompt_text, model_name="bedrock")
+        return execute_llm_request_safely_sync(
+            llm, prompt_text, model_name="bedrock", timeout=settings.LLM_REQUEST_TIMEOUT
+        )
 
     else:
         # LangChain models: add retry logic based on model type
@@ -628,6 +635,7 @@ def invoke_llm(llm, prompt, variables=None):
                     llm,
                     [HumanMessage(content=formatted_text)],
                     model_name=getattr(llm, "model_name", "gpt-4o"),
+                    timeout=settings.LLM_REQUEST_TIMEOUT,
                 )
             else:
                 # If prompt is a plain string, just pass as-is
@@ -698,7 +706,10 @@ async def invoke_llm_async(llm, prompt, variables=None):
         from app.services.universal_llm_wrapper import execute_llm_request_safely
 
         result = await execute_llm_request_safely(
-            llm, prompt_text, model_name="replicate"
+            llm,
+            prompt_text,
+            model_name="replicate",
+            timeout=settings.LLM_REQUEST_TIMEOUT,
         )
         return result
 
@@ -714,7 +725,7 @@ async def invoke_llm_async(llm, prompt, variables=None):
         from app.services.universal_llm_wrapper import execute_llm_request_safely
 
         result = await execute_llm_request_safely(
-            llm, prompt_text, model_name="bedrock"
+            llm, prompt_text, model_name="bedrock", timeout=settings.LLM_REQUEST_TIMEOUT
         )
         return result
 
@@ -789,6 +800,7 @@ async def invoke_llm_async(llm, prompt, variables=None):
                     llm,
                     [HumanMessage(content=formatted_text)],
                     model_name=getattr(llm, "model_name", "gpt-4o"),
+                    timeout=settings.LLM_REQUEST_TIMEOUT,
                 )
             else:
                 # If prompt is a plain string, just pass as-is
@@ -899,7 +911,10 @@ def invoke_llm_with_image(
             )
 
             response_text = execute_llm_request_safely_sync(
-                llm, prompt_text, model_name="replicate"
+                llm,
+                prompt_text,
+                model_name="replicate",
+                timeout=settings.LLM_REQUEST_TIMEOUT,
             )
             return response_text
         except Exception as e:
@@ -952,6 +967,7 @@ def invoke_llm_with_image(
                 messages,
                 images=[image_base64] if image_base64 else None,
                 model_name=getattr(llm, "model_name", "gpt-4o"),
+                timeout=settings.LLM_REQUEST_TIMEOUT,
             )
 
             print("Raw response from LangChain:", response)
@@ -1155,7 +1171,10 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
             )
 
             response_text = execute_llm_request_safely_sync(
-                llm, text_content, model_name="replicate"
+                llm,
+                text_content,
+                model_name="replicate",
+                timeout=settings.LLM_REQUEST_TIMEOUT,
             )
             return response_text
         except Exception as e:
@@ -1203,6 +1222,7 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
                 [message],
                 images=images_list,
                 model_name=getattr(llm, "model_name", "gpt-4o"),
+                timeout=settings.LLM_REQUEST_TIMEOUT,
             )
 
             print("Successfully received response from multimodal LLM")

@@ -100,8 +100,49 @@ const useAuth = () => {
       })
       navigate({ to: "/login" })
     },
-    onError: (err: ApiError) => {
-      handleError(err)
+    onError: (err: Error | ApiError) => {
+      // Handle both ApiError and regular Error objects
+      let errDetail: string
+      let status: number
+
+      if ('status' in err && 'body' in err) {
+        // It's an ApiError
+        errDetail = (err.body as any)?.detail
+        status = err.status
+      } else {
+        // For regular Error objects, the message contains the error detail
+        errDetail = err.message
+        status = 400 // Default status for regular errors
+      }
+
+      if (status === 400 && errDetail?.includes?.("Registration pending approval")) {
+        toaster.create({
+          title: "Registration Pending",
+          description: "Your registration is pending admin approval. Please check your email for updates.",
+          type: "warning",
+          duration: 6000,
+        })
+      } else if (status === 400 && errDetail?.includes?.("already exists in the system")) {
+        toaster.create({
+          title: "Account Already Exists",
+          description: "An account with this email already exists. Please try logging in or use a different email.",
+          type: "error",
+          duration: 5000,
+        })
+      } else {
+        // For ApiError objects, use the handleError function
+        if ('status' in err && 'body' in err) {
+          handleError(err)
+        } else {
+          // For regular Error objects, show a generic error
+          toaster.create({
+            title: "Registration Failed",
+            description: errDetail || "Something went wrong. Please try again.",
+            type: "error",
+            duration: 5000,
+          })
+        }
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })
