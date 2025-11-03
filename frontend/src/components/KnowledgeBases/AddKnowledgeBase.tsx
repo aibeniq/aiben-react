@@ -15,7 +15,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useTranslation, Trans } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { FaPlus, FaTrash } from "react-icons/fa"
 
 import { EmbeddingModelsService, KnowledgeBasesService } from "@/client"
@@ -50,7 +50,9 @@ const AddKnowledgeBase = () => {
 
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
-  const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
+  const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<
+    string | null
+  >(null)
   const [availableProviders, setAvailableProviders] = useState<string[]>([]) //only show Embedding Model providers allowed in config.py
   const [taskId, setTaskId] = useState<string | null>(null)
   const hasHandledCompletionRef = useRef(false) // Prevent multiple success toasts
@@ -77,7 +79,8 @@ const AddKnowledgeBase = () => {
 
   const { data: embeddingModels = [] } = useQuery({
     queryKey: ["embedding-models"],
-    queryFn: () => EmbeddingModelsService.getEmbeddingModels().then((res) => res.data),
+    queryFn: () =>
+      EmbeddingModelsService.getEmbeddingModels().then((res) => res.data),
     // Don't fetch if modal is closed
     enabled: isOpen,
   })
@@ -134,12 +137,24 @@ const AddKnowledgeBase = () => {
       showErrorToast(progress.error)
       setTaskId(null)
     }
-  }, [taskId, progress.completed, progress.error, showErrorToast, showSuccessToast, queryClient, t])
+  }, [
+    taskId,
+    progress.completed,
+    progress.error,
+    showErrorToast,
+    showSuccessToast,
+    queryClient,
+    t,
+  ])
 
   // Reset completion handler whenever taskId changes (new task starts)
   useEffect(() => {
     if (taskId) {
-      console.log("🔄 New task started:", taskId, "- resetting completion handler")
+      console.log(
+        "🔄 New task started:",
+        taskId,
+        "- resetting completion handler",
+      )
       hasHandledCompletionRef.current = false
     }
   }, [taskId])
@@ -148,7 +163,10 @@ const AddKnowledgeBase = () => {
   useEffect(() => {
     EmbeddingModelsService.getAvailableProviders()
       .then((response) => {
-        if (response.embedding_providers && Array.isArray(response.embedding_providers)) {
+        if (
+          response.embedding_providers &&
+          Array.isArray(response.embedding_providers)
+        ) {
           setAvailableProviders(response.embedding_providers)
         } else {
           setAvailableProviders(["openai", "aws"]) // fallback
@@ -170,7 +188,10 @@ const AddKnowledgeBase = () => {
     ) {
       if (defaultModel?.id) {
         setSelectedEmbeddingModelId(defaultModel.id)
-      } else if (filteredEmbeddingModels?.length > 0 && filteredEmbeddingModels[0]?.id) {
+      } else if (
+        filteredEmbeddingModels?.length > 0 &&
+        filteredEmbeddingModels[0]?.id
+      ) {
         setSelectedEmbeddingModelId(filteredEmbeddingModels[0].id)
       }
     }
@@ -215,7 +236,9 @@ const AddKnowledgeBase = () => {
 
       // Force immediate state reset to prevent any cached progress from previous session
       setTimeout(() => {
-        console.log("🧹 AGGRESSIVE CLEANUP: Ensuring all state is reset after modal open")
+        console.log(
+          "🧹 AGGRESSIVE CLEANUP: Ensuring all state is reset after modal open",
+        )
         setTaskId(null)
         hasHandledCompletionRef.current = false
       }, 50)
@@ -285,7 +308,11 @@ const AddKnowledgeBase = () => {
         setTimeout(() => {
           console.log("🎯 Setting new Task ID after reset:", data.task_id)
           setTaskId(data.task_id)
-          console.log("🎯 Task ID set to:", data.task_id, "- progress polling should now be active")
+          console.log(
+            "🎯 Task ID set to:",
+            data.task_id,
+            "- progress polling should now be active",
+          )
         }, 1000) // Increased delay
 
         // Step 2: Start the actual file upload in the background
@@ -295,7 +322,10 @@ const AddKnowledgeBase = () => {
         // This prevents the mutation completion from interfering with progress polling
         console.log("🔄 SETTING UP UPLOAD TIMEOUT for task:", data.task_id)
         setTimeout(async () => {
-          console.log("🚀 UPLOAD TIMEOUT TRIGGERED - about to start upload for task:", data.task_id)
+          console.log(
+            "🚀 UPLOAD TIMEOUT TRIGGERED - about to start upload for task:",
+            data.task_id,
+          )
           try {
             // Use SDK method for cancellable operation
             const uploadPromise = KnowledgeBasesService.createKnowledgeBase({
@@ -312,13 +342,24 @@ const AddKnowledgeBase = () => {
             const cancellablePromise = registerOperation(uploadPromise)
 
             const uploadResult = await cancellablePromise
-            console.log("✅ File upload POST completed successfully:", uploadResult)
-            console.log("🔄 Background processing should now continue with task_id:", data.task_id)
-            console.log("⚠️ Frontend should KEEP POLLING until task reaches 100%")
+            console.log(
+              "✅ File upload POST completed successfully:",
+              uploadResult,
+            )
+            console.log(
+              "🔄 Background processing should now continue with task_id:",
+              data.task_id,
+            )
+            console.log(
+              "⚠️ Frontend should KEEP POLLING until task reaches 100%",
+            )
 
             // CRITICAL: Ensure the taskId remains set even after POST completes
             // The background processing will continue and update progress via the same task_id
-            console.log("🎯 Ensuring taskId remains set for continued polling:", data.task_id)
+            console.log(
+              "🎯 Ensuring taskId remains set for continued polling:",
+              data.task_id,
+            )
           } catch (err: any) {
             console.error("❌ File upload failed:", err)
 
@@ -338,7 +379,10 @@ const AddKnowledgeBase = () => {
           }
         }, 2000) // 2 second delay
       } else {
-        console.error("❌ No task_id in response. Response keys:", Object.keys(data))
+        console.error(
+          "❌ No task_id in response. Response keys:",
+          Object.keys(data),
+        )
         console.error("❌ Full response object:", data)
       }
 
@@ -356,7 +400,10 @@ const AddKnowledgeBase = () => {
         errorMessage =
           (err.body as { detail: string }).detail ||
           "A knowledge base with this title already exists"
-      } else if (err.message?.includes("Network Error") || err.code === "ERR_NETWORK") {
+      } else if (
+        err.message?.includes("Network Error") ||
+        err.code === "ERR_NETWORK"
+      ) {
         errorMessage =
           "Upload timeout or server error. Try with fewer/smaller files or check your connection."
       } else if (err.body?.detail) {
@@ -369,7 +416,9 @@ const AddKnowledgeBase = () => {
       setTaskId(null)
     },
     onSettled: () => {
-      console.log("🏁 Knowledge base mutation SETTLED - doing final cache invalidation")
+      console.log(
+        "🏁 Knowledge base mutation SETTLED - doing final cache invalidation",
+      )
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
       queryClient.invalidateQueries({ queryKey: ["items"] })
     },
@@ -392,10 +441,13 @@ const AddKnowledgeBase = () => {
 
     // For large uploads, inform user about async processing
     const fileCount = selectedFiles.length
-    const totalSizeMB = selectedFiles.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)
+    const totalSizeMB =
+      selectedFiles.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)
 
     if (fileCount > 100 || totalSizeMB > 100) {
-      console.log(`⚠️ Large upload detected: ${fileCount} files, ${totalSizeMB.toFixed(1)}MB`)
+      console.log(
+        `⚠️ Large upload detected: ${fileCount} files, ${totalSizeMB.toFixed(1)}MB`,
+      )
       // Could add a confirmation dialog here in the future
     }
 
@@ -446,10 +498,13 @@ const AddKnowledgeBase = () => {
       "text/plain": [".txt"], // Plain text files
       "application/pdf": [".pdf"], // PDF files
       "application/msword": [".doc"], // Word documents
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"], // Word documents (modern format)
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"], // Word documents (modern format)
       "application/rtf": [".rtf"], // Rich Text Format files
       "text/csv": [".csv"], // CSV files
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"], // Excel files (modern format)
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ], // Excel files (modern format)
       "application/vnd.ms-excel": [".xls"], // Excel files (legacy format)
     },
     multiple: true, // Allow multiple file uploads
@@ -479,7 +534,9 @@ const AddKnowledgeBase = () => {
       </DialogTrigger>
       <DialogContent>
         <Box position="relative">
-          {(isSubmitting || progress.isActive || (taskId && !progress.completed)) && (
+          {(isSubmitting ||
+            progress.isActive ||
+            (taskId && !progress.completed)) && (
             <Box
               position="absolute"
               top="0"
@@ -496,20 +553,39 @@ const AddKnowledgeBase = () => {
               p={6}
             >
               <VStack gap={4} width="80%" maxWidth="400px">
-                <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+                <Text
+                  color="white"
+                  fontSize="lg"
+                  fontWeight="medium"
+                  textAlign="center"
+                >
                   {(() => {
-                    if (progress.message_key && typeof progress.message_key === "string") {
+                    if (
+                      progress.message_key &&
+                      typeof progress.message_key === "string"
+                    ) {
                       const params = progress.message_params || {}
                       // Use Trans component to avoid type issues with t function
                       return (
-                        <Trans i18nKey={progress.message_key} values={params} components={{}} />
+                        <Trans
+                          i18nKey={progress.message_key}
+                          values={params}
+                          components={{}}
+                        />
                       )
                     }
-                    return progress.message || t("knowledgeBases.modals.messages.processing")
+                    return (
+                      progress.message ||
+                      t("knowledgeBases.modals.messages.processing")
+                    )
                   })()}
                 </Text>
                 <Box width="100%">
-                  <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+                  <Progress.Root
+                    value={progress.percentage}
+                    size="lg"
+                    colorPalette="blue"
+                  >
                     <Progress.Track>
                       <Progress.Range />
                     </Progress.Track>
@@ -543,7 +619,9 @@ const AddKnowledgeBase = () => {
                   <Input
                     id="title"
                     {...register("title", {
-                      required: t("knowledgeBases.modals.validation.titleRequired"),
+                      required: t(
+                        "knowledgeBases.modals.validation.titleRequired",
+                      ),
                     })}
                     placeholder={t("knowledgeBases.modals.fields.title")}
                     type="text"
@@ -599,9 +677,13 @@ const AddKnowledgeBase = () => {
                 >
                   <input {...getInputProps()} />
                   {isDragActive ? (
-                    <Text>{t("knowledgeBases.modals.fileUpload.dropFiles")}</Text>
+                    <Text>
+                      {t("knowledgeBases.modals.fileUpload.dropFiles")}
+                    </Text>
                   ) : (
-                    <Text>{t("knowledgeBases.modals.fileUpload.dragAndDrop")}</Text>
+                    <Text>
+                      {t("knowledgeBases.modals.fileUpload.dragAndDrop")}
+                    </Text>
                   )}
                 </Box>
 
@@ -617,14 +699,21 @@ const AddKnowledgeBase = () => {
                 {/* Display Selected Files */}
                 {selectedFiles.length > 0 && (
                   <Box w="full">
-                    <Text mb={2}>{t("knowledgeBases.modals.fileUpload.selectedFiles")}</Text>
+                    <Text mb={2}>
+                      {t("knowledgeBases.modals.fileUpload.selectedFiles")}
+                    </Text>
                     <VStack align="start" gap={2}>
                       {selectedFiles.map((file, index) => {
                         const truncatedName = truncateText(file.name)
                         const needsTooltip = file.name.length > 30
 
                         return (
-                          <HStack key={index} w="full" justify="space-between" minW="0">
+                          <HStack
+                            key={index}
+                            w="full"
+                            justify="space-between"
+                            minW="0"
+                          >
                             <Box flex="1" minW="0">
                               {needsTooltip ? (
                                 <Tooltip content={file.name} showArrow>
@@ -652,7 +741,9 @@ const AddKnowledgeBase = () => {
                             </Box>
                             <Box
                               as="button"
-                              aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
+                              aria-label={t(
+                                "knowledgeBases.modals.fileUpload.removeFile",
+                              )}
                               onClick={() => handleRemoveFile(index)}
                               _hover={{ color: "red.500" }}
                               flexShrink={0}
@@ -670,7 +761,11 @@ const AddKnowledgeBase = () => {
 
             <DialogFooter gap={2}>
               <DialogActionTrigger asChild>
-                <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                <Button
+                  variant="subtle"
+                  colorPalette="gray"
+                  disabled={isSubmitting}
+                >
                   {t("knowledgeBases.modals.buttons.cancel")}
                 </Button>
               </DialogActionTrigger>

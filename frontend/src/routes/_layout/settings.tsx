@@ -6,9 +6,9 @@ import Appearance from "@/components/UserSettings/Appearance"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
 import LanguageSettings from "@/components/UserSettings/LanguageSettings"
-import VisionAnalysisSettings from "@/components/UserSettings/VisionAnalysisSettings"
 import PdfParsingSettings from "@/components/UserSettings/PdfParsingSettings"
 import UserInformation from "@/components/UserSettings/UserInformation"
+import VisionAnalysisSettings from "@/components/UserSettings/VisionAnalysisSettings"
 import useAuth from "@/hooks/useAuth"
 
 const tabsConfig = [
@@ -63,7 +63,9 @@ export const Route = createFileRoute("/_layout/settings")({
 function UserSettings() {
   const { user: currentUser } = useAuth()
   const { t } = useTranslation()
-  const finalTabs = currentUser?.is_superuser ? tabsConfig.slice(0, 3) : tabsConfig
+  const finalTabs = currentUser?.is_superuser
+    ? tabsConfig.slice(0, 3)
+    : tabsConfig
 
   if (!currentUser) {
     return null
@@ -77,7 +79,13 @@ function UserSettings() {
             {t("settings.title")}
           </Heading>
         </Box>
-        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
+        <Box
+          border="1px solid"
+          borderColor="gray.200"
+          borderRadius="md"
+          p={4}
+          bg="bg"
+        >
           <Tabs.Root defaultValue="my-profile" variant="subtle">
             <Tabs.List>
               {finalTabs.map((tab) => (

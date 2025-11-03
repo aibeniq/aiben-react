@@ -83,11 +83,20 @@ const DeleteKnowledgeBase = ({ id }: { id: string }) => {
 
           <DialogFooter gap={2}>
             <DialogActionTrigger asChild>
-              <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+              <Button
+                variant="subtle"
+                colorPalette="gray"
+                disabled={isSubmitting}
+              >
                 {t("knowledgeBases.deleteModal.cancelButton")}
               </Button>
             </DialogActionTrigger>
-            <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
+            <Button
+              variant="solid"
+              colorPalette="red"
+              type="submit"
+              loading={isSubmitting}
+            >
               {t("knowledgeBases.deleteModal.confirmButton")}
             </Button>
           </DialogFooter>

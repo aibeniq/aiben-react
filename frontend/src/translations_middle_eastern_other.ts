@@ -415,8 +415,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       downloadDocx: "הורד DOCX",
       downloadCsv: "הורד CSV",
       clearReport: "נקה דוח",
-      resultsPlaceholder:
-        "התוצאות יופיעו כאן לאחר יצירת המסמך.",
+      resultsPlaceholder: "התוצאות יופיעו כאן לאחר יצירת המסמך.",
       sectionsWithSources: "חלקים עם מקורות",
       sectionNumber: "חלק {number}: {title}",
       kbGenerated: "נוצר על ידי KB",
@@ -610,7 +609,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         deleteChecklist: "حذف چک‌لیست",
         pleaseWait: "لطفا صبر کنید، ما اسناد شما را بررسی می‌کنیم",
         reviewSuccess: "بررسی سند با موفقیت تکمیل شد!",
-        reviewSuccessMultiple: "{{count}} فایل با به اشتراک‌گذاری بهینه‌سازی شده زمینه پردازش شد!",
+        reviewSuccessMultiple:
+          "{{count}} فایل با به اشتراک‌گذاری بهینه‌سازی شده زمینه پردازش شد!",
       },
       compare: {
         title: "مقایسه اسناد",
@@ -858,8 +858,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       downloadDocx: "دانلود DOCX",
       downloadCsv: "دانلود CSV",
       clearReport: "پاک کردن گزارش",
-      resultsPlaceholder:
-        "نتایج پس از ایجاد سند در اینجا ظاهر خواهند شد.",
+      resultsPlaceholder: "نتایج پس از ایجاد سند در اینجا ظاهر خواهند شد.",
       sectionsWithSources: "بخش‌ها با منابع",
       sectionNumber: "بخش {number}: {title}",
       kbGenerated: "توسط KB تولید شده",
@@ -1053,7 +1052,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         deleteChecklist: "Kontrol Listesini Sil",
         pleaseWait: "Lütfen bekleyin, belgelerinizi inceliyoruz",
         reviewSuccess: "Belge incelemesi başarıyla tamamlandı!",
-        reviewSuccessMultiple: "{{count}} dosya optimize edilmiş bağlam paylaşımı ile işlendi!",
+        reviewSuccessMultiple:
+          "{{count}} dosya optimize edilmiş bağlam paylaşımı ile işlendi!",
       },
       compare: {
         title: "Belgeleri Karşılaştır",
@@ -1500,7 +1500,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         deleteChecklist: "Futa Orodha ya Ukaguzi",
         pleaseWait: "Tafadhali subiri, tunakagua hati zako",
         reviewSuccess: "Ukaguzi wa hati umekamilika kwa mafanikio!",
-        reviewSuccessMultiple: "Faili {{count}} zimeshughulikiwa na ugawaji wa muktadha ulioboreshwa!",
+        reviewSuccessMultiple:
+          "Faili {{count}} zimeshughulikiwa na ugawaji wa muktadha ulioboreshwa!",
       },
       compare: {
         title: "Linganisha Hati",
@@ -1748,8 +1749,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       downloadDocx: "Pakua DOCX",
       downloadCsv: "Pakua CSV",
       clearReport: "Futa Ripoti",
-      resultsPlaceholder:
-        "Matokeo yataonekana hapa baada ya kuunda hati.",
+      resultsPlaceholder: "Matokeo yataonekana hapa baada ya kuunda hati.",
       sectionsWithSources: "Sehemu zilizo na Vyanzo",
       sectionNumber: "Sehemu {number}: {title}",
       kbGenerated: "Imezalishwa na KB",
@@ -1944,7 +1944,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         deleteChecklist: "Excluir Lista de Verificação",
         pleaseWait: "Aguarde, estamos revisando seus documentos",
         reviewSuccess: "Revisão do documento concluída com sucesso!",
-        reviewSuccessMultiple: "{{count}} arquivos processados com compartilhamento de contexto otimizado!",
+        reviewSuccessMultiple:
+          "{{count}} arquivos processados com compartilhamento de contexto otimizado!",
       },
       compare: {
         title: "Comparar Documentos",
@@ -2204,8 +2205,10 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       kbGenerated: "Gerado por KB",
       rawText: "Texto bruto",
       viewSourceCitations: "Ver Citações de Fonte ({count})",
-      documentCopiedSuccess: "Documento copiado com sucesso para a área de transferência",
-      documentCopiedError: "Não foi possível copiar o documento para a área de transferência",
+      documentCopiedSuccess:
+        "Documento copiado com sucesso para a área de transferência",
+      documentCopiedError:
+        "Não foi possível copiar o documento para a área de transferência",
       documentDownloadSuccess: "Download do documento bem-sucedido",
       documentDownloadError: "Download do documento falhou: {error}",
       csvDownloadSuccess: "Download do CSV bem-sucedido",
@@ -2398,7 +2401,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         deleteChecklist: "Eliminar Lista de Verificación",
         pleaseWait: "Por favor espere, estamos revisando sus documentos",
         reviewSuccess: "¡Revisión del documento completada exitosamente!",
-        reviewSuccessMultiple: "¡{{count}} archivos procesados con intercambio de contexto optimizado!",
+        reviewSuccessMultiple:
+          "¡{{count}} archivos procesados con intercambio de contexto optimizado!",
       },
       generate: {
         pageDescription:
@@ -3368,7 +3372,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         modalTitlePositive: "چه چیزی مفید بود؟",
         modalTitleNegative: "چه چیزی می‌تواند بهبود یابد؟",
         descriptionPositive: "به ما بگویید چه چیزی در این پاسخ را دوست داشتید.",
-        descriptionNegative: "به ما بگویید چگونه می‌توانیم این پاسخ را بهبود بخشیم.",
+        descriptionNegative:
+          "به ما بگویید چگونه می‌توانیم این پاسخ را بهبود بخشیم.",
         placeholder: "نظرات شما (اختیاری)",
         cancel: "لغو",
         updateFeedback: "به‌روزرسانی بازخورد",
@@ -3379,7 +3384,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         tooltipMarkNegative: "به عنوان غیر مفید علامت‌گذاری کنید",
         feedbackSaved: "بازخورد ذخیره شد",
         thankYouMessage: "از بازخورد شما سپاسگزاریم!",
-        submitErrorMessage: "ارسال بازخورد ناموفق بود. لطفاً دوباره امتحان کنید.",
+        submitErrorMessage:
+          "ارسال بازخورد ناموفق بود. لطفاً دوباره امتحان کنید.",
       },
       emptyMessages: {
         review: "هنوز سابقه بررسی وجود ندارد",
@@ -3415,18 +3421,21 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         modalTitlePositive: "Ne faydalıydı?",
         modalTitleNegative: "Ne iyileştirilebilir?",
         descriptionPositive: "Bu yanıtta neyi beğendiğinizi bize söyleyin.",
-        descriptionNegative: "Bu yanıtı nasıl iyileştirebileceğimizi bize söyleyin.",
+        descriptionNegative:
+          "Bu yanıtı nasıl iyileştirebileceğimizi bize söyleyin.",
         placeholder: "Yorumlarınız (isteğe bağlı)",
         cancel: "İptal",
         updateFeedback: "Geri bildirimi güncelle",
         submit: "Gönder",
         tooltipEditPositive: "Faydalı geri bildiriminizi düzenleyin",
         tooltipMarkPositive: "Faydalı olarak işaretle",
-        tooltipEditNegative: "İyileştirmeler için geri bildiriminizi düzenleyin",
+        tooltipEditNegative:
+          "İyileştirmeler için geri bildiriminizi düzenleyin",
         tooltipMarkNegative: "Faydasız olarak işaretle",
         feedbackSaved: "Geri bildirim kaydedildi",
         thankYouMessage: "Geri bildiriminiz için teşekkürler!",
-        submitErrorMessage: "Geri bildirim gönderilemedi. Lütfen tekrar deneyin.",
+        submitErrorMessage:
+          "Geri bildirim gönderilemedi. Lütfen tekrar deneyin.",
       },
       emptyMessages: {
         review: "Henüz gözden geçirme geçmişi yok",
@@ -3473,7 +3482,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         tooltipMarkNegative: "Weka alama kuwa haina manufaa",
         feedbackSaved: "Maoni yamehifadhiwa",
         thankYouMessage: "Asante kwa maoni yako!",
-        submitErrorMessage: "Imeshindikana kutuma maoni. Tafadhali jaribu tena.",
+        submitErrorMessage:
+          "Imeshindikana kutuma maoni. Tafadhali jaribu tena.",
       },
       emptyMessages: {
         review: "Bado hakuna historia ya uhakiki",
@@ -3520,7 +3530,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         tooltipMarkNegative: "Marcar como não útil",
         feedbackSaved: "Feedback salvo",
         thankYouMessage: "Obrigado pelo seu feedback!",
-        submitErrorMessage: "Falha ao enviar feedback. Por favor, tente novamente.",
+        submitErrorMessage:
+          "Falha ao enviar feedback. Por favor, tente novamente.",
       },
       emptyMessages: {
         review: "Ainda não há histórico de revisão",
@@ -3567,7 +3578,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         tooltipMarkNegative: "Marcar como no útil",
         feedbackSaved: "Retroalimentación guardada",
         thankYouMessage: "¡Gracias por tu retroalimentación!",
-        submitErrorMessage: "Error al enviar retroalimentación. Por favor, inténtalo de nuevo.",
+        submitErrorMessage:
+          "Error al enviar retroalimentación. Por favor, inténtalo de nuevo.",
       },
       emptyMessages: {
         review: "Aún no hay historial de revisión",
@@ -3583,11 +3595,13 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         evaluationLoaded: "Evaluación cargada exitosamente",
         reportLoaded: "Informe cargado exitosamente",
         comparisonLoaded: "Comparación cargada exitosamente",
-        formProcessingLoaded: "Procesamiento de formulario cargado exitosamente",
+        formProcessingLoaded:
+          "Procesamiento de formulario cargado exitosamente",
         evaluationDeleted: "Evaluación eliminada exitosamente",
         reportDeleted: "Informe eliminado exitosamente",
         comparisonDeleted: "Comparación eliminada exitosamente",
-        formProcessingDeleted: "Procesamiento de formulario eliminado exitosamente",
+        formProcessingDeleted:
+          "Procesamiento de formulario eliminado exitosamente",
       },
     }
   }

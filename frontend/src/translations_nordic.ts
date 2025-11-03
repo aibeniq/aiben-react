@@ -296,7 +296,8 @@ export const addNordicTranslations = (resources: any) => {
           "Analysera alla dokument i kunskapsbasen (omfattande, grundlig)",
         pleaseWait: "Vänta medan vi granskar dina dokument",
         reviewSuccess: "Dokumentgranskning slutförd framgångsrikt!",
-        reviewSuccessMultiple: "{{count}} filer bearbetade med optimerad kontextdelning!",
+        reviewSuccessMultiple:
+          "{{count}} filer bearbetade med optimerad kontextdelning!",
       },
       generate: {
         pageDescription:
@@ -986,7 +987,8 @@ export const addNordicTranslations = (resources: any) => {
           "Analyser alle dokumenter i kunnskapsbasen (omfattende, grundig)",
         pleaseWait: "Vennligst vent mens vi gjennomgår dokumentene dine",
         reviewSuccess: "Dokumentgjennomgang fullført vellykket!",
-        reviewSuccessMultiple: "{{count}} filer behandlet med optimalisert kontekstdeling!",
+        reviewSuccessMultiple:
+          "{{count}} filer behandlet med optimalisert kontekstdeling!",
       },
       generate: {
         pageDescription:
@@ -1679,7 +1681,8 @@ export const addNordicTranslations = (resources: any) => {
           "Analyser alle dokumenter i videnbasen (omfattende, grundig)",
         pleaseWait: "Vent venligst mens vi gennemgår dine dokumenter",
         reviewSuccess: "Dokumentgennemgang fuldført succesfuldt!",
-        reviewSuccessMultiple: "{{count}} filer behandlet med optimeret kontekstdeling!",
+        reviewSuccessMultiple:
+          "{{count}} filer behandlet med optimeret kontekstdeling!",
       },
       generate: {
         pageDescription:
@@ -2366,7 +2369,8 @@ export const addNordicTranslations = (resources: any) => {
           "Analysoi kaikki asiakirjat tietokannassa (täydellinen, perusteellinen)",
         pleaseWait: "Odota, kun tarkistamme asiakirjasi",
         reviewSuccess: "Asiakirjan tarkistus suoritettu onnistuneesti!",
-        reviewSuccessMultiple: "{{count}} tiedostoa käsitelty optimoitulla kontekstin jakamisella!",
+        reviewSuccessMultiple:
+          "{{count}} tiedostoa käsitelty optimoitulla kontekstin jakamisella!",
       },
       generate: {
         pageDescription:
@@ -2830,7 +2834,8 @@ export const addNordicTranslations = (resources: any) => {
       modalTitlePositive: "Mikä oli hyödyllistä?",
       modalTitleNegative: "Mitä voidaan parantaa?",
       descriptionPositive: "Kerro meille, mitä pidit tästä vastauksesta.",
-      descriptionNegative: "Kerro meille, miten voimme parantaa tätä vastausta.",
+      descriptionNegative:
+        "Kerro meille, miten voimme parantaa tätä vastausta.",
       placeholder: "Kommenttisi (valinnainen)",
       cancel: "Peruuta",
       updateFeedback: "Päivitä palaute",
@@ -2841,7 +2846,8 @@ export const addNordicTranslations = (resources: any) => {
       tooltipMarkNegative: "Merkitse hyödyttömäksi",
       feedbackSaved: "Palaute tallennettu",
       thankYouMessage: "Kiitos palautteestasi!",
-      submitErrorMessage: "Palautteen lähettäminen epäonnistui. Yritä uudelleen.",
+      submitErrorMessage:
+        "Palautteen lähettäminen epäonnistui. Yritä uudelleen.",
     }
   }
 }

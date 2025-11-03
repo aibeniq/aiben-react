@@ -1,6 +1,6 @@
+import { Alert, Container, Spinner, Text } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useSearch } from "@tanstack/react-router"
-import { Container, Text, Spinner, Alert } from "@chakra-ui/react"
 
 import { UsersService } from "@/client"
 
@@ -37,7 +37,8 @@ function RejectRegistration() {
           <Alert.Indicator />
           <Alert.Title>Rejection Failed</Alert.Title>
           <Alert.Description>
-            Invalid or expired rejection link. The token may have expired or already been used.
+            Invalid or expired rejection link. The token may have expired or
+            already been used.
           </Alert.Description>
         </Alert.Root>
       </Container>

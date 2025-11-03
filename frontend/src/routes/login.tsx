@@ -50,7 +50,13 @@ function Login() {
         gap={4}
         centerContent
       >
-        <Image src={Logo} alt="FastAPI logo" height="auto" maxW="2xs" alignSelf="center" />
+        <Image
+          src={Logo}
+          alt="FastAPI logo"
+          height="auto"
+          maxW="2xs"
+          alignSelf="center"
+        />
         <Field invalid={!!errors.username} errorText={errors.username?.message}>
           <InputGroup w="100%" startElement={<FiMail />}>
             <Input
@@ -71,7 +77,11 @@ function Login() {
           placeholder="Password"
           errors={errors}
         />
-        <RouterLink to="/recover-password" className="main-link" style={{ width: "fit-content" }}>
+        <RouterLink
+          to="/recover-password"
+          className="main-link"
+          style={{ width: "fit-content" }}
+        >
           <Text
             color="rgba(0, 65, 72, 0.8)"
             fontSize="sm"
@@ -95,7 +105,11 @@ function Login() {
         <HStack gap={1}>
           <Text>Don't have an account? </Text>
           <Box>
-            <RouterLink to="/signup" className="main-link" style={{ width: "fit-content" }}>
+            <RouterLink
+              to="/signup"
+              className="main-link"
+              style={{ width: "fit-content" }}
+            >
               <Text
                 color="rgba(0, 65, 72, 0.8)"
                 fontSize="sm"

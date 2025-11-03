@@ -180,7 +180,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         deleteChecklist: "Smazat Kontrolní Seznam",
         pleaseWait: "Počkejte prosím, než zkontrolujeme vaše dokumenty",
         reviewSuccess: "Kontrola dokumentu dokončena úspěšně!",
-        reviewSuccessMultiple: "{{count}} souborů zpracováno s optimalizovaným sdílením kontextu!",
+        reviewSuccessMultiple:
+          "{{count}} souborů zpracováno s optimalizovaným sdílením kontextu!",
       },
       compare: {
         title: "Porovnat dokumenty",
@@ -440,8 +441,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       downloadDocx: "Stáhnout DOCX",
       downloadCsv: "Stáhnout CSV",
       clearReport: "Vymazat zprávu",
-      resultsPlaceholder:
-        "Výsledky se zobrazí zde po vygenerování dokumentu.",
+      resultsPlaceholder: "Výsledky se zobrazí zde po vygenerování dokumentu.",
       sectionsWithSources: "Části se zdroji",
       sectionNumber: "Část {number}: {title}",
       kbGenerated: "Vygenerováno KB",
@@ -638,7 +638,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         deleteChecklist: "Zmazať Kontrolný Zoznam",
         pleaseWait: "Čakajte prosím, kým skontrolujeme vaše dokumenty",
         reviewSuccess: "Kontrola dokumentu dokončená úspešne!",
-        reviewSuccessMultiple: "{{count}} súborov spracovaných s optimalizovaným zdieľaním kontextu!",
+        reviewSuccessMultiple:
+          "{{count}} súborov spracovaných s optimalizovaným zdieľaním kontextu!",
       },
       compare: {
         title: "Porovnať dokumenty",
@@ -899,8 +900,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       downloadDocx: "Stiahnuť DOCX",
       downloadCsv: "Stiahnuť CSV",
       clearReport: "Vymazať správu",
-      resultsPlaceholder:
-        "Výsledky sa zobrazia tu po vygenerovaní dokumentu.",
+      resultsPlaceholder: "Výsledky sa zobrazia tu po vygenerovaní dokumentu.",
       sectionsWithSources: "Časti so zdrojmi",
       sectionNumber: "Časť {number}: {title}",
       kbGenerated: "Vygenerované KB",
@@ -1097,7 +1097,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         deleteChecklist: "Ellenőrzőlista Törlése",
         pleaseWait: "Kérjük várjon, amíg áttekintjük a dokumentumait",
         reviewSuccess: "A dokumentum áttekintése sikeresen befejeződött!",
-        reviewSuccessMultiple: "{{count}} fájl feldolgozva optimalizált kontextusmegosztással!",
+        reviewSuccessMultiple:
+          "{{count}} fájl feldolgozva optimalizált kontextusmegosztással!",
       },
       compare: {
         title: "Dokumentumok összehasonlítása",
@@ -1550,9 +1551,11 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         saveChecklist: "Salvați Lista de Verificare",
         cancel: "Anulați",
         deleteChecklist: "Ștergeți Lista de Verificare",
-        pleaseWait: "Vă rugăm așteptați în timp ce revizuim documentele dumneavoastră",
+        pleaseWait:
+          "Vă rugăm așteptați în timp ce revizuim documentele dumneavoastră",
         reviewSuccess: "Revizuirea documentului s-a finalizat cu succes!",
-        reviewSuccessMultiple: "{{count}} fișiere procesate cu partajarea optimizată a contextului!",
+        reviewSuccessMultiple:
+          "{{count}} fișiere procesate cu partajarea optimizată a contextului!",
       },
       compare: {
         title: "Compararea documentelor",
@@ -1796,7 +1799,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       pageDescription:
         "Generați un document pe baza unui contur definit de utilizator și a bazei de date de documente.",
       generatingDocument: "Se generează documentul...",
-      pleaseWait: "Vă rugăm așteptați în timp ce generăm raportul dumneavoastră",
+      pleaseWait:
+        "Vă rugăm așteptați în timp ce generăm raportul dumneavoastră",
       knowledgeBaseTitle: "Baza de Cunoștințe",
       documentOutlineTitle: "Conturul Documentului",
       clickToSelect: "Faceți clic pentru a selecta",
@@ -1848,11 +1852,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       submit: "Trimiteți",
       tooltipEditPositive: "Editați feedback-ul dumneavoastră util",
       tooltipMarkPositive: "Marcați ca util",
-      tooltipEditNegative: "Editați feedback-ul dumneavoastră pentru îmbunătățiri",
+      tooltipEditNegative:
+        "Editați feedback-ul dumneavoastră pentru îmbunătățiri",
       tooltipMarkNegative: "Marcați ca neutil",
       feedbackSaved: "Feedback salvat",
       thankYouMessage: "Vă mulțumim pentru feedback!",
-      submitErrorMessage: "Nu s-a putut trimite feedback-ul. Încercați din nou.",
+      submitErrorMessage:
+        "Nu s-a putut trimite feedback-ul. Încercați din nou.",
     },
   }
 
@@ -2027,7 +2033,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         deleteChecklist: "Изтрийте списъка за проверка",
         pleaseWait: "Моля изчакайте, докато прегледаме вашите документи",
         reviewSuccess: "Прегледът на документа завърши успешно!",
-        reviewSuccessMultiple: "{{count}} файла обработени с оптимизирано споделяне на контекста!",
+        reviewSuccessMultiple:
+          "{{count}} файла обработени с оптимизирано споделяне на контекста!",
       },
       compare: {
         title: "Сравняване на документи",
@@ -2324,7 +2331,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       tooltipMarkNegative: "Маркирай като неполезно",
       feedbackSaved: "Обратната връзка е запазена",
       thankYouMessage: "Благодарим за обратната връзка!",
-      submitErrorMessage: "Неуспешно изпращане на обратната връзка. Опитайте отново.",
+      submitErrorMessage:
+        "Неуспешно изпращане на обратната връзка. Опитайте отново.",
     },
   }
 
@@ -2499,7 +2507,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         deleteChecklist: "Obriši listu provjere",
         pleaseWait: "Molimo pričekajte dok pregledavamo vaše dokumente",
         reviewSuccess: "Pregled dokumenta uspješno završen!",
-        reviewSuccessMultiple: "{{count}} datoteka obrađeno s optimiziranim dijeljenjem konteksta!",
+        reviewSuccessMultiple:
+          "{{count}} datoteka obrađeno s optimiziranim dijeljenjem konteksta!",
       },
       compare: {
         title: "Usporedi dokumente",
@@ -2788,7 +2797,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       tooltipMarkNegative: "Označi kao nekorišno",
       feedbackSaved: "Povratne informacije spremljene",
       thankYouMessage: "Hvala vam na povratnim informacijama!",
-      submitErrorMessage: "Slanje povratnih informacija nije uspjelo. Pokušajte ponovo.",
+      submitErrorMessage:
+        "Slanje povratnih informacija nije uspjelo. Pokušajte ponovo.",
     },
   }
 
@@ -2963,7 +2973,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         deleteChecklist: "Обриши листу провере",
         pleaseWait: "Молимо сачекајте док прегледамо ваше документе",
         reviewSuccess: "Преглед документа успешно завршен!",
-        reviewSuccessMultiple: "{{count}} датотека обрађено са оптимизованим дељењем контекста!",
+        reviewSuccessMultiple:
+          "{{count}} датотека обрађено са оптимизованим дељењем контекста!",
       },
       compare: {
         title: "Упореди документе",
@@ -3252,7 +3263,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       tooltipMarkNegative: "Означи као некорисно",
       feedbackSaved: "Повратне информације сачуване",
       thankYouMessage: "Хвала вам на повратним информацијама!",
-      submitErrorMessage: "Слање повратних информација није успело. Покушајте поново.",
+      submitErrorMessage:
+        "Слање повратних информација није успело. Покушајте поново.",
     },
   }
 
@@ -3427,7 +3439,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         deleteChecklist: "Izbriši kontrolno listo",
         pleaseWait: "Prosimo, počakajte, da pregledamo vaše dokumente",
         reviewSuccess: "Pregled dokumenta uspešno zaključen!",
-        reviewSuccessMultiple: "{{count}} datotek obdelanih z optimiziranim deljenjem konteksta!",
+        reviewSuccessMultiple:
+          "{{count}} datotek obdelanih z optimiziranim deljenjem konteksta!",
       },
       compare: {
         title: "Primerjaj dokumente",
@@ -4711,7 +4724,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         modalTitlePositive: "Mi volt hasznos?",
         modalTitleNegative: "Mit lehetne javítani?",
         descriptionPositive: "Mondja el nekünk, mit kedvelt ebben a válaszban.",
-        descriptionNegative: "Mondja el nekünk, hogyan javíthatjuk ezt a választ.",
+        descriptionNegative:
+          "Mondja el nekünk, hogyan javíthatjuk ezt a választ.",
         placeholder: "Az Ön megjegyzései (opcionális)",
         cancel: "Mégse",
         updateFeedback: "Visszajelzés frissítése",
@@ -4722,7 +4736,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         tooltipMarkNegative: "Jelölje nem hasznosnak",
         feedbackSaved: "Visszajelzés mentve",
         thankYouMessage: "Köszönjük a visszajelzését!",
-        submitErrorMessage: "Nem sikerült elküldeni a visszajelzést. Próbálja újra.",
+        submitErrorMessage:
+          "Nem sikerült elküldeni a visszajelzést. Próbálja újra.",
       },
       emptyMessages: {
         review: "Még nincs áttekintési előzmény",
@@ -4769,7 +4784,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         tooltipMarkNegative: "Označit jako neužitečné",
         feedbackSaved: "Zpětná vazba uložena",
         thankYouMessage: "Děkujeme za vaši zpětnou vazbu!",
-        submitErrorMessage: "Nepodařilo se odeslat zpětnou vazbu. Zkuste to znovu.",
+        submitErrorMessage:
+          "Nepodařilo se odeslat zpětnou vazbu. Zkuste to znovu.",
       },
       emptyMessages: {
         review: "Zatím žádná historie kontroly",
@@ -4804,7 +4820,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       feedback: {
         modalTitlePositive: "Čo bolo užitočné?",
         modalTitleNegative: "Čo by sa dalo zlepšiť?",
-        descriptionPositive: "Povedzte nám, čo sa vám na tejto odpovedi páčilo.",
+        descriptionPositive:
+          "Povedzte nám, čo sa vám na tejto odpovedi páčilo.",
         descriptionNegative: "Povedzte nám, ako môžeme túto odpoveď zlepšiť.",
         placeholder: "Vaše komentáre (voliteľné)",
         cancel: "Zrušiť",
@@ -4816,7 +4833,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         tooltipMarkNegative: "Označiť ako neužitočné",
         feedbackSaved: "Spätná väzba uložená",
         thankYouMessage: "Ďakujeme za vašu spätnú väzbu!",
-        submitErrorMessage: "Nepodarilo sa odoslať spätnú väzbu. Skúste to znovu.",
+        submitErrorMessage:
+          "Nepodarilo sa odoslať spätnú väzbu. Skúste to znovu.",
       },
       emptyMessages: {
         review: "Zatiaľ žiadna história kontroly",

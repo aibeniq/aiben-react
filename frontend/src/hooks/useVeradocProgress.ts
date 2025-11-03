@@ -205,7 +205,7 @@ export const useVeradocProgress = (taskId: string | null) => {
           }
 
           // Exponential backoff: base 1000ms, double for each consecutive error, max 30000ms
-          const newInterval = Math.min(1000 * Math.pow(2, consecutiveErrorCount), 30000)
+          const newInterval = Math.min(1000 * 2 ** consecutiveErrorCount, 30000)
           intervalIdRef.current = window.setInterval(pollProgress, newInterval)
         }
 

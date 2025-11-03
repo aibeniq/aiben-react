@@ -599,21 +599,25 @@ export type UserUpdate = {
   preferred_language?: string | null
 }
 
-export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData = {
-  requestBody: {
-    pdf_parsing_preference: string
+export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData =
+  {
+    requestBody: {
+      pdf_parsing_preference: string
+    }
   }
-}
 
-export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse = User
+export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse =
+  User
 
-export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutData = {
-  requestBody: {
-    vision_analysis_enabled: boolean
+export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutData =
+  {
+    requestBody: {
+      vision_analysis_enabled: boolean
+    }
   }
-}
 
-export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutResponse = User
+export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutResponse =
+  User
 
 export type UserUpdateMe = {
   full_name?: string | null

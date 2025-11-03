@@ -1,7 +1,7 @@
 import { Button, HStack, Heading } from "@chakra-ui/react"
 import type React from "react"
-import { FiCheck, FiCopy } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
+import { FiCheck, FiCopy } from "react-icons/fi"
 import DownloadButton from "../../ui/download-button"
 
 interface ResultsHeaderProps {
@@ -24,7 +24,7 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   showCsvDownload,
 }) => {
   const { t } = useTranslation()
-  
+
   return (
     <HStack justify="space-between" align="center" width="100%">
       <Heading size="md">{t("ui.results")}</Heading>

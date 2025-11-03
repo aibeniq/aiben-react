@@ -3,9 +3,9 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   FormconnectService,
+  type GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse,
   ReportgenieService,
   TwincheckService,
-  type GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse,
   VeradocService,
 } from "../client"
 import useCustomToast from "./useCustomToast"
@@ -27,7 +27,7 @@ interface UseToolArchiveReturn {
     { [key: string]: unknown },
     GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse
   > &
-  ToolActions
+    ToolActions
   reportgenie: ToolState<{ [key: string]: unknown }, any> & ToolActions
   twincheck: ToolState<{ [key: string]: unknown }, any> & ToolActions
   formconnect: ToolState<{ [key: string]: unknown }, any> & ToolActions
@@ -50,7 +50,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     { [key: string]: unknown }[]
   >([])
   const [selectedVeradocReport, setSelectedVeradocReport] =
-    useState<GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse | null>(null)
+    useState<GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse | null>(
+      null,
+    )
   const [isVeradocLoading, setIsVeradocLoading] = useState(false)
 
   // ReportGenie (Generate) state

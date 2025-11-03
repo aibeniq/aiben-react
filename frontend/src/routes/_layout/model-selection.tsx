@@ -96,7 +96,10 @@ function LlmModels() {
         if (response.llm_providers && Array.isArray(response.llm_providers)) {
           setAvailableProviders(response.llm_providers)
           // If current provider is not in available list, set to first available
-          if (modelProvider && !response.llm_providers.includes(modelProvider)) {
+          if (
+            modelProvider &&
+            !response.llm_providers.includes(modelProvider)
+          ) {
             setModelProvider(response.llm_providers[0] || "openai")
           }
         }
@@ -104,7 +107,13 @@ function LlmModels() {
       .catch((error) => {
         console.error("Failed to fetch available providers:", error)
         // Fallback to defaults
-        setAvailableProviders(["huggingface", "openai", "ollama", "replicate", "aws"])
+        setAvailableProviders([
+          "huggingface",
+          "openai",
+          "ollama",
+          "replicate",
+          "aws",
+        ])
       })
   }, [])
 
@@ -180,7 +189,12 @@ function LlmModels() {
 
   // Add mutations for adding, updating, deleting models
   const addModelMutation = useMutation({
-    mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) =>
+    mutationFn: (data: {
+      name: string
+      model_id: string
+      provider: string
+      description: string
+    }) =>
       LlmModelsService.createLlmModel({
         requestBody: { ...data, provider: data.provider as any },
       }),
@@ -198,20 +212,24 @@ function LlmModels() {
 
   // Mutation to set a model as default
   const setDefaultMutation = useMutation({
-    mutationFn: (modelId: string) => LlmModelsService.setDefaultLlmModel({ modelId }),
+    mutationFn: (modelId: string) =>
+      LlmModelsService.setDefaultLlmModel({ modelId }),
     onSuccess: () => {
       showSuccessToast(t("toast.defaultModelUpdated"))
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
       queryClient.invalidateQueries({ queryKey: ["defaultLlmModel"] }) // <--- add this
     },
     onError: (error) => {
-      showErrorToast(t("toast.defaultModelUpdateFailed", { error: error.message }))
+      showErrorToast(
+        t("toast.defaultModelUpdateFailed", { error: error.message }),
+      )
     },
   })
 
   // Mutation to delete a model
   const deleteModelMutation = useMutation({
-    mutationFn: (modelId: string) => LlmModelsService.deleteLlmModel({ modelId }),
+    mutationFn: (modelId: string) =>
+      LlmModelsService.deleteLlmModel({ modelId }),
     onSuccess: () => {
       showSuccessToast(t("toast.llmDeleted"))
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
@@ -229,7 +247,9 @@ function LlmModels() {
     }
 
     if (modelProvider === "openai" && !isApiKeyConfigured) {
-      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      showErrorToast(
+        "API key is required for OpenAI models and is not configured in the backend",
+      )
       return
     }
 
@@ -283,7 +303,9 @@ function LlmModels() {
 
     // Only check for API key if it's not configured in the backend
     if (modelProvider === "openai" && !isApiKeyConfigured) {
-      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      showErrorToast(
+        "API key is required for OpenAI models and is not configured in the backend",
+      )
       return
     }
 
@@ -336,7 +358,13 @@ function LlmModels() {
   }
 
   return (
-    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="bg">
+    <Box
+      border="1px solid"
+      borderColor="gray.200"
+      borderRadius="md"
+      p={6}
+      bg="bg"
+    >
       <VStack gap={4} align="stretch">
         <Box>
           <Heading size="lg" mb={2}>
@@ -372,7 +400,9 @@ function LlmModels() {
               <EmptyState.Indicator>
                 <FiSettings size={24} />
               </EmptyState.Indicator>
-              <EmptyState.Title>{t("modelSelection.noLlmsConfigured")}</EmptyState.Title>
+              <EmptyState.Title>
+                {t("modelSelection.noLlmsConfigured")}
+              </EmptyState.Title>
               <EmptyState.Description>
                 {t("modelSelection.addNewLlmToGetStarted")}
               </EmptyState.Description>
@@ -382,21 +412,32 @@ function LlmModels() {
           <Table.Root>
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.name")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.modelId")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.provider")}</Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.name")}
+                </Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.modelId")}
+                </Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.provider")}
+                </Table.ColumnHeader>
                 <Table.ColumnHeader>
                   {t("modelSelection.tableHeaders.description")}
                 </Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.status")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.actions")}</Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.status")}
+                </Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.actions")}
+                </Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
               {modelsData.data
                 .filter(
                   (model): model is typeof model & { provider: string } =>
-                    model.provider !== undefined && availableProviders.includes(model.provider),
+                    model.provider !== undefined &&
+                    availableProviders.includes(model.provider),
                 )
                 .map((model) => (
                   <Table.Row key={model.id}>
@@ -405,7 +446,10 @@ function LlmModels() {
                       <code>{model.model_id}</code>
                     </Table.Cell>
                     <Table.Cell>
-                      <Badge colorPalette={getProviderColor(model.provider)} size="sm">
+                      <Badge
+                        colorPalette={getProviderColor(model.provider)}
+                        size="sm"
+                      >
                         {getProviderDisplayName(model.provider)}
                       </Badge>
                     </Table.Cell>
@@ -427,7 +471,9 @@ function LlmModels() {
                           <Button
                             size="xs"
                             colorPalette="blue"
-                            onClick={() => model.id && handleSetDefault(model.id)}
+                            onClick={() =>
+                              model.id && handleSetDefault(model.id)
+                            }
                           >
                             {t("modelSelection.actions.setAsDefault")}
                           </Button>
@@ -436,7 +482,9 @@ function LlmModels() {
                           <Button
                             size="xs"
                             colorPalette="red"
-                            onClick={() => model.id && handleDeleteModel(model.id)}
+                            onClick={() =>
+                              model.id && handleDeleteModel(model.id)
+                            }
                           >
                             {t("delete")}
                           </Button>
@@ -470,19 +518,29 @@ function LlmModels() {
                   }}
                 >
                   <Dialog.Header>
-                    <Dialog.Title>{t("modelSelection.dialog.addNewLlm")}</Dialog.Title>
+                    <Dialog.Title>
+                      {t("modelSelection.dialog.addNewLlm")}
+                    </Dialog.Title>
                   </Dialog.Header>
                   <Dialog.Body>
                     <VStack gap={4}>
-                      <Field label={t("modelSelection.dialog.displayName")} required>
+                      <Field
+                        label={t("modelSelection.dialog.displayName")}
+                        required
+                      >
                         <Input
                           value={modelName}
                           onChange={(e) => setModelName(e.target.value)}
-                          placeholder={t("modelSelection.placeholders.customModel")}
+                          placeholder={t(
+                            "modelSelection.placeholders.customModel",
+                          )}
                         />
                       </Field>
 
-                      <Field label={t("modelSelection.dialog.provider")} required>
+                      <Field
+                        label={t("modelSelection.dialog.provider")}
+                        required
+                      >
                         <select
                           value={modelProvider}
                           onChange={(e) => setModelProvider(e.target.value)}
@@ -513,7 +571,10 @@ function LlmModels() {
                         </select>
                       </Field>
 
-                      <Field label={t("modelSelection.dialog.modelId")} required>
+                      <Field
+                        label={t("modelSelection.dialog.modelId")}
+                        required
+                      >
                         <HStack>
                           <Input
                             value={modelId}
@@ -521,7 +582,9 @@ function LlmModels() {
                               setModelId(e.target.value)
                               setIsModelValid(null)
                             }}
-                            placeholder={t("modelSelection.placeholders.embeddingModelId")}
+                            placeholder={t(
+                              "modelSelection.placeholders.embeddingModelId",
+                            )}
                           />
                           <Button
                             onClick={handleValidateModel}
@@ -551,7 +614,13 @@ function LlmModels() {
                             color={isModelValid ? "green.700" : "red.700"}
                           >
                             <HStack>
-                              <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
+                              <Box>
+                                {isModelValid ? (
+                                  <FiCheckCircle />
+                                ) : (
+                                  <FiXCircle />
+                                )}
+                              </Box>
                               <Text fontSize="sm">{validationMessage}</Text>
                             </HStack>
                           </Box>
@@ -562,7 +631,9 @@ function LlmModels() {
                         <Textarea
                           value={modelDescription}
                           onChange={(e) => setModelDescription(e.target.value)}
-                          placeholder={t("modelSelection.placeholders.describeModel")}
+                          placeholder={t(
+                            "modelSelection.placeholders.describeModel",
+                          )}
                           rows={3}
                         />
                       </Field>
@@ -607,10 +678,16 @@ function EmbeddingModels() {
   useEffect(() => {
     EmbeddingModelsService.getAvailableProviders()
       .then((response) => {
-        if (response.embedding_providers && Array.isArray(response.embedding_providers)) {
+        if (
+          response.embedding_providers &&
+          Array.isArray(response.embedding_providers)
+        ) {
           setAvailableProviders(response.embedding_providers)
           // If current provider is not in available list, set to first available
-          if (modelProvider && !response.embedding_providers.includes(modelProvider)) {
+          if (
+            modelProvider &&
+            !response.embedding_providers.includes(modelProvider)
+          ) {
             setModelProvider(response.embedding_providers[0] || "openai")
           }
         }
@@ -618,7 +695,13 @@ function EmbeddingModels() {
       .catch((error) => {
         console.error("Failed to fetch available providers:", error)
         // Fallback to defaults
-        setAvailableProviders(["huggingface", "openai", "ollama", "replicate", "aws"])
+        setAvailableProviders([
+          "huggingface",
+          "openai",
+          "ollama",
+          "replicate",
+          "aws",
+        ])
       })
   }, [])
 
@@ -719,8 +802,13 @@ function EmbeddingModels() {
 
   // Mutation to validate a model
   const validateModelMutation = useMutation({
-    mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
-      console.log("The following data will be sent to the server for model validation:", data)
+    mutationFn: (data: {
+      requestBody: { model_id: string; provider: string }
+    }) => {
+      console.log(
+        "The following data will be sent to the server for model validation:",
+        data,
+      )
       return EmbeddingModelsService.validateEmbeddingModel({
         requestBody: {
           ...data.requestBody,
@@ -743,7 +831,8 @@ function EmbeddingModels() {
 
   // Mutation to set a model as default
   const setDefaultMutation = useMutation({
-    mutationFn: (modelId: string) => EmbeddingModelsService.setDefaultEmbeddingModel({ modelId }),
+    mutationFn: (modelId: string) =>
+      EmbeddingModelsService.setDefaultEmbeddingModel({ modelId }),
     onSuccess: () => {
       showSuccessToast(t("toast.defaultModelUpdated"))
       queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
@@ -756,7 +845,8 @@ function EmbeddingModels() {
 
   // Mutation to delete a model
   const deleteModelMutation = useMutation({
-    mutationFn: (modelId: string) => EmbeddingModelsService.deleteEmbeddingModel({ modelId }),
+    mutationFn: (modelId: string) =>
+      EmbeddingModelsService.deleteEmbeddingModel({ modelId }),
     onSuccess: () => {
       showSuccessToast(t("toast.modelDeleted"))
       queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
@@ -775,12 +865,19 @@ function EmbeddingModels() {
     }
 
     if (modelProvider === "openai" && !isApiKeyConfigured) {
-      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      showErrorToast(
+        "API key is required for OpenAI models and is not configured in the backend",
+      )
       return
     }
 
     setIsValidating(true)
-    console.log("Validating model with ID:", modelId, "and provider:", modelProvider)
+    console.log(
+      "Validating model with ID:",
+      modelId,
+      "and provider:",
+      modelProvider,
+    )
     validateModelMutation.mutate({
       requestBody: {
         model_id: modelId,
@@ -797,7 +894,9 @@ function EmbeddingModels() {
     }
 
     if (modelProvider === "openai" && !isApiKeyConfigured) {
-      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      showErrorToast(
+        "API key is required for OpenAI models and is not configured in the backend",
+      )
       return
     }
 
@@ -822,7 +921,13 @@ function EmbeddingModels() {
   }
 
   return (
-    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="bg">
+    <Box
+      border="1px solid"
+      borderColor="gray.200"
+      borderRadius="md"
+      p={6}
+      bg="bg"
+    >
       <VStack gap={4} align="stretch">
         <Box>
           <Heading size="lg" mb={2}>
@@ -858,7 +963,9 @@ function EmbeddingModels() {
               <EmptyState.Indicator>
                 <FiSettings size={24} />
               </EmptyState.Indicator>
-              <EmptyState.Title>{t("modelSelection.noEmbeddingModelsConfigured")}</EmptyState.Title>
+              <EmptyState.Title>
+                {t("modelSelection.noEmbeddingModelsConfigured")}
+              </EmptyState.Title>
               <EmptyState.Description>
                 {t("modelSelection.addNewEmbeddingModelToGetStarted")}
               </EmptyState.Description>
@@ -868,21 +975,32 @@ function EmbeddingModels() {
           <Table.Root>
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.name")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.modelId")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.provider")}</Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.name")}
+                </Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.modelId")}
+                </Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.provider")}
+                </Table.ColumnHeader>
                 <Table.ColumnHeader>
                   {t("modelSelection.tableHeaders.description")}
                 </Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.status")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("modelSelection.tableHeaders.actions")}</Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.status")}
+                </Table.ColumnHeader>
+                <Table.ColumnHeader>
+                  {t("modelSelection.tableHeaders.actions")}
+                </Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
               {modelsData.data
                 .filter(
                   (model): model is typeof model & { provider: string } =>
-                    model.provider !== undefined && availableProviders.includes(model.provider),
+                    model.provider !== undefined &&
+                    availableProviders.includes(model.provider),
                 )
                 .map((model) => (
                   <Table.Row key={model.id}>
@@ -891,7 +1009,10 @@ function EmbeddingModels() {
                       <code>{model.model_id}</code>
                     </Table.Cell>
                     <Table.Cell>
-                      <Badge colorPalette={getProviderColor(model.provider)} size="sm">
+                      <Badge
+                        colorPalette={getProviderColor(model.provider)}
+                        size="sm"
+                      >
                         {getProviderDisplayName(model.provider)}
                       </Badge>
                     </Table.Cell>
@@ -913,7 +1034,9 @@ function EmbeddingModels() {
                           <Button
                             size="xs"
                             colorPalette="blue"
-                            onClick={() => model.id && handleSetDefault(model.id)}
+                            onClick={() =>
+                              model.id && handleSetDefault(model.id)
+                            }
                           >
                             {t("modelSelection.actions.setAsDefault")}
                           </Button>
@@ -922,7 +1045,9 @@ function EmbeddingModels() {
                           <Button
                             size="xs"
                             colorPalette="red"
-                            onClick={() => model.id && handleDeleteModel(model.id)}
+                            onClick={() =>
+                              model.id && handleDeleteModel(model.id)
+                            }
                           >
                             {t("delete")}
                           </Button>
@@ -935,7 +1060,10 @@ function EmbeddingModels() {
           </Table.Root>
         )}
         {/* Dialog for adding a new embedding model */}
-        <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
+        <Dialog.Root
+          open={isOpen}
+          onOpenChange={(details) => setIsOpen(details.open)}
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
@@ -947,19 +1075,29 @@ function EmbeddingModels() {
                   }}
                 >
                   <Dialog.Header>
-                    <Dialog.Title>{t("modelSelection.addEmbeddingModel")}</Dialog.Title>
+                    <Dialog.Title>
+                      {t("modelSelection.addEmbeddingModel")}
+                    </Dialog.Title>
                   </Dialog.Header>
                   <Dialog.Body>
                     <VStack gap={4}>
-                      <Field label={t("modelSelection.dialog.displayName")} required>
+                      <Field
+                        label={t("modelSelection.dialog.displayName")}
+                        required
+                      >
                         <Input
                           value={modelName}
                           onChange={(e) => setModelName(e.target.value)}
-                          placeholder={t("modelSelection.placeholders.customModel")}
+                          placeholder={t(
+                            "modelSelection.placeholders.customModel",
+                          )}
                         />
                       </Field>
 
-                      <Field label={t("modelSelection.dialog.provider")} required>
+                      <Field
+                        label={t("modelSelection.dialog.provider")}
+                        required
+                      >
                         <select
                           value={modelProvider}
                           onChange={(e) => setModelProvider(e.target.value)}
@@ -990,7 +1128,10 @@ function EmbeddingModels() {
                         </select>
                       </Field>
 
-                      <Field label={t("modelSelection.dialog.modelId")} required>
+                      <Field
+                        label={t("modelSelection.dialog.modelId")}
+                        required
+                      >
                         <HStack>
                           <Input
                             value={modelId}
@@ -998,7 +1139,9 @@ function EmbeddingModels() {
                               setModelId(e.target.value)
                               setIsModelValid(null)
                             }}
-                            placeholder={t("modelSelection.placeholders.embeddingModelId")}
+                            placeholder={t(
+                              "modelSelection.placeholders.embeddingModelId",
+                            )}
                           />
                           <Button
                             onClick={handleValidateModel}
@@ -1028,7 +1171,13 @@ function EmbeddingModels() {
                             color={isModelValid ? "green.700" : "red.700"}
                           >
                             <HStack>
-                              <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
+                              <Box>
+                                {isModelValid ? (
+                                  <FiCheckCircle />
+                                ) : (
+                                  <FiXCircle />
+                                )}
+                              </Box>
                               <Text fontSize="sm">{validationMessage}</Text>
                             </HStack>
                           </Box>
@@ -1039,7 +1188,9 @@ function EmbeddingModels() {
                         <Textarea
                           value={modelDescription}
                           onChange={(e) => setModelDescription(e.target.value)}
-                          placeholder={t("modelSelection.placeholders.describeModel")}
+                          placeholder={t(
+                            "modelSelection.placeholders.describeModel",
+                          )}
                           rows={3}
                         />
                       </Field>

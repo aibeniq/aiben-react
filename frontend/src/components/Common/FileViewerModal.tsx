@@ -41,9 +41,9 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     }
 
     let searchText = normalizeForSearch(originalSnippet)
-    
+
     // Limit search text length to prevent regex recursion issues (similar to PDF limit)
-    const maxTextSearchLength = 1000  // Reasonable limit for text files (adjust as needed)
+    const maxTextSearchLength = 1000 // Reasonable limit for text files (adjust as needed)
     if (searchText.length > maxTextSearchLength) {
       // Trim to word boundary
       const trimmed = searchText.substring(0, maxTextSearchLength)

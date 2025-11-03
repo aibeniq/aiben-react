@@ -1,9 +1,9 @@
-import { Field } from "@/components/ui/field"
-import { Box, Card, VStack, Text, Switch } from "@chakra-ui/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { UsersService } from "@/client"
+import { Field } from "@/components/ui/field"
 import useAuth from "@/hooks/useAuth"
-import { useState, useEffect } from "react"
+import { Box, Card, Switch, Text, VStack } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 const VisionAnalysisSettings = () => {
@@ -15,7 +15,10 @@ const VisionAnalysisSettings = () => {
   // Sync local state with user data when it changes
   useEffect(() => {
     if (user?.vision_analysis_enabled !== undefined) {
-      console.log("[VisionAnalysis] Syncing state from user:", user.vision_analysis_enabled)
+      console.log(
+        "[VisionAnalysis] Syncing state from user:",
+        user.vision_analysis_enabled,
+      )
       setEnabled(user.vision_analysis_enabled)
     }
   }, [user?.vision_analysis_enabled])
@@ -38,7 +41,12 @@ const VisionAnalysisSettings = () => {
 
   const handleToggle = () => {
     const newValue = !enabled
-    console.log("[VisionAnalysis] Toggle clicked, current:", enabled, "new:", newValue)
+    console.log(
+      "[VisionAnalysis] Toggle clicked, current:",
+      enabled,
+      "new:",
+      newValue,
+    )
     setEnabled(newValue)
     updateMutation.mutate(newValue)
   }
@@ -56,8 +64,16 @@ const VisionAnalysisSettings = () => {
             </Text>
           </Box>
 
-          <Box p={3} bg="blue.50" borderRadius="md" borderLeft="4px solid" borderColor="blue.500">
-            <Text fontSize="sm">{t("settings.visionAnalysis.costWarning")}</Text>
+          <Box
+            p={3}
+            bg="blue.50"
+            borderRadius="md"
+            borderLeft="4px solid"
+            borderColor="blue.500"
+          >
+            <Text fontSize="sm">
+              {t("settings.visionAnalysis.costWarning")}
+            </Text>
           </Box>
 
           <Field label={t("settings.visionAnalysis.enableLabel") as string}>

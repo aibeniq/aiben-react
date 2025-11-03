@@ -46,13 +46,16 @@ const FeedbackButtons = ({
     try {
       // Try to get the translation
       const translated = t(key)
-      
+
       // If the translation doesn't exist or is the same as the key, use fallback
-      if (!translated || translated === key || translated.startsWith('[missing key]')) {
+      if (
+        !translated ||
+        translated === key ||
+        translated.startsWith("[missing key]")
+      ) {
         return fallback
-      } else {
-        return translated
       }
+      return translated
     } catch (error) {
       console.error(`Translation error for "${key}":`, error)
       return fallback
@@ -109,14 +112,24 @@ const FeedbackButtons = ({
         feedbackText: feedbackText.trim() || undefined,
       })
 
-      showSuccessToast(getTranslation("feedback.thankYouMessage", "Thank you for your feedback!"))
+      showSuccessToast(
+        getTranslation(
+          "feedback.thankYouMessage",
+          "Thank you for your feedback!",
+        ),
+      )
       setIsModalOpen(false)
       if (onFeedbackSubmitted) {
         onFeedbackSubmitted(feedbackType)
       }
     } catch (error) {
       console.error("Failed to submit feedback:", error)
-      showErrorToast(getTranslation("feedback.submitErrorMessage", "Failed to submit feedback. Please try again."))
+      showErrorToast(
+        getTranslation(
+          "feedback.submitErrorMessage",
+          "Failed to submit feedback. Please try again.",
+        ),
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -137,8 +150,14 @@ const FeedbackButtons = ({
         <Tooltip
           content={
             existingFeedback?.feedback === "correct"
-              ? getTranslation("feedback.tooltipEditPositive", "Edit your helpful feedback")
-              : getTranslation("feedback.tooltipMarkPositive", "Mark as helpful")
+              ? getTranslation(
+                  "feedback.tooltipEditPositive",
+                  "Edit your helpful feedback",
+                )
+              : getTranslation(
+                  "feedback.tooltipMarkPositive",
+                  "Mark as helpful",
+                )
           }
           showArrow
         >
@@ -159,8 +178,14 @@ const FeedbackButtons = ({
         <Tooltip
           content={
             existingFeedback?.feedback === "incorrect"
-              ? getTranslation("feedback.tooltipEditNegative", "Edit your feedback for improvements")
-              : getTranslation("feedback.tooltipMarkNegative", "Mark as not helpful")
+              ? getTranslation(
+                  "feedback.tooltipEditNegative",
+                  "Edit your feedback for improvements",
+                )
+              : getTranslation(
+                  "feedback.tooltipMarkNegative",
+                  "Mark as not helpful",
+                )
           }
           showArrow
         >
@@ -217,21 +242,36 @@ const FeedbackButtons = ({
             >
               <Text fontWeight="semibold" fontSize="lg" mb={3}>
                 {feedbackType === "correct"
-                  ? getTranslation("feedback.modalTitlePositive", "What was helpful?")
-                  : getTranslation("feedback.modalTitleNegative", "What could be improved?")}
+                  ? getTranslation(
+                      "feedback.modalTitlePositive",
+                      "What was helpful?",
+                    )
+                  : getTranslation(
+                      "feedback.modalTitleNegative",
+                      "What could be improved?",
+                    )}
               </Text>
 
               <Text fontSize="sm" mb={2}>
                 {feedbackType === "correct"
-                  ? getTranslation("feedback.descriptionPositive", "Tell us what you liked about this response.")
-                  : getTranslation("feedback.descriptionNegative", "Tell us how we can improve this response.")}
+                  ? getTranslation(
+                      "feedback.descriptionPositive",
+                      "Tell us what you liked about this response.",
+                    )
+                  : getTranslation(
+                      "feedback.descriptionNegative",
+                      "Tell us how we can improve this response.",
+                    )}
               </Text>
 
               <Textarea
                 ref={textareaRef}
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder={getTranslation("feedback.placeholder", "Your comments (optional)")}
+                placeholder={getTranslation(
+                  "feedback.placeholder",
+                  "Your comments (optional)",
+                )}
                 size="md"
                 resize="vertical"
                 rows={4}
@@ -248,7 +288,12 @@ const FeedbackButtons = ({
                   onClick={handleSubmitFeedback}
                   loading={isSubmitting}
                 >
-                  {existingFeedback?.feedback ? getTranslation("feedback.updateFeedback", "Update Feedback") : getTranslation("feedback.submit", "Submit")}
+                  {existingFeedback?.feedback
+                    ? getTranslation(
+                        "feedback.updateFeedback",
+                        "Update Feedback",
+                      )
+                    : getTranslation("feedback.submit", "Submit")}
                 </Button>
               </HStack>
             </Box>

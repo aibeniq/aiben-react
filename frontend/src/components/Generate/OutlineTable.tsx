@@ -2,7 +2,11 @@ import { Button, Checkbox, HStack, IconButton, Table } from "@chakra-ui/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiCopy, FiEye, FiPlus, FiTrash2 } from "react-icons/fi"
-import { type KnowledgeBasePublic, type ReportGenieOutline, ReportgenieService } from "../../client"
+import {
+  type KnowledgeBasePublic,
+  type ReportGenieOutline,
+  ReportgenieService,
+} from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { generateUUID } from "../../utils/uuid"
 import OutlineModal from "./OutlineModal"
@@ -39,13 +43,20 @@ const OutlineTableHeader = ({ onCreateNew }: OutlineTableHeaderProps) => {
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
         <Table.ColumnHeader w="6" />
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("modelSelection.tableHeaders.name")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("modelSelection.tableHeaders.description")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader w="32" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          w="32"
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           <Button size="sm" onClick={onCreateNew} ml="auto" variant="ghost">
             <FiPlus size={14} />
           </Button>
@@ -64,7 +75,10 @@ const OutlineTableBody = ({
   onCopyOutline,
   onDeleteOutline,
 }: OutlineTableBodyProps) => {
-  const handleRowSelection = (outline: ReportGenieOutline, isChecked: boolean) => {
+  const handleRowSelection = (
+    outline: ReportGenieOutline,
+    isChecked: boolean,
+  ) => {
     if (isChecked) {
       onOutlineChange(outline)
       onSectionsChange(outline.sections || "")
@@ -164,14 +178,21 @@ const OutlineTable = ({
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingOutline, setEditingOutline] = useState<ReportGenieOutline | null>(null)
+  const [editingOutline, setEditingOutline] =
+    useState<ReportGenieOutline | null>(null)
   const [outlineName, setOutlineName] = useState("")
   const [outlineDescription, setOutlineDescription] = useState("")
 
   const handleViewOutline = (outline: ReportGenieOutline) => {
-    console.log("🔍 OutlineTable: Opening edit modal for outline:", outline.name)
+    console.log(
+      "🔍 OutlineTable: Opening edit modal for outline:",
+      outline.name,
+    )
     console.log("🔍 OutlineTable: Raw outline.sections:", outline.sections)
-    console.log("🔍 OutlineTable: Type of outline.sections:", typeof outline.sections)
+    console.log(
+      "🔍 OutlineTable: Type of outline.sections:",
+      typeof outline.sections,
+    )
 
     setEditingOutline(outline)
     setOutlineName(outline.name)
@@ -184,7 +205,10 @@ const OutlineTable = ({
         // If it's already a string, verify it's valid JSON, otherwise use as-is
         try {
           const parsed = JSON.parse(outline.sections)
-          console.log("🔍 OutlineTable: Successfully parsed sections JSON:", parsed)
+          console.log(
+            "🔍 OutlineTable: Successfully parsed sections JSON:",
+            parsed,
+          )
           sectionsString = outline.sections
         } catch (error) {
           console.log(
@@ -201,7 +225,10 @@ const OutlineTable = ({
           ])
         }
       } else if (Array.isArray(outline.sections)) {
-        console.log("🔍 OutlineTable: Sections is array, stringifying:", outline.sections)
+        console.log(
+          "🔍 OutlineTable: Sections is array, stringifying:",
+          outline.sections,
+        )
         // If it's already parsed as an array, stringify it
         sectionsString = JSON.stringify(outline.sections)
       } else {
@@ -216,7 +243,10 @@ const OutlineTable = ({
       console.log("🔍 OutlineTable: No sections found in outline")
     }
 
-    console.log("🔍 OutlineTable: Final sectionsString being passed:", sectionsString)
+    console.log(
+      "🔍 OutlineTable: Final sectionsString being passed:",
+      sectionsString,
+    )
     onSectionsChange(sectionsString)
     setIsModalOpen(true)
   }
@@ -259,7 +289,11 @@ const OutlineTable = ({
     setOutlineName("")
     setOutlineDescription("")
     // Initialize with an empty section for immediate editing
-    onSectionsChange(JSON.stringify([{ id: generateUUID(), text: "", consultDocuments: true }]))
+    onSectionsChange(
+      JSON.stringify([
+        { id: generateUUID(), text: "", consultDocuments: true },
+      ]),
+    )
     setIsModalOpen(true)
   }
 
@@ -305,7 +339,11 @@ const OutlineTable = ({
       onOutlinesUpdate()
     } catch (error: any) {
       console.error("Error saving outline:", error)
-      showErrorToast(t("toast.outlineSaveFailed", { error: error.message || "Unknown error" }))
+      showErrorToast(
+        t("toast.outlineSaveFailed", {
+          error: error.message || "Unknown error",
+        }),
+      )
     }
   }
 

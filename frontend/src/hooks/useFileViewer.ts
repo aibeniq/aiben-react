@@ -1,12 +1,13 @@
-import { type SourceContentResponse, FilesService } from "@/client"
+import { FilesService, type SourceContentResponse } from "@/client"
 import { useState } from "react"
-import useCustomToast from "./useCustomToast"
 import { useTranslation } from "react-i18next"
+import useCustomToast from "./useCustomToast"
 
 export const useFileViewer = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [currentFile, setCurrentFile] =
-    useState<SourceContentResponse | null>(null)
+  const [currentFile, setCurrentFile] = useState<SourceContentResponse | null>(
+    null,
+  )
   const { showErrorToast } = useCustomToast()
   const { t } = useTranslation()
 
