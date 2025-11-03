@@ -78,9 +78,9 @@
       "name": "名前",
       "description": "説明",
       "sources": "ソース",
-      "noDescription": "説明なし",
-      "sourcesCount": "{{count}} 件のソース",
-      "pagesCount": "{{count}} ページ"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "名前",
     "knowledgeBaseTableDescription": "説明",

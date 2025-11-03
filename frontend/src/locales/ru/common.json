@@ -75,9 +75,9 @@
       "name": "Имя",
       "description": "Описание",
       "sources": "Источники",
-      "noDescription": "Нет описания",
-      "sourcesCount": "{{count}} источников",
-      "pagesCount": "{{count}} страниц"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Имя",
     "knowledgeBaseTableDescription": "Описание",

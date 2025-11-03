@@ -76,9 +76,9 @@
       "name": "Namn",
       "description": "Beskrivning",
       "sources": "Källor",
-      "noDescription": "Ingen beskrivning",
-      "sourcesCount": "{{count}} källor",
-      "pagesCount": "{{count}} sidor"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Namn",
     "knowledgeBaseTableDescription": "Beskrivning",

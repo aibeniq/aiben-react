@@ -76,9 +76,9 @@
       "name": "Nombre",
       "description": "Descripción",
       "sources": "Fuentes",
-      "noDescription": "Sin descripción",
-      "sourcesCount": "{{count}} fuentes",
-      "pagesCount": "{{count}} páginas"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Nombre",
     "knowledgeBaseTableDescription": "Descripción",
