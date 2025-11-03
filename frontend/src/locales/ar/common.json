@@ -78,9 +78,9 @@
       "name": "الاسم",
       "description": "الوصف",
       "sources": "المصادر",
-      "noDescription": "لا يوجد وصف",
-      "sourcesCount": "{{count}} مصادر",
-      "pagesCount": "{{count}} صفحات"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "الاسم",
     "knowledgeBaseTableDescription": "الوصف",

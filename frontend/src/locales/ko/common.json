@@ -73,9 +73,9 @@
       "name": "이름",
       "description": "설명",
       "sources": "소스",
-      "noDescription": "설명 없음",
-      "sourcesCount": "{{count}} 출처",
-      "pagesCount": "{{count}} 페이지"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "이름",
     "knowledgeBaseTableDescription": "설명",

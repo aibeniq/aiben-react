@@ -76,9 +76,9 @@
       "name": "名称",
       "description": "描述",
       "sources": "来源",
-      "noDescription": "无描述",
-      "sourcesCount": "{{count}} 个来源",
-      "pagesCount": "{{count}} 页"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "名称",
     "knowledgeBaseTableDescription": "描述",
