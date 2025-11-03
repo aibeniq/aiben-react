@@ -79,9 +79,9 @@
       "name": "Naziv",
       "description": "Opis",
       "sources": "Izvori",
-      "noDescription": "Nema opisa",
-      "sourcesCount": "{{count}} izvora",
-      "pagesCount": "{{count}} stranica"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Odaberite bazu znanja...",
     "noKnowledgeBasesAvailable": "Nema dostupnih baza znanja. Prvo stvorite jednu za korištenje ove značajke.",
@@ -119,7 +119,44 @@
     "delete": "Obriši",
     "confirmationRequired": "Potrebna je potvrda",
     "deleteConfirmationText": "Svi vaši podaci računa bit će trajno obrisani. Ako ste sigurni, kliknite \"Potvrdi\" za nastavak. Ova radnja se ne može poništiti.",
-    "cancel": "Odustani"
+    "cancel": "Odustani",
+    "visionAnalysis": {
+      "tab": "Analiza Vizije",
+      "title": "Postavke Analize Vizije",
+      "description": "Kontrolirajte hoće li AI analizirati slike ugrađene u vaše dokumente. Onemogućavanje ovoga može značajno smanjiti troškove API-ja za dokumente s mnogo slika.",
+      "enableLabel": "Omogući Analizu Vizije",
+      "costWarning": "Upozorenje: Analiza vizije može biti skupa za dokumente s mnogo slika. Svaka analizirana slika uzrokuje dodatne troškove API-ja. Razmislite o onemogućavanju ako uglavnom radite s dokumentima koji sadrže samo tekst.",
+      "whenEnabled": "Kada je omogućeno:",
+      "feature1": "Slike u PDF i DOCX datotekama bit će analizirane",
+      "feature2": "Grafikoni, dijagrami i vizualni sadržaj bit će izdvojeni",
+      "feature3": "Polja obrazaca na slikama mogu se otkriti (FormConnect)",
+      "feature4": "Sveobuhvatnije razumijevanje dokumenta",
+      "whenDisabled": "Kada je onemogućeno:",
+      "disabled1": "Bit će analiziran samo tekstualni sadržaj (niži troškovi)",
+      "disabled2": "Vizualni elementi u dokumentima bit će zanemareni"
+    },
+    "pdfParsing": {
+      "tab": "Analiza PDF-a",
+      "title": "Postavke Analize PDF-a",
+      "description": "Kontrolirajte kako sustav obrađuje PDF dokumente. Odaberite način koji najbolje odgovara vašem radnom tijeku i vrstama dokumenata.",
+      "explanation": "Savjet: Različiti načini analize nude različite kompromise između brzine i točnosti. Odaberite na temelju vaših tipičnih vrsta dokumenata.",
+      "modeLabel": "Način Analize PDF-a",
+      "enhancedMode": "Poboljšani (Najbolja Kvaliteta)",
+      "enhancedDescription": "Uvijek koristi PyMuPDF4LLM za nadmoćno izdvajanje tablica. Najbolje za dokumente sa složenim tablicama, ali sporije.",
+      "basicMode": "Osnovni (Najbrži)",
+      "basicDescription": "Koristi samo brzo izdvajanje pypdf. Najbolje za dokumente samo s tekstom bez tablica.",
+      "comparison": {
+        "title": "Usporedba Načina:",
+        "enhancedTitle": "Poboljšani Način",
+        "enhancedFeature1": "Uvijek koristi PyMuPDF4LLM",
+        "enhancedFeature2": "Najbolje očuvanje strukture tablice",
+        "enhancedWarning": "Sporije vrijeme obrade",
+        "basicTitle": "Osnovni Način",
+        "basicFeature1": "Najbrža brzina obrade",
+        "basicFeature2": "Niža upotreba resursa",
+        "basicWarning": "Može propustiti formatiranje tablice"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Nešto je pošlo po zlu",

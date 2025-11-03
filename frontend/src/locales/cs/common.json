@@ -79,9 +79,9 @@
       "name": "Název",
       "description": "Popis",
       "sources": "Zdroje",
-      "noDescription": "Žádný popis",
-      "sourcesCount": "{{count}} zdrojů",
-      "pagesCount": "{{count}} stránek"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Vyberte databázi znalostí...",
     "noKnowledgeBasesAvailable": "Žádné dostupné databáze znalostí. Nejprve vytvořte jednu pro použití této funkce.",
@@ -119,7 +119,44 @@
     "delete": "Smazat",
     "confirmationRequired": "Vyžadováno potvrzení",
     "deleteConfirmationText": "Všechna data vašeho účtu budou trvale odstraněna. Pokud jste si jisti, klikněte na \"Potvrdit\" pro pokračování. Tuto akci nelze vrátit zpět.",
-    "cancel": "Zrušit"
+    "cancel": "Zrušit",
+    "visionAnalysis": {
+      "tab": "Analýza obrazu",
+      "title": "Nastavení analýzy obrazu",
+      "description": "Řídí, zda AI analyzuje obrázky vložené ve vašich dokumentech. Zakázání tohoto může výrazně snížit náklady na API pro dokumenty s mnoha obrázky.",
+      "enableLabel": "Povolit analýzu obrazu",
+      "costWarning": "Varování: Analýza obrazu může být drahá pro dokumenty s mnoha obrázky. Každý analyzovaný obrázek způsobuje dodatečné náklady na API. Zvažte zakázání, pokud pracujete převážně s dokumenty pouze s textem.",
+      "whenEnabled": "Když je povoleno:",
+      "feature1": "Obrázky v souborech PDF a DOCX budou analyzovány",
+      "feature2": "Grafy, diagramy a vizuální obsah budou extrahovány",
+      "feature3": "Pole formulářů v obrázcích mohou být detekovány (FormConnect)",
+      "feature4": "Komplexnější porozumění dokumentu",
+      "whenDisabled": "Když je zakázáno:",
+      "disabled1": "Bude analyzován pouze textový obsah (nižší náklady)",
+      "disabled2": "Vizuální prvky v dokumentech budou ignorovány"
+    },
+    "pdfParsing": {
+      "tab": "Analýza PDF",
+      "title": "Předvolby analýzy PDF",
+      "description": "Řídí, jak systém zpracovává dokumenty PDF. Vyberte režim, který nejlépe vyhovuje vašemu pracovnímu postupu a typům dokumentů.",
+      "explanation": "Tip: Různé režimy analýzy nabízejí různé kompromisy mezi rychlostí a přesností. Vyberte na základě vašich typických typů dokumentů.",
+      "modeLabel": "Režim analýzy PDF",
+      "enhancedMode": "Vylepšený (nejlepší kvalita)",
+      "enhancedDescription": "Vždy používá PyMuPDF4LLM pro vynikající extrakci tabulek. Nejlepší pro dokumenty se složitými tabulkami, ale pomalejší.",
+      "basicMode": "Základní (nejrychlejší)",
+      "basicDescription": "Používá pouze rychlou extrakci pypdf. Nejlepší pro dokumenty pouze s textem bez tabulek.",
+      "comparison": {
+        "title": "Porovnání režimů:",
+        "enhancedTitle": "Vylepšený režim",
+        "enhancedFeature1": "Vždy používá PyMuPDF4LLM",
+        "enhancedFeature2": "Nejlepší zachování struktury tabulky",
+        "enhancedWarning": "Pomalejší doba zpracování",
+        "basicTitle": "Základní režim",
+        "basicFeature1": "Nejrychlejší rychlost zpracování",
+        "basicFeature2": "Nižší využití zdrojů",
+        "basicWarning": "Může přehlédnout formátování tabulky"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Něco se pokazilo",

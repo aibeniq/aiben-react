@@ -78,9 +78,9 @@
       "name": "Ad",
       "description": "Açıklama",
       "sources": "Kaynaklar",
-      "noDescription": "Açıklama yok",
-      "sourcesCount": "{{count}} kaynak",
-      "pagesCount": "{{count}} sayfa"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Ad",
     "knowledgeBaseTableDescription": "Açıklama",
@@ -122,7 +122,44 @@
     "delete": "Sil",
     "confirmationRequired": "Onay Gerekli",
     "deleteConfirmationText": "Hesap verilerinizin tümü kalıcı olarak silinecektir. Emin olduğunuzda devam etmek için \"Onayla\"ya tıklayın. Bu işlem geri alınamaz.",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "visionAnalysis": {
+      "tab": "Görsel Analiz",
+      "title": "Görsel Analiz Ayarları",
+      "description": "AI'nin belgelerinizde gömülü görüntüleri analiz edip etmediğini kontrol eder. Bunu devre dışı bırakmak, birçok görüntü içeren belgeler için API maliyetlerini önemli ölçüde azaltabilir.",
+      "enableLabel": "Görsel Analizi Etkinleştir",
+      "costWarning": "Uyarı: Görsel analiz, birçok görüntü içeren belgeler için pahalı olabilir. Analiz edilen her görüntü ek API maliyeti doğurur. Öncelikle sadece metin belgeleriyle çalışıyorsanız devre dışı bırakmayı düşünün.",
+      "whenEnabled": "Etkinleştirildiğinde:",
+      "feature1": "PDF ve DOCX dosyalarındaki görüntüler analiz edilecektir",
+      "feature2": "Grafikler, diyagramlar ve görsel içerik çıkarılacaktır",
+      "feature3": "Görüntülerdeki form alanları tespit edilebilir (FormConnect)",
+      "feature4": "Daha kapsamlı belge anlayışı",
+      "whenDisabled": "Devre dışı bırakıldığında:",
+      "disabled1": "Yalnızca metin içeriği analiz edilecektir (düşük maliyet)",
+      "disabled2": "Belgelerdeki görsel unsurlar göz ardı edilecektir"
+    },
+    "pdfParsing": {
+      "tab": "PDF Analizi",
+      "title": "PDF Analizi Tercihleri",
+      "description": "Sistemin PDF belgelerini nasıl işlediğini kontrol eder. İş akışınıza ve belge türlerinize en uygun modu seçin.",
+      "explanation": "İpucu: Farklı analiz modları hız ve doğruluk arasında farklı ödünleşimler sunar. Tipik belge türlerinize göre seçim yapın.",
+      "modeLabel": "PDF Analizi Modu",
+      "enhancedMode": "Gelişmiş (En İyi Kalite)",
+      "enhancedDescription": "Üstün tablo çıkarma için her zaman PyMuPDF4LLM kullanır. Karmaşık tablolar içeren belgeler için en iyisi, ancak daha yavaştır.",
+      "basicMode": "Temel (En Hızlı)",
+      "basicDescription": "Yalnızca hızlı pypdf çıkarma kullanır. Tablolar içermeyen sadece metin belgeleri için en iyisi.",
+      "comparison": {
+        "title": "Mod Karşılaştırması:",
+        "enhancedTitle": "Gelişmiş Mod",
+        "enhancedFeature1": "Her zaman PyMuPDF4LLM kullanır",
+        "enhancedFeature2": "En iyi tablo yapısı korunması",
+        "enhancedWarning": "Daha yavaş işleme süresi",
+        "basicTitle": "Temel Mod",
+        "basicFeature1": "En hızlı işleme hızı",
+        "basicFeature2": "Daha düşük kaynak kullanımı",
+        "basicWarning": "Tablo formatını kaçırabilir"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Bir şeyler ters gitti",

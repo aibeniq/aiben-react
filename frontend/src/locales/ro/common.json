@@ -77,9 +77,9 @@
       "name": "Nume",
       "description": "Descriere",
       "sources": "Surse",
-      "noDescription": "Fără descriere",
-      "sourcesCount": "{{count}} surse",
-      "pagesCount": "{{count}} pagini"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Selectați o bază de cunoștințe...",
     "noKnowledgeBasesAvailable": "Nu există baze de cunoștințe disponibile. Creați una mai întâi pentru a utiliza această funcție.",
@@ -117,7 +117,44 @@
     "delete": "Șterge",
     "confirmationRequired": "Confirmare necesară",
     "deleteConfirmationText": "Toate datele contului dvs. vor fi șterse permanent. Dacă sunteți sigur, faceți clic pe \"Confirmă\" pentru a continua. Această acțiune nu poate fi anulată.",
-    "cancel": "Anulează"
+    "cancel": "Anulează",
+    "visionAnalysis": {
+      "tab": "Analiză Vizuală",
+      "title": "Setări Analiză Vizuală",
+      "description": "Controlează dacă AI-ul analizează imaginile încorporate în documentele dvs. Dezactivarea acestei opțiuni poate reduce semnificativ costurile API pentru documentele cu multe imagini.",
+      "enableLabel": "Activează Analiza Vizuală",
+      "costWarning": "Avertisment: Analiza vizuală poate fi costisitoare pentru documentele cu multe imagini. Fiecare imagine analizată generează costuri API suplimentare. Luați în considerare dezactivarea dacă lucrați în principal cu documente care conțin doar text.",
+      "whenEnabled": "Când este activată:",
+      "feature1": "Imaginile din fișierele PDF și DOCX vor fi analizate",
+      "feature2": "Graficele, diagramele și conținutul vizual vor fi extrase",
+      "feature3": "Câmpurile de formular din imagini pot fi detectate (FormConnect)",
+      "feature4": "Înțelegere mai cuprinzătoare a documentului",
+      "whenDisabled": "Când este dezactivată:",
+      "disabled1": "Doar conținutul text va fi analizat (cost mai mic)",
+      "disabled2": "Elementele vizuale din documente vor fi ignorate"
+    },
+    "pdfParsing": {
+      "tab": "Analiză PDF",
+      "title": "Preferințe Analiză PDF",
+      "description": "Controlează cum sistemul procesează documentele PDF. Alegeți modul care se potrivește cel mai bine fluxului dvs. de lucru și tipurilor de documente.",
+      "explanation": "Sfat: Diferite moduri de analiză oferă compromisuri diferite între viteză și acuratețe. Alegeți pe baza tipurilor dvs. tipice de documente.",
+      "modeLabel": "Mod Analiză PDF",
+      "enhancedMode": "Îmbunătățit (Cea Mai Bună Calitate)",
+      "enhancedDescription": "Utilizează întotdeauna PyMuPDF4LLM pentru extracția superioară a tabelelor. Cel mai bun pentru documente cu tabele complexe, dar mai lent.",
+      "basicMode": "De Bază (Cel Mai Rapid)",
+      "basicDescription": "Utilizează doar extracția rapidă pypdf. Cel mai bun pentru documente doar cu text fără tabele.",
+      "comparison": {
+        "title": "Comparare Moduri:",
+        "enhancedTitle": "Mod Îmbunătățit",
+        "enhancedFeature1": "Utilizează întotdeauna PyMuPDF4LLM",
+        "enhancedFeature2": "Cea mai bună păstrare a structurii tabelului",
+        "enhancedWarning": "Timp de procesare mai lent",
+        "basicTitle": "Mod De Bază",
+        "basicFeature1": "Cea mai rapidă viteză de procesare",
+        "basicFeature2": "Utilizare mai mică a resurselor",
+        "basicWarning": "Poate pierde formatarea tabelului"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Ceva a mers prost",

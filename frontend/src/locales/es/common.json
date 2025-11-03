@@ -122,7 +122,44 @@
     "delete": "Eliminar",
     "confirmationRequired": "Se Requiere Confirmación",
     "deleteConfirmationText": "Todos los datos de tu cuenta serán eliminados permanentemente. Si estás seguro, por favor haz clic en \"Confirmar\" para proceder. Esta acción no se puede deshacer.",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "visionAnalysis": {
+      "tab": "Análisis de Visión",
+      "title": "Configuración de Análisis de Visión",
+      "description": "Controla si la IA analiza las imágenes incrustadas en tus documentos. Deshabilitar esto puede reducir significativamente los costos de API para documentos con muchas imágenes.",
+      "enableLabel": "Habilitar Análisis de Visión",
+      "costWarning": "Advertencia: El análisis de visión puede ser costoso para documentos con muchas imágenes. Cada imagen analizada incurre en costos adicionales de API. Considera deshabilitarlo si principalmente trabajas con documentos de solo texto.",
+      "whenEnabled": "Cuando está habilitado:",
+      "feature1": "Las imágenes en archivos PDF y DOCX serán analizadas",
+      "feature2": "Los gráficos, diagramas y contenido visual serán extraídos",
+      "feature3": "Los campos de formulario en imágenes pueden ser detectados (FormConnect)",
+      "feature4": "Comprensión de documento más completa",
+      "whenDisabled": "Cuando está deshabilitado:",
+      "disabled1": "Solo el contenido de texto será analizado (costo menor)",
+      "disabled2": "Los elementos visuales en los documentos serán ignorados"
+    },
+    "pdfParsing": {
+      "tab": "Análisis de PDF",
+      "title": "Preferencias de Análisis de PDF",
+      "description": "Controla cómo el sistema procesa los documentos PDF. Elige el modo que mejor se adapte a tu flujo de trabajo y tipos de documentos.",
+      "explanation": "Consejo: Los diferentes modos de análisis ofrecen diferentes compensaciones entre velocidad y precisión. Elige basado en tus tipos de documentos típicos.",
+      "modeLabel": "Modo de Análisis de PDF",
+      "enhancedMode": "Mejorado (Mejor Calidad)",
+      "enhancedDescription": "Siempre usa PyMuPDF4LLM para una extracción de tablas superior. Mejor para documentos con tablas complejas, pero más lento.",
+      "basicMode": "Básico (Más Rápido)",
+      "basicDescription": "Usa solo extracción pypdf rápida. Mejor para documentos de solo texto sin tablas.",
+      "comparison": {
+        "title": "Comparación de Modos:",
+        "enhancedTitle": "Modo Mejorado",
+        "enhancedFeature1": "Siempre usa PyMuPDF4LLM",
+        "enhancedFeature2": "Mejor preservación de estructura de tablas",
+        "enhancedWarning": "Tiempo de procesamiento más lento",
+        "basicTitle": "Modo Básico",
+        "basicFeature1": "Velocidad de procesamiento más rápida",
+        "basicFeature2": "Menor uso de recursos",
+        "basicWarning": "Puede perder formato de tablas"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Algo salió mal",

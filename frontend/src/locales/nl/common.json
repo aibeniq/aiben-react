@@ -75,9 +75,9 @@
       "name": "Naam",
       "description": "Beschrijving",
       "sources": "Bronnen",
-      "noDescription": "Geen beschrijving",
-      "sourcesCount": "{{count}} bronnen",
-      "pagesCount": "{{count}} pagina's"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Naam",
     "knowledgeBaseTableDescription": "Beschrijving",
@@ -119,7 +119,44 @@
     "delete": "Verwijderen",
     "confirmationRequired": "Bevestiging vereist",
     "deleteConfirmationText": "Al uw accountgegevens worden permanent verwijderd. Als u zeker bent, klik dan op \"Bevestigen\" om door te gaan. Deze actie kan niet ongedaan worden gemaakt.",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "visionAnalysis": {
+      "tab": "Beeldanalyse",
+      "title": "Beeldanalyse Instellingen",
+      "description": "Bepaalt of de AI afbeeldingen in uw documenten analyseert. Dit uitschakelen kan de API-kosten aanzienlijk verminderen voor documenten met veel afbeeldingen.",
+      "enableLabel": "Beeldanalyse Inschakelen",
+      "costWarning": "Waarschuwing: Beeldanalyse kan duur zijn voor documenten met veel afbeeldingen. Elke geanalyseerde afbeelding brengt extra API-kosten met zich mee. Overweeg uit te schakelen als u voornamelijk werkt met documenten die alleen tekst bevatten.",
+      "whenEnabled": "Indien ingeschakeld:",
+      "feature1": "Afbeeldingen in PDF- en DOCX-bestanden worden geanalyseerd",
+      "feature2": "Grafieken, diagrammen en visuele inhoud worden geëxtraheerd",
+      "feature3": "Formuliervelden in afbeeldingen kunnen worden gedetecteerd (FormConnect)",
+      "feature4": "Meer uitgebreide documentbegrip",
+      "whenDisabled": "Indien uitgeschakeld:",
+      "disabled1": "Alleen tekstinhoud wordt geanalyseerd (lagere kosten)",
+      "disabled2": "Visuele elementen in documenten worden genegeerd"
+    },
+    "pdfParsing": {
+      "tab": "PDF Analyse",
+      "title": "PDF Analyse Voorkeuren",
+      "description": "Bepaalt hoe het systeem PDF-documenten verwerkt. Kies de modus die het beste past bij uw workflow en documenttypen.",
+      "explanation": "Tip: Verschillende analysemodi bieden verschillende afwegingen tussen snelheid en nauwkeurigheid. Kies op basis van uw typische documenttypen.",
+      "modeLabel": "PDF Analyse Modus",
+      "enhancedMode": "Uitgebreid (Beste Kwaliteit)",
+      "enhancedDescription": "Gebruikt altijd PyMuPDF4LLM voor superieure tabel extractie. Beste voor documenten met complexe tabellen, maar langzamer.",
+      "basicMode": "Basis (Snelste)",
+      "basicDescription": "Gebruikt alleen snelle pypdf extractie. Beste voor documenten die alleen tekst bevatten zonder tabellen.",
+      "comparison": {
+        "title": "Modus Vergelijking:",
+        "enhancedTitle": "Uitgebreide Modus",
+        "enhancedFeature1": "Gebruikt altijd PyMuPDF4LLM",
+        "enhancedFeature2": "Beste tabel structuur behoud",
+        "enhancedWarning": "Langzamere verwerkingstijd",
+        "basicTitle": "Basis Modus",
+        "basicFeature1": "Snelste verwerkingssnelheid",
+        "basicFeature2": "Lagere resource gebruik",
+        "basicWarning": "Kan tabel opmaak missen"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Er is iets misgegaan",

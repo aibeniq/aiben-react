@@ -82,9 +82,9 @@
       "name": "Nimi",
       "description": "Kirjeldus",
       "sources": "Allikad",
-      "noDescription": "Kirjeldust pole",
-      "sourcesCount": "{{count}} allikat",
-      "pagesCount": "{{count}} lehte"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Vali teadmistebaas...",
     "noKnowledgeBasesAvailable": "Ühtegi teadmistebaasi pole saadaval. Loo esmalt üks, et kasutada seda funktsiooni.",
@@ -122,7 +122,44 @@
     "delete": "Kustuta",
     "confirmationRequired": "Kinnitus nõutav",
     "deleteConfirmationText": "Kõik sinu konto andmed kustutatakse jäädavalt. Kui oled kindel, klõpsa jätkamiseks \"Kinnita\". Seda toimingut ei saa tagasi võtta.",
-    "cancel": "Tühista"
+    "cancel": "Tühista",
+    "visionAnalysis": {
+      "tab": "Visuaalne analüüs",
+      "title": "Visuaalse analüüsi seaded",
+      "description": "Kontrollige, kas AI analüüsib teie dokumentidesse manustatud pilte. Selle funktsiooni keelamine võib oluliselt vähendada API kulusid dokumentide puhul, millel on palju pilte.",
+      "enableLabel": "Luba visuaalne analüüs",
+      "costWarning": "Hoiatus: Visuaalne analüüs võib olla kallis dokumentide puhul, millel on palju pilte. Iga analüüsitud pilt põhjustab täiendavaid API kulusid. Kaaluge keelamist, kui töötate peamiselt ainult tekstidokumentidega.",
+      "whenEnabled": "Kui lubatud:",
+      "feature1": "PDF- ja DOCX-failides olevad pildid analüüsitakse",
+      "feature2": "Diagrammid, skeemid ja visuaalne sisu ekstraheeritakse",
+      "feature3": "Vormiväljad piltidel võivad olla tuvastatavad (FormConnect)",
+      "feature4": "Põhjalikum dokumendi mõistmine",
+      "whenDisabled": "Kui keelatud:",
+      "disabled1": "Analüüsitakse ainult tekstisisu (madalamad kulud)",
+      "disabled2": "Dokumendi visuaalseid elemente ignoreeritakse"
+    },
+    "pdfParsing": {
+      "tab": "PDF parsimine",
+      "title": "PDF parsimise eelistused",
+      "description": "Kontrollige, kuidas süsteem töötleb PDF-dokumente. Valige režiim, mis sobib kõige paremini teie töövooga ja dokumenditüüpidega.",
+      "explanation": "Nõuanne: Erinevad parsimisrežiimid pakuvad erinevaid kompromisse kiiruse ja täpsuse vahel. Valige oma tüüpiliste dokumenditüüpide põhjal.",
+      "modeLabel": "PDF parsimisrežiim",
+      "enhancedMode": "Täiustatud (parim kvaliteet)",
+      "enhancedDescription": "Kasutab alati PyMuPDF4LLM-i ülemäärase tabeli ekstraktsiooni jaoks. Parim dokumentidele, millel on keerulised tabelid, kuid aeglasem.",
+      "basicMode": "Põhiline (kiireim)",
+      "basicDescription": "Kasutab ainult kiiret pypdf ekstraktsiooni. Parim ainult tekstidokumentidele ilma tabeliteta.",
+      "comparison": {
+        "title": "Režiimide võrdlus:",
+        "enhancedTitle": "Täiustatud režiim",
+        "enhancedFeature1": "Kasutab alati PyMuPDF4LLM-i",
+        "enhancedFeature2": "Parim tabelistruktuuri säilitamine",
+        "enhancedWarning": "Aeglasem töötlemisaeg",
+        "basicTitle": "Põhirežiim",
+        "basicFeature1": "Kiireim töötlemiskiirus",
+        "basicFeature2": "Madalam ressursikasutus",
+        "basicWarning": "Võib tabeli vorminduse vahele jätta"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Midagi läks valesti",

@@ -82,9 +82,9 @@
       "name": "Név",
       "description": "Leírás",
       "sources": "Források",
-      "noDescription": "Nincs leírás",
-      "sourcesCount": "{{count}} forrás",
-      "pagesCount": "{{count}} oldal"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Válassz egy tudásbázist...",
     "noKnowledgeBasesAvailable": "Nincsenek elérhető tudásbázisok. Hozz létre egyet először a funkció használatához.",
@@ -122,7 +122,44 @@
     "delete": "Törlés",
     "confirmationRequired": "Megerősítés szükséges",
     "deleteConfirmationText": "Az összes fiókadata véglegesen törölve lesz. Ha biztos benne, kattintson a \"Megerősítés\" gombra a folytatáshoz. Ez a művelet nem vonható vissza.",
-    "cancel": "Mégse"
+    "cancel": "Mégse",
+    "visionAnalysis": {
+      "tab": "Látás Elemzés",
+      "title": "Látás Elemzés Beállítások",
+      "description": "Szabályozza, hogy az AI elemezze-e a dokumentumaiba ágyazott képeket. Ennek letiltása jelentősen csökkentheti az API költségeket a sok képet tartalmazó dokumentumok esetében.",
+      "enableLabel": "Látás Elemzés Engedélyezése",
+      "costWarning": "Figyelmeztetés: A látás elemzés drága lehet a sok képet tartalmazó dokumentumok esetében. Minden elemzett kép további API költségeket okoz. Fontolja meg a letiltást, ha elsősorban csak szöveges dokumentumokkal dolgozik.",
+      "whenEnabled": "Ha engedélyezve van:",
+      "feature1": "A PDF és DOCX fájlok képei elemzésre kerülnek",
+      "feature2": "Diagramok, ábrák és vizuális tartalom kinyerésre kerül",
+      "feature3": "Az űrlap mezők képeken észlelhetők (FormConnect)",
+      "feature4": "Átfedőbb dokumentum megértés",
+      "whenDisabled": "Ha letiltva van:",
+      "disabled1": "Csak a szöveges tartalom kerül elemzésre (alacsonyabb költség)",
+      "disabled2": "A dokumentumok vizuális elemei figyelmen kívül maradnak"
+    },
+    "pdfParsing": {
+      "tab": "PDF Elemzés",
+      "title": "PDF Elemzés Beállítások",
+      "description": "Szabályozza, hogyan dolgozza fel a rendszer a PDF dokumentumokat. Válassza ki a munkafolyamatának és dokumentumtípusainak legjobban megfelelő módot.",
+      "explanation": "Tipp: A különböző elemzési módok különböző kompromisszumokat kínálnak a sebesség és pontosság között. Válasszon a tipikus dokumentumtípusai alapján.",
+      "modeLabel": "PDF Elemzés Mód",
+      "enhancedMode": "Fokozott (Legjobb Minőség)",
+      "enhancedDescription": "Mindig a PyMuPDF4LLM-et használja a kiváló tábla-kivonáshoz. Legjobb a komplex táblákat tartalmazó dokumentumokhoz, de lassabb.",
+      "basicMode": "Alap (Leggyorsabb)",
+      "basicDescription": "Csak a gyors pypdf kivonást használja. Legjobb a csak szöveges dokumentumokhoz táblák nélkül.",
+      "comparison": {
+        "title": "Mód Összehasonlítás:",
+        "enhancedTitle": "Fokozott Mód",
+        "enhancedFeature1": "Mindig PyMuPDF4LLM-et használ",
+        "enhancedFeature2": "Legjobb tábla szerkezet megőrzés",
+        "enhancedWarning": "Lassabb feldolgozási idő",
+        "basicTitle": "Alap Mód",
+        "basicFeature1": "Leggyorsabb feldolgozási sebesség",
+        "basicFeature2": "Alacsonyabb erőforrás használat",
+        "basicWarning": "Előfordulhat, hogy kihagyja a tábla formázást"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Valami hiba történt",

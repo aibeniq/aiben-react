@@ -82,9 +82,9 @@
       "name": "Ime",
       "description": "Opis",
       "sources": "Viri",
-      "noDescription": "Ni opisa",
-      "sourcesCount": "{{count}} virov",
-      "pagesCount": "{{count}} strani"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Izberite bazo znanja...",
     "noKnowledgeBasesAvailable": "Ni na voljo nobenih baz znanja. Najprej ustvarite eno, da uporabite to funkcijo.",
@@ -122,7 +122,44 @@
     "delete": "Izbriši",
     "confirmationRequired": "Potrebna je potrditev",
     "deleteConfirmationText": "Vsi podatki vašega računa bodo trajno izbrisani. Če ste prepričani, kliknite \"Potrdi\" za nadaljevanje. Tega dejanja ni mogoče razveljaviti.",
-    "cancel": "Prekliči"
+    "cancel": "Prekliči",
+    "visionAnalysis": {
+      "tab": "Analiza Vizije",
+      "title": "Nastavitve Analize Vizije",
+      "description": "Nadzoruje, ali AI analizira slike, vdelane v vaše dokumente. Onemogočanje tega lahko znatno zmanjša stroške API za dokumente z veliko slikami.",
+      "enableLabel": "Omogoči Analizo Vizije",
+      "costWarning": "Opozorilo: Analiza vizije je lahko draga za dokumente z veliko slikami. Vsaka analizirana slika povzroči dodatne stroške API. Razmislite o onemogočanju, če delate predvsem z dokumenti, ki vsebujejo samo besedilo.",
+      "whenEnabled": "Ko je omogočeno:",
+      "feature1": "Slike v datotekah PDF in DOCX bodo analizirane",
+      "feature2": "Grafikoni, diagrami in vizualna vsebina bodo ekstrahirani",
+      "feature3": "Polja obrazcev na slikah so lahko zaznana (FormConnect)",
+      "feature4": "Celovitejše razumevanje dokumenta",
+      "whenDisabled": "Ko je onemogočeno:",
+      "disabled1": "Analizirana bo samo besedilna vsebina (nižji stroški)",
+      "disabled2": "Vizualni elementi v dokumentih bodo prezrti"
+    },
+    "pdfParsing": {
+      "tab": "Analiza PDF",
+      "title": "Nastavitve Analize PDF",
+      "description": "Nadzoruje, kako sistem obdeluje dokumente PDF. Izberite način, ki najbolje ustreza vašemu delovnemu toku in vrstam dokumentov.",
+      "explanation": "Nasvet: Različni načini analize ponujajo različne kompromise med hitrostjo in natančnostjo. Izberite na podlagi vaših tipičnih vrst dokumentov.",
+      "modeLabel": "Način Analize PDF",
+      "enhancedMode": "Izboljšan (Najboljša Kakovost)",
+      "enhancedDescription": "Vedno uporablja PyMuPDF4LLM za vrhunsko ekstrakcijo tabel. Najboljše za dokumente s kompleksnimi tabelami, vendar počasnejše.",
+      "basicMode": "Osnovni (Najhitrejši)",
+      "basicDescription": "Uporablja samo hitro ekstrakcijo pypdf. Najboljše za dokumente samo z besedilom brez tabel.",
+      "comparison": {
+        "title": "Primerjava Načinov:",
+        "enhancedTitle": "Izboljšan Način",
+        "enhancedFeature1": "Vedno uporablja PyMuPDF4LLM",
+        "enhancedFeature2": "Najboljše ohranjanje strukture tabele",
+        "enhancedWarning": "Počasnejši čas obdelave",
+        "basicTitle": "Osnovni Način",
+        "basicFeature1": "Najhitrejša hitrost obdelave",
+        "basicFeature2": "Nižja poraba virov",
+        "basicWarning": "Lahko spregleda oblikovanje tabele"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Nekaj je šlo narobe",
