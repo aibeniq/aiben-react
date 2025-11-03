@@ -65,7 +65,9 @@ def has_tables_fast(file_path: str) -> Tuple[bool, int]:
         return True, 0
 
 
-def _extract_pdf_with_pymupdf4llm_sync(file_path: str, filename: str = None) -> str:
+def _extract_pdf_with_pymupdf4llm_sync(
+    file_path: str, filename: str = None
+) -> List[str]:
     """
     Synchronous helper to extract PDF content using PyMuPDF4LLM.
     This function runs the CPU-intensive extraction in a separate thread.
@@ -75,11 +77,12 @@ def _extract_pdf_with_pymupdf4llm_sync(file_path: str, filename: str = None) -> 
         filename: Optional filename for logging
 
     Returns:
-        Markdown text extracted from the PDF
+        List of page chunks extracted from the PDF using native page boundaries
     """
     print(f"Using PyMuPDF4LLM for enhanced table parsing on {filename}")
-    md_text = pymupdf4llm.to_markdown(file_path)
-    return md_text
+    # Use page_chunks=True to get native page boundaries from PyMuPDF4LLM
+    page_chunks = pymupdf4llm.to_markdown(file_path, page_chunks=True)
+    return page_chunks
 
 
 async def extract_pdf_with_pymupdf4llm(
@@ -122,77 +125,38 @@ async def extract_pdf_with_pymupdf4llm(
         # Run the CPU-intensive extraction in a thread pool to avoid blocking
         # the async event loop. This allows progress API requests to be served
         # while PyMuPDF4LLM is processing the PDF.
-        md_text = await asyncio.to_thread(
+        page_chunks = await asyncio.to_thread(
             _extract_pdf_with_pymupdf4llm_sync, file_path, filename
         )
 
-        # DEBUG: Print the raw extracted text to see what we got
-        print(f"\n{'='*80}")
-        print(f"[DEBUG] PyMuPDF4LLM extracted text for {filename}")
-        print(f"[DEBUG] Total length: {len(md_text)} characters")
-        print(f"{'='*80}")
+        # Process each page chunk with correct page numbering
+        for page_num, page_chunk in enumerate(page_chunks, 1):
+            # Extract text from the chunk dictionary
+            if isinstance(page_chunk, dict) and "text" in page_chunk:
+                page_content = page_chunk["text"]
+            else:
+                # Fallback for unexpected format
+                page_content = str(page_chunk)
 
-        # Check for page separator
-        page_separator = "\n---\n"
-        separator_count = md_text.count(page_separator)
-        print(f"[DEBUG] Found {separator_count} instances of '\\n---\\n' separator")
-
-        # If no standard separator, try triple newlines (common in PyMuPDF4LLM)
-        if separator_count == 0:
-            page_separator = "\n\n\n"
-            separator_count = md_text.count(page_separator)
-            print(
-                f"[DEBUG] Using alternative separator '\\n\\n\\n' - found {separator_count} instances"
+            # Add page even if content appears empty - PyMuPDF4LLM page_chunks are reliable
+            # (empty pages are valid, e.g., cover pages, separator pages)
+            doc = Document(
+                page_content=page_content.strip() if page_content else "",
+                metadata={
+                    "source": filename or file_path,
+                    "page": page_num,
+                    "extraction_method": "pymupdf4llm_native_chunks",
+                    "has_tables": "|" in page_content if page_content else False,
+                },
             )
+            documents.append(doc)
 
-        # Show first 2000 characters
-        print(f"\n[DEBUG] First 2000 characters of extracted text:")
-        print(f"{'-'*80}")
-        print(md_text[:2000])
-        print(f"{'-'*80}\n")
-
-        # Show a sample around the first separator if it exists
-        if separator_count > 0:
-            first_sep_idx = md_text.find(page_separator)
-            start = max(0, first_sep_idx - 200)
-            end = min(len(md_text), first_sep_idx + 200)
-            separator_display = page_separator.replace(chr(10), "\\n")
-            print(
-                f"[DEBUG] Text around first '{separator_display}' separator (chars {start}-{end}):"
-            )
-            print(f"{'-'*80}")
-            print(md_text[start:end])
-            print(f"{'-'*80}\n")
-        else:
-            print(f"[DEBUG] WARNING: No page separators found at all!")
-
-        # Split into pages if possible (PyMuPDF4LLM may return full document)
-        # Common page separator in Markdown output
-        pages = md_text.split(page_separator)
-
-        print(f"[DEBUG] Split resulted in {len(pages)} page(s)")
-        print(
-            f"[DEBUG] Page lengths: {[len(p) for p in pages[:10]]}..."
-        )  # Show first 10
-
-        for page_num, page_content in enumerate(pages, 1):
-            if page_content.strip():  # Only add non-empty pages
-                doc = Document(
-                    page_content=page_content.strip(),
-                    metadata={
-                        "source": filename or file_path,
-                        "page": page_num,
-                        "extraction_method": "pymupdf4llm_markdown",
-                        "has_tables": "|" in page_content,  # Simple table detection
-                    },
-                )
-                documents.append(doc)
-
+        # DEBUG: Print info about the extracted chunks
+        print(f"[DEBUG] PyMuPDF4LLM extracted {len(page_chunks)} page chunks")
         print(f"[DEBUG] Created {len(documents)} Document objects")
         print(
             f"[DEBUG] Document page numbers: {[d.metadata.get('page') for d in documents[:10]]}..."
         )
-        print(f"{'='*80}\n")
 
     except Exception as e:
         print(f"Error with PyMuPDF4LLM extraction for {filename}: {e}")
