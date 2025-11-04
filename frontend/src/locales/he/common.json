@@ -683,7 +683,12 @@
       "documentEvaluation": "הערכת מסמך",
       "generatedDocument": "מסמך שנוצר",
       "documentComparison": "השוואת מסמכים",
-      "matchingResults": "תוצאות התאמה"
+      "matchingResults": "תוצאות התאמה",
+      "generatedOn": "נוצר ב: {date} על ידי משתמש {name} - אימייל: {email}",
+      "question": "שאלה",
+      "answer": "תשובה",
+      "relevantPolicyContext": "הקשר מדיניות רלוונטי",
+      "topic": "נושא"
     },
     "labels": {
       "questionsAndAnswers": "שאלות ותשובות",

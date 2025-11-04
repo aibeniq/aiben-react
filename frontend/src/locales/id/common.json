@@ -731,7 +731,12 @@
       "documentEvaluation": "Evaluasi Dokumen",
       "generatedDocument": "Dokumen yang Dihasilkan",
       "documentComparison": "Perbandingan Dokumen",
-      "matchingResults": "Hasil Pencocokan"
+      "matchingResults": "Hasil Pencocokan",
+      "generatedOn": "Dihasilkan pada: {date} oleh pengguna {name} - email: {email}",
+      "question": "Pertanyaan",
+      "answer": "Jawaban",
+      "relevantPolicyContext": "Konteks Kebijakan yang Relevan",
+      "topic": "Topik"
     },
     "labels": {
       "questionsAndAnswers": "Pertanyaan dan Jawaban",

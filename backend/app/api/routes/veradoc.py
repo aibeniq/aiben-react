@@ -40,11 +40,106 @@ from app.services.translation import (
     translate_progress_message,
     translate,
 )
+from app.services.docx_translations import translate_docx_header
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
 from app.services.enhanced_retrieval import SmartRetrieverFactory
 from app.services.progress_tracker import progress_tracker
+
+# Cache for frontend translations
+_frontend_translations_cache = None
+
+
+def _load_frontend_translations():
+    """
+    Load frontend translations from common.json files.
+    """
+    global _frontend_translations_cache
+    if _frontend_translations_cache is not None:
+        return _frontend_translations_cache
+
+    translations = {}
+    # In Docker, frontend locales are copied to /app/frontend/src/locales
+    locales_dir = Path("/app/frontend/src/locales")
+
+    # Fallback for development (not in Docker)
+    if not locales_dir.exists():
+        # Get to project root: backend/app/api/routes -> backend/app/api -> backend/app -> backend -> project_root
+        locales_dir = (
+            Path(__file__).parent.parent.parent.parent.parent
+            / "frontend"
+            / "src"
+            / "locales"
+        )
+
+    if locales_dir.exists():
+        for lang_dir in locales_dir.iterdir():
+            if lang_dir.is_dir() and (lang_dir / "common.json").exists():
+                lang_code = lang_dir.name
+                with open(lang_dir / "common.json", "r", encoding="utf-8") as f:
+                    translations[lang_code] = json.load(f)
+    else:
+        print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+
+    _frontend_translations_cache = translations
+    return translations
+
+
+def translate_frontend(key, language="en", **kwargs):
+    """
+    Translate a key using frontend translations with parameter substitution.
+    """
+    translations = _load_frontend_translations()
+
+    print(f"[translate_frontend] Translating key: {key}, language: {language}")
+    print(f"[translate_frontend] Available languages: {list(translations.keys())}")
+
+    # Get translations for the requested language, fallback to English
+    lang_translations = translations.get(language, translations.get("en", {}))
+
+    if not lang_translations:
+        print(
+            f"[translate_frontend] ERROR: No translations found for language: {language}"
+        )
+        return key
+
+    # Navigate to the nested key
+    keys = key.split(".")
+    value = lang_translations
+    for k in keys:
+        if isinstance(value, dict) and k in value:
+            value = value[k]
+            print(f"[translate_frontend] Found key '{k}': {type(value)}")
+        else:
+            print(f"[translate_frontend] Key '{k}' not found in current level")
+            # Fallback to English if key not found
+            en_translations = translations.get("en", {})
+            value = en_translations
+            for k in keys:
+                if isinstance(value, dict) and k in value:
+                    value = value[k]
+                else:
+                    print(
+                        f"[translate_frontend] Key '{k}' not found even in English, returning: {key}"
+                    )
+                    return key  # Return key if not found
+
+    if not isinstance(value, str):
+        print(f"[translate_frontend] ERROR: Final value is not a string: {type(value)}")
+        return key
+
+    print(f"[translate_frontend] Found translation: {value}")
+
+    # Substitute parameters
+    try:
+        result = value.format(**kwargs)
+        print(f"[translate_frontend] After substitution: {result}")
+        return result
+    except (KeyError, ValueError) as e:
+        print(f"[translate_frontend] Error during substitution: {e}")
+        return value
+
 
 from sqlmodel import select
 from fastapi import (
@@ -2790,26 +2885,30 @@ async def generate_docx(
         doc = Document()
 
         print("Adding title and date to the document...")
-        # Determine language
-        language = (
-            request.language
-            or getattr(current_user, "preferred_language", "en")
-            or "en"
-        )
+        # Determine language - prioritize user's preferred language over request
+        # because frontend i18n might not be properly initialized
+        user_preferred = getattr(current_user, "preferred_language", None)
+        language = user_preferred or request.language or "en"
+
+        print(f"[DOCX Generation] Language determined: {language}")
+        print(f"[DOCX Generation] request.language: {request.language}")
+        print(f"[DOCX Generation] current_user.preferred_language: {user_preferred}")
 
         # Add a title
         title_text = (
             request.title
             if request.title
-            else translate("document_evaluation", language)
+            else translate_docx_header("documentEvaluation", language)
         )
+        print(f"[DOCX Generation] Title text: {title_text}")
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add translated subtitle with metadata
         date_str = datetime.now().strftime("%B %d, %Y at %H:%M")
-        subtitle_template = translate("generated_on", language)
-        subtitle = subtitle_template.format(
+        subtitle = translate_docx_header(
+            "generatedOn",
+            language,
             date=date_str,
             name=current_user.full_name or current_user.email,
             email=current_user.email,
@@ -3419,163 +3518,6 @@ Return only the final selected questions, one per line, numbered."""
             "additional_instructions": additional_instructions,
             "language_instruction": f"Respond in this language: {settings.SUPPORTED_LANGUAGES.get(getattr(current_user, 'preferred_language', 'en'), 'English')}.",
         }
-
-        # Generate questions using the LLM
-        questions_response = invoke_llm(
-            llm,
-            settings.VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE,
-            prompt_variables,
-        )
-
-        # Parse the response to extract questions and analysis
-        questions = []
-        analysis = ""
-
-        lines = questions_response.strip().split("\n")
-        in_questions_section = False
-        in_analysis_section = False
-
-        for line in lines:
-            line = line.strip()
-            if line.startswith("QUESTIONS:"):
-                in_questions_section = True
-                in_analysis_section = False
-                continue
-            elif line.startswith("ANALYSIS:"):
-                in_questions_section = False
-                in_analysis_section = True
-                continue
-
-            if in_questions_section:
-                # Extract questions (numbered list)
-                if re.match(r"^\d+\.\s+", line):
-                    question = re.sub(r"^\d+\.\s+", "", line)
-                    if question.strip():
-                        questions.append(question.strip())
-            elif in_analysis_section:
-                if line:
-                    if analysis:
-                        analysis += " " + line
-                    else:
-                        analysis = line
-
-        # If parsing failed, try simpler approach
-        if not questions:
-            # Split by lines and look for numbered items
-            for line in lines:
-                line = line.strip()
-                if re.match(r"^\d+\.\s+", line):
-                    question = re.sub(r"^\d+\.\s+", "", line)
-                    if question.strip():
-                        questions.append(question.strip())
-
-        # Ensure we have some questions
-        if not questions:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to generate questions from the description. Please try with a more detailed description.",
-            )
-
-        # Apply user-specified limit if provided, otherwise use all generated questions
-        if num_questions:
-            questions = questions[:num_questions]
-
-        if not analysis:
-            analysis = f"Generated {len(questions)} questions based on the provided description to ensure comprehensive evaluation coverage."
-
-        # Record the interaction
-        record_llm_interaction(
-            session=session,
-            user_id=current_user.id,
-            functionality="generate_checklist_questions",
-            input_data={
-                "description": description,
-                "requested_questions": num_questions,
-                "checklist_type": checklist_type,
-            },
-            output_data={
-                "questions_count": len(questions),
-                "analysis": analysis,
-            },
-            metadata={},
-        )
-
-        return GenerateQuestionsResponse(
-            questions=questions, description_analysis=analysis
-        )
-
-    except Exception as e:
-        print(f"Error generating questions: {e}")
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=500, detail=f"Error generating questions: {str(e)}"
-        )
-
-
-@router.post("/generate-questions", response_model=GenerateQuestionsResponse)
-async def generate_questions(
-    session: SessionDep, current_user: CurrentUser, request: GenerateQuestionsRequest
-):
-    """
-    Generate checklist questions based on a description using LLM (JSON version).
-    Optionally uses a knowledge base as reference for generating questions.
-    """
-    try:
-        # Get the default LLM
-        llm = get_default_llm(session, current_user)
-
-        # Handle optional description
-        description = request.description or ""
-
-        # Prepare variables for the prompt
-        prompt_variables = {
-            "description": description,
-            "checklist_type": request.checklist_type or "general",
-            "reference_documents_instruction": "",
-            "reference_documents_content": "",
-            "additional_instructions": "",
-            "language_instruction": f"Respond in this language: {settings.SUPPORTED_LANGUAGES.get(getattr(current_user, 'preferred_language', 'en'), 'English')}.",
-        }
-
-        # If knowledge base is provided, retrieve content using selected search mode
-        if request.knowledge_base_id:
-            try:
-                from app.services.content_retrieval import (
-                    retrieve_knowledge_base_content,
-                )
-
-                print(
-                    f"Retrieving knowledge base content for KB ID: {request.knowledge_base_id}, search mode: {request.search_mode}"
-                )
-                content, instruction = await retrieve_knowledge_base_content(
-                    session=session,
-                    current_user=current_user,
-                    knowledge_base_id=request.knowledge_base_id,
-                    search_mode=request.search_mode,
-                    query=description,
-                )
-
-                if content:
-                    print(
-                        f"Successfully retrieved KB content: {len(content)} characters"
-                    )
-                    prompt_variables["reference_documents_content"] = content
-                    prompt_variables["reference_documents_instruction"] = (
-                        f"{instruction} The questions should be relevant to the description while also "
-                        f"considering the content and requirements found in these reference documents. "
-                        f"Search mode used: {request.search_mode}"
-                    )
-                    prompt_variables["additional_instructions"] = (
-                        "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions"
-                    )
-                else:
-                    print("Warning: No content retrieved from knowledge base")
-
-            except Exception as e:
-                print(f"Error retrieving knowledge base documents: {e}")
-                traceback.print_exc()
-                # Continue without reference documents if there's an error
-                pass
 
         # Generate questions using the LLM
         questions_response = invoke_llm(

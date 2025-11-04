@@ -752,7 +752,12 @@
       "documentEvaluation": "Оцінка документа",
       "generatedDocument": "Створений документ",
       "documentComparison": "Порівняння документів",
-      "matchingResults": "Результати зіставлення"
+      "matchingResults": "Результати зіставлення",
+      "generatedOn": "Створено: {date} користувачем {name} - email: {email}",
+      "question": "Питання",
+      "answer": "Відповідь",
+      "relevantPolicyContext": "Відповідний Контекст Політики",
+      "topic": "Тема"
     },
     "labels": {
       "questionsAndAnswers": "Питання та відповіді",

@@ -712,7 +712,12 @@
       "documentEvaluation": "Evaluacija dokumenta",
       "generatedDocument": "Generirani dokument",
       "documentComparison": "Usporedba dokumenata",
-      "matchingResults": "Rezultati podudaranja"
+      "matchingResults": "Rezultati podudaranja",
+      "generatedOn": "Generirano: {date} od korisnika {name} - email: {email}",
+      "question": "Pitanje",
+      "answer": "Odgovor",
+      "relevantPolicyContext": "Relevantan Kontekst Politike",
+      "topic": "Tema"
     },
     "labels": {
       "questionsAndAnswers": "Pitanja i odgovori",

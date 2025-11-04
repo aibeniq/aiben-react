@@ -511,12 +511,17 @@
     "docxHeaders": {
       "evaluationSummary": "Evaluation Summary",
       "questionAnswerDetails": "Question-Answer Details",
+      "question": "Question",
+      "answer": "Answer",
+      "relevantPolicyContext": "Relevant Policy Context",
       "summary": "Summary",
       "topicAnalysis": "Topic Analysis",
+      "topic": "Topic",
       "documentEvaluation": "Document Evaluation",
       "generatedDocument": "Generated Document",
       "documentComparison": "Document Comparison",
-      "matchingResults": "Matching Results"
+      "matchingResults": "Matching Results",
+      "generatedOn": "Generated on: {date} by user {name} - email: {email}"
     },
     "labels": {
       "questionsAndAnswers": "Questions & Answers",

@@ -683,7 +683,12 @@
       "documentEvaluation": "Belge Değerlendirmesi",
       "generatedDocument": "Oluşturulan Belge",
       "documentComparison": "Belge Karşılaştırması",
-      "matchingResults": "Eşleşen Sonuçlar"
+      "matchingResults": "Eşleşen Sonuçlar",
+      "generatedOn": "Oluşturulma tarihi: {date} kullanıcı {name} - email: {email}",
+      "question": "Soru",
+      "answer": "Cevap",
+      "relevantPolicyContext": "İlgili Politika Bağlamı",
+      "topic": "Konu"
     },
     "labels": {
       "questionsAndAnswers": "Sorular ve Cevaplar",

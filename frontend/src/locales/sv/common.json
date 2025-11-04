@@ -812,7 +812,12 @@
       "documentEvaluation": "Dokumentutvärdering",
       "generatedDocument": "Genererat Dokument",
       "documentComparison": "Dokumentjämförelse",
-      "matchingResults": "Matchande Resultat"
+      "matchingResults": "Matchande Resultat",
+      "generatedOn": "Genererat: {date} av användare {name} - email: {email}",
+      "question": "Fråga",
+      "answer": "Svar",
+      "relevantPolicyContext": "Relevant Policykontext",
+      "topic": "Ämne"
     },
     "labels": {
       "questionsAndAnswers": "Frågor och Svar",

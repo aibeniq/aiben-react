@@ -712,7 +712,12 @@
       "documentEvaluation": "Оценка на документа",
       "generatedDocument": "Генериран документ",
       "documentComparison": "Сравнение на документи",
-      "matchingResults": "Съвпадащи резултати"
+      "matchingResults": "Съвпадащи резултати",
+      "generatedOn": "Генерирано на: {date} от потребител {name} - имейл: {email}",
+      "question": "Въпрос",
+      "answer": "Отговор",
+      "relevantPolicyContext": "Съответен Контекст на Политиката",
+      "topic": "Тема"
     },
     "labels": {
       "questionsAndAnswers": "Въпроси и отговори",

@@ -36,6 +36,7 @@ from app.services.llms import (
     record_llm_interaction,
 )
 from app.services.translation import translate_text_if_needed, translate
+from app.services.docx_translations import translate_docx_header
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.progress_tracker import progress_tracker
@@ -2217,24 +2218,24 @@ async def generate_docx(
         doc = Document()
 
         print("Adding title and date to the document...")
-        # Determine language
-        language = (
-            request.language
-            or getattr(current_user, "preferred_language", "en")
-            or "en"
-        )
+        # Determine language - prioritize user's preferred language
+        user_preferred = getattr(current_user, "preferred_language", None)
+        language = user_preferred or request.language or "en"
 
         # Add a title
         title_text = (
-            request.title if request.title else translate("matching_results", language)
+            request.title
+            if request.title
+            else translate_docx_header("matchingResults", language)
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add translated subtitle with metadata
         date_str = datetime.now().strftime("%B %d, %Y at %H:%M")
-        subtitle_template = translate("generated_on", language)
-        subtitle = subtitle_template.format(
+        subtitle = translate_docx_header(
+            "generatedOn",
+            language,
             date=date_str,
             name=current_user.full_name or current_user.email,
             email=current_user.email,
@@ -2509,3 +2510,81 @@ Return the CSV content:"""
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
+
+
+from app.services.translation import translate_text_if_needed, translate
+from app.api.deps import CurrentUser, SessionDep
+from app.core.config import settings
+
+# Cache for frontend translations
+_frontend_translations_cache = None
+
+
+def _load_frontend_translations():
+    """
+    Load frontend translations from common.json files.
+    """
+    global _frontend_translations_cache
+    if _frontend_translations_cache is not None:
+        return _frontend_translations_cache
+
+    translations = {}
+    # Try Docker path first, then fallback to development path
+    docker_locales_dir = Path("/app/frontend/src/locales")
+    dev_locales_dir = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "frontend"
+        / "src"
+        / "locales"
+    )
+
+    locales_dir = docker_locales_dir if docker_locales_dir.exists() else dev_locales_dir
+    print(f"[_load_frontend_translations] Using locales directory: {locales_dir}")
+
+    if locales_dir.exists():
+        for lang_dir in locales_dir.iterdir():
+            if lang_dir.is_dir() and (lang_dir / "common.json").exists():
+                lang_code = lang_dir.name
+                with open(lang_dir / "common.json", "r", encoding="utf-8") as f:
+                    translations[lang_code] = json.load(f)
+        print(f"[_load_frontend_translations] Loaded {len(translations)} languages")
+    else:
+        print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+
+    _frontend_translations_cache = translations
+    return translations
+
+
+def translate_frontend(key, language="en", **kwargs):
+    """
+    Translate a key using frontend translations with parameter substitution.
+    """
+    translations = _load_frontend_translations()
+
+    # Get translations for the requested language, fallback to English
+    lang_translations = translations.get(language, translations.get("en", {}))
+
+    # Navigate to the nested key
+    keys = key.split(".")
+    value = lang_translations
+    for k in keys:
+        if isinstance(value, dict) and k in value:
+            value = value[k]
+        else:
+            # Fallback to English if key not found
+            en_translations = translations.get("en", {})
+            value = en_translations
+            for k in keys:
+                if isinstance(value, dict) and k in value:
+                    value = value[k]
+                else:
+                    return key  # Return key if not found
+
+    if not isinstance(value, str):
+        return key
+
+    # Substitute parameters
+    try:
+        return value.format(**kwargs)
+    except (KeyError, ValueError):
+        return value

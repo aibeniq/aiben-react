@@ -731,7 +731,12 @@
       "documentEvaluation": "Dokumentum értékelés",
       "generatedDocument": "Generált dokumentum",
       "documentComparison": "Dokumentum összehasonlítás",
-      "matchingResults": "Egyező eredmények"
+      "matchingResults": "Egyező eredmények",
+      "generatedOn": "Létrehozva: {date} {name} felhasználó által - email: {email}",
+      "question": "Kérdés",
+      "answer": "Válasz",
+      "relevantPolicyContext": "Releváns Szabályzat Kontextus",
+      "topic": "Téma"
     },
     "labels": {
       "questionsAndAnswers": "Kérdések és válaszok",

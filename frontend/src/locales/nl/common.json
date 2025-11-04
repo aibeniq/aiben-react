@@ -727,7 +727,12 @@
       "documentEvaluation": "Document Evaluatie",
       "generatedDocument": "Gegenereerd Document",
       "documentComparison": "Document Vergelijking",
-      "matchingResults": "Overeenkomstresultaten"
+      "matchingResults": "Overeenkomstresultaten",
+      "generatedOn": "Gegenereerd op: {date} door gebruiker {name} - email: {email}",
+      "question": "Vraag",
+      "answer": "Antwoord",
+      "relevantPolicyContext": "Relevante Beleidscontext",
+      "topic": "Onderwerp"
     },
     "labels": {
       "questionsAndAnswers": "Vragen en Antwoorden",

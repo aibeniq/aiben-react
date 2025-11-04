@@ -676,7 +676,12 @@
       "documentEvaluation": "Evaluare document",
       "generatedDocument": "Document generat",
       "documentComparison": "Comparare document",
-      "matchingResults": "Rezultate potrivite"
+      "matchingResults": "Rezultate potrivite",
+      "generatedOn": "Generat pe: {date} de către utilizatorul {name} - email: {email}",
+      "question": "Întrebare",
+      "answer": "Răspuns",
+      "relevantPolicyContext": "Context de Politică Relevant",
+      "topic": "Subiect"
     },
     "labels": {
       "questionsAndAnswers": "Întrebări și răspunsuri",

@@ -731,7 +731,12 @@
       "documentEvaluation": "Dokumento vertinimas",
       "generatedDocument": "Sugeneruotas dokumentas",
       "documentComparison": "Dokumentų palyginimas",
-      "matchingResults": "Atitinkantys rezultatai"
+      "matchingResults": "Atitinkantys rezultatai",
+      "generatedOn": "Sugeneruota: {date} naudotojo {name} - el. paštas: {email}",
+      "question": "Klausimas",
+      "answer": "Atsakymas",
+      "relevantPolicyContext": "Aktualus Politikos Kontekstas",
+      "topic": "Tema"
     },
     "labels": {
       "questionsAndAnswers": "Klausimai ir atsakymai",

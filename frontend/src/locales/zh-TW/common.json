@@ -715,7 +715,12 @@
       "documentEvaluation": "文件評估",
       "generatedDocument": "生成的文件",
       "documentComparison": "文件比較",
-      "matchingResults": "匹配結果"
+      "matchingResults": "匹配結果",
+      "generatedOn": "生成於: {date} 用戶 {name} - 郵箱: {email}",
+      "question": "問題",
+      "answer": "答案",
+      "relevantPolicyContext": "相關政策背景",
+      "topic": "主題"
     },
     "labels": {
       "questionsAndAnswers": "問題與答案",

@@ -41,10 +41,6 @@ COPY ./app /app/app
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
 RUN TMPDIR=/tmp uv sync
 
-# Sync the project
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
-RUN TMPDIR=/tmp uv sync
-
 # Production stage
 FROM python:3.10-slim
 

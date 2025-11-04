@@ -706,7 +706,12 @@
       "documentEvaluation": "文档评估",
       "generatedDocument": "生成的文档",
       "documentComparison": "文档比较",
-      "matchingResults": "匹配结果"
+      "matchingResults": "匹配结果",
+      "generatedOn": "生成于: {date} 用户 {name} - 邮箱: {email}",
+      "question": "问题",
+      "answer": "答案",
+      "relevantPolicyContext": "相关政策背景",
+      "topic": "主题"
     },
     "labels": {
       "questionsAndAnswers": "问题与答案",

@@ -717,7 +717,12 @@
       "documentEvaluation": "Penilaian Dokumen",
       "generatedDocument": "Dokumen Dijana",
       "documentComparison": "Perbandingan Dokumen",
-      "matchingResults": "Keputusan Padanan"
+      "matchingResults": "Keputusan Padanan",
+      "generatedOn": "Dijana pada: {date} oleh pengguna {name} - email: {email}",
+      "question": "Soalan",
+      "answer": "Jawapan",
+      "relevantPolicyContext": "Konteks Dasar yang Berkaitan",
+      "topic": "Topik"
     },
     "labels": {
       "questionsAndAnswers": "Soalan dan Jawapan",

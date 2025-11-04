@@ -858,7 +858,12 @@
       "documentEvaluation": "문서 평가",
       "generatedDocument": "생성된 문서",
       "documentComparison": "문서 비교",
-      "matchingResults": "일치 결과"
+      "matchingResults": "일치 결과",
+      "generatedOn": "생성일: {date} 사용자 {name} - 이메일: {email}",
+      "question": "질문",
+      "answer": "답변",
+      "relevantPolicyContext": "관련 정책 컨텍스트",
+      "topic": "주제"
     },
     "labels": {
       "questionsAndAnswers": "질문과 답변",

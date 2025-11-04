@@ -683,7 +683,12 @@
       "documentEvaluation": "ارزیابی سند",
       "generatedDocument": "سند تولید شده",
       "documentComparison": "مقایسه سند",
-      "matchingResults": "نتایج تطبیق"
+      "matchingResults": "نتایج تطبیق",
+      "generatedOn": "ایجاد شده در: {date} توسط کاربر {name} - ایمیل: {email}",
+      "question": "سوال",
+      "answer": "پاسخ",
+      "relevantPolicyContext": "زمینه سیاست مرتبط",
+      "topic": "موضوع"
     },
     "labels": {
       "questionsAndAnswers": "سوالات و پاسخ‌ها",

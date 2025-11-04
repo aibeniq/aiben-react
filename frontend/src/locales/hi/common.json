@@ -587,7 +587,12 @@
       "documentEvaluation": "दस्तावेज़ मूल्यांकन",
       "generatedDocument": "उत्पन्न दस्तावेज़",
       "documentComparison": "दस्तावेज़ तुलना",
-      "matchingResults": "मिलान परिणाम"
+      "matchingResults": "मिलान परिणाम",
+      "generatedOn": "उत्पन्न किया गया: {date} उपयोगकर्ता {name} द्वारा - ईमेल: {email}",
+      "question": "प्रश्न",
+      "answer": "उत्तर",
+      "relevantPolicyContext": "प्रासंगिक नीति संदर्भ",
+      "topic": "विषय"
     },
     "labels": {
       "questionsAndAnswers": "प्रश्न और उत्तर",

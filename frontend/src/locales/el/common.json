@@ -731,7 +731,12 @@
       "documentEvaluation": "Αξιολόγηση Εγγράφου",
       "generatedDocument": "Δημιουργημένο Έγγραφο",
       "documentComparison": "Σύγκριση Εγγράφων",
-      "matchingResults": "Αποτελέσματα Αντιστοίχισης"
+      "matchingResults": "Αποτελέσματα Αντιστοίχισης",
+      "generatedOn": "Δημιουργήθηκε στις: {date} από χρήστη {name} - email: {email}",
+      "question": "Ερώτηση",
+      "answer": "Απάντηση",
+      "relevantPolicyContext": "Σχετικό Πλαίσιο Πολιτικής",
+      "topic": "Θέμα"
     },
     "labels": {
       "questionsAndAnswers": "Ερωτήσεις & Απαντήσεις",
