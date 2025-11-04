@@ -267,6 +267,50 @@ def extract_text_from_pdf_bytes(
     """
     Extract text from PDF bytes with configurable parsing mode.
 
+    This is a SYNC wrapper that runs the async PDF extraction in a new event loop.
+    Use this when called from synchronous code that needs PDF text extraction.
+
+    Parsing modes:
+    - 'auto': Automatically detect tables and use enhanced parsing if tables exist
+    - 'enhanced': Always use PyMuPDF4LLM if available (force enhanced parsing)
+    - 'basic': Always use basic pypdf extraction (skip enhanced parsing)
+
+    Args:
+        file_content: PDF file content as bytes
+        filename: Filename for error messages
+        parsing_mode: PDF parsing mode ('auto', 'enhanced', or 'basic')
+
+    Returns:
+        Extracted text as string
+    """
+    import asyncio
+
+    # Run the async version in a new event loop
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(
+                extract_text_from_pdf_bytes_async(file_content, filename, parsing_mode)
+            )
+        finally:
+            loop.close()
+    except RuntimeError as e:
+        # If there's already a running loop, try to get it
+        if "There is no current event loop" not in str(e):
+            raise
+        # Fallback: run in the current loop if it exists
+        return asyncio.run(
+            extract_text_from_pdf_bytes_async(file_content, filename, parsing_mode)
+        )
+
+
+async def extract_text_from_pdf_bytes_async(
+    file_content: bytes, filename: str, parsing_mode: str = "auto"
+) -> str:
+    """
+    Extract text from PDF bytes with configurable parsing mode (ASYNC version).
+
     Parsing modes:
     - 'auto': Automatically detect tables and use enhanced parsing if tables exist
     - 'enhanced': Always use PyMuPDF4LLM if available (force enhanced parsing)
@@ -294,7 +338,7 @@ def extract_text_from_pdf_bytes(
                 # Force enhanced parsing if available
                 if PYMUPDF4LLM_AVAILABLE:
                     print(f"Using enhanced parsing (forced) for {filename}")
-                    documents = extract_pdf_with_pymupdf4llm(
+                    documents = await extract_pdf_with_pymupdf4llm(
                         temp_file_path, filename, skip_table_check=True
                     )
                     return "\n\n".join([doc.page_content for doc in documents])
@@ -302,7 +346,7 @@ def extract_text_from_pdf_bytes(
                     print(
                         f"Enhanced parsing requested but PyMuPDF4LLM not available, using basic pypdf for {filename}"
                     )
-                    documents = load_pdf_with_pypdf(
+                    documents = await load_pdf_with_pypdf(
                         temp_file_path, filename, parsing_mode="basic"
                     )
                     return "\n\n".join([doc.page_content for doc in documents])
@@ -316,7 +360,7 @@ def extract_text_from_pdf_bytes(
                     print(
                         f"Tables detected ({table_count}), using PyMuPDF4LLM for {filename}"
                     )
-                    documents = extract_pdf_with_pymupdf4llm(
+                    documents = await extract_pdf_with_pymupdf4llm(
                         temp_file_path, filename, skip_table_check=True
                     )
                     return "\n\n".join([doc.page_content for doc in documents])
@@ -325,13 +369,13 @@ def extract_text_from_pdf_bytes(
                         f"No tables detected, using fast pypdf extraction for {filename}"
                     )
                     # No tables - use fast pypdf method
-                    documents = load_pdf_with_pypdf(
+                    documents = await load_pdf_with_pypdf(
                         temp_file_path, filename, parsing_mode="basic"
                     )
                     return "\n\n".join([doc.page_content for doc in documents])
             else:
                 # Use basic pypdf method (mode='basic' or fallback)
-                documents = load_pdf_with_pypdf(
+                documents = await load_pdf_with_pypdf(
                     temp_file_path, filename, parsing_mode="basic"
                 )
                 return "\n\n".join([doc.page_content for doc in documents])

@@ -27,6 +27,7 @@ from app.models import (
     LanguageUpdate,
     VisionAnalysisUpdate,
     PdfParsingPreferenceUpdate,
+    ProcessingDefaultsUpdate,
     UserStatus,
 )
 from app.utils.email_utils import (
@@ -107,6 +108,41 @@ def update_pdf_parsing_preference(
     # Update user's PDF parsing preference
     user = session.get(User, current_user.id)
     user.pdf_parsing_preference = parsing_update.pdf_parsing_preference
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+@router.put("/me/processing-defaults", response_model=UserPublic)
+def update_processing_defaults(
+    defaults_update: ProcessingDefaultsUpdate,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """Update current user's processing defaults (search mode, vision analysis, PDF parsing)."""
+
+    # Validate search mode
+    valid_modes = ["vector", "full_scan"]
+    if defaults_update.default_processing_mode not in valid_modes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid search mode. Must be one of: {', '.join(valid_modes)}",
+        )
+
+    # Validate PDF parsing preference
+    valid_pdf_modes = ["enhanced", "basic"]
+    if defaults_update.pdf_parsing_preference not in valid_pdf_modes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid PDF parsing mode. Must be one of: {', '.join(valid_pdf_modes)}",
+        )
+
+    # Update user's processing defaults
+    user = session.get(User, current_user.id)
+    user.default_processing_mode = defaults_update.default_processing_mode
+    user.vision_analysis_enabled = defaults_update.vision_analysis_enabled
+    user.pdf_parsing_preference = defaults_update.pdf_parsing_preference
     session.add(user)
     session.commit()
     session.refresh(user)
