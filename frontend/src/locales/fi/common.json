@@ -30,7 +30,8 @@
     "previous": "Edellinen",
     "confirm": "Vahvista",
     "back": "Takaisin",
-    "done": "Valmis"
+    "done": "Valmis",
+    "apply": "Käytä"
   },
   "forms": {
     "firstName": "Etunimi",
@@ -159,7 +160,62 @@
         "basicFeature2": "Alhaisempi resurssien käyttö",
         "basicWarning": "Saattaa jättää taulukkojen muotoilun huomiotta"
       }
+    },
+    "processingDefaults": {
+      "tab": "Käsittelyn oletukset",
+      "title": "Käsittelyn oletukset",
+      "description": "Aseta oletusasetuksesi asiakirjojen käsittelylle. Näitä asetuksia käytetään oletuksena, mutta voit ohittaa ne yksittäisille toiminnoille käyttämällä hammaspyöräkuvaketta.",
+      "explanation": "💡 Nämä oletukset määrittävät, miten asiakirjoja käsitellään kaikissa ominaisuuksissa. Voit ohittaa nämä asetukset millä tahansa tietyllä tehtävällä käyttämällä käsittelyasetusten vieressä olevaa hammaspyöräkuvaketta.",
+      "searchMode": "Hakutila",
+      "vectorSearch": "Vektorihaku (nopea)",
+      "vectorSearchDescription": "Käyttää tekoälyn samankaltaisuushakua löytääkseen relevantin sisällön nopeasti. Paras useimmissa tapauksissa.",
+      "fullDocumentScan": "Täydellinen asiakirjaskannaus (kattava)",
+      "fullScanDescription": "Analysoi kaikki sisältö tietopohjassa perusteellisesti. Kattavampi mutta hitaampi.",
+      "visionAnalysis": "Visioanalyysi",
+      "enableVisionAnalysis": "Ota visioanalyysi käyttöön asiakirjojen kuville",
+      "visionAnalysisDescription": "Kun käytössä, PDF- ja DOCX-tiedostojen kuvat analysoidaan. Tämä voi kasvattaa API-kustannuksia merkittävästi kuvapitoisille asiakirjoille.",
+      "visionEnabled": "Käytössä",
+      "visionEnabledDescription": "PDF- ja DOCX-tiedostojen kuvat analysoidaan",
+      "visionDisabled": "Pois käytöstä (suositus)",
+      "visionDisabledDescription": "Vain tekstisisältö analysoidaan (alempi kustannus)",
+      "visionCostWarning": "⚠️ Varoitus: Visioanalyysi voi olla kallista asiakirjoille, joissa on paljon kuvia. Jokainen analysoitu kuva aiheuttaa lisäkustannuksia API:lle.",
+      "pdfParsing": "PDF-jäsentämistila",
+      "enhancedParsing": "Parannettu (paras laatu)",
+      "enhancedParsingDescription": "Käyttää PyMuPDF4LLM:ää erinomaiselle taulukoiden poistolle. Paras monimutkaisille asiakirjoille.",
+      "basicParsing": "Perus (nopein)",
+      "basicParsingDescription": "Käyttää nopeaa pypdf-poistoa. Paras tekstivain asiakirjoille.",
+      "comparison": {
+        "title": "Pikavertailu:",
+        "vectorTitle": "Vektorihaku",
+        "vectorFeature1": "Nopeat ja kohdennetut tulokset",
+        "vectorFeature2": "Lyhyempi käsittelyaika",
+        "fullScanTitle": "Täydellinen asiakirjaskannaus",
+        "fullScanFeature1": "Kattava kaikki sisällön kattavuus",
+        "fullScanWarning": "Hitaampi käsittely, suurempi resurssien käyttö"
+      }
     }
+  },
+  "processingSettings": {
+    "title": "Käsittelyasetukset",
+    "configure": "Määritä käsittelyasetukset",
+    "searchMode": "Hakutila",
+    "vectorSearch": "Vektorihaku",
+    "vectorSearchDescription": "Nopeat, kohdennetut tulokset käyttäen tekoälyn samankaltaisuutta",
+    "fullDocumentScan": "Täydellinen asiakirjaskannaus",
+    "fullScanDescription": "Kattava kaikki sisällön analyysi (hitaampi)",
+    "visionAnalysis": "Visioanalyysi",
+    "enableVisionAnalysis": "Analysoi asiakirjojen kuvat",
+    "visionAnalysisDescription": "Pura tietoa kaavioista, diagrammeista ja kuvista",
+    "visionEnabled": "Käytössä",
+    "visionEnabledDescription": "Analysoi kuvat, kaaviot ja diagrammit",
+    "visionDisabled": "Pois käytöstä",
+    "visionDisabledDescription": "Analysoi vain tekstisisältö (nopeampi, alempi kustannus)",
+    "pdfParsing": "PDF-jäsentäminen",
+    "enhancedParsing": "Parannettu",
+    "enhancedParsingDescription": "Paras asiakirjoille, joissa on taulukoita (hitaampi)",
+    "basicParsing": "Perus",
+    "basicParsingDescription": "Nopea tekstin purku",
+    "overrideNote": "💡 Nämä asetukset ohittavat oletusasetuksesi vain tälle toiminnolle."
   },
   "errors": {
     "somethingWentWrong": "Jotain meni pieleen",

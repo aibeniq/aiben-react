@@ -1,12 +1,15 @@
 import { type KnowledgeBasePublic, type VeraDocChecklist, VeradocService } from "@/client"
 import type { CancelablePromise } from "@/client/core/CancelablePromise"
 import FileUpload, { type FileItem } from "@/components/Common/FileUpload"
-import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import ProcessingSettingsPopup, {
+  type ProcessingSettings,
+} from "@/components/Common/ProcessingSettingsPopup"
 import SourceLink from "@/components/Common/SourceLink"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
+import useAuth from "@/hooks/useAuth"
 import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 import { useVeradocProgress } from "@/hooks/useVeradocProgress"
@@ -48,6 +51,7 @@ interface QuestionData {
 
 const VeraDoc = () => {
   const { t, i18n } = useTranslation()
+  const { user } = useAuth()
 
   // Helper function to safely get translations with fallback
   const getTranslation = (key: string, fallback: string) => {
@@ -115,10 +119,12 @@ const VeraDoc = () => {
     reviewInputs?.selectedChecklist || null,
   )
 
-  // Search mode state for main review functionality
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
-    reviewInputs?.searchMode || "vector",
-  )
+  // Processing settings state - initialized from user defaults
+  const [processingSettings, setProcessingSettings] = useState<ProcessingSettings>({
+    searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+    visionAnalysis: user?.vision_analysis_enabled || false,
+    pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+  })
 
   // State to track which citations are expanded - using object instead of Set
   const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
@@ -227,7 +233,7 @@ const VeraDoc = () => {
       selectedChecklist,
       questions,
       customInstructions,
-      searchMode,
+      searchMode: processingSettings.searchMode,
       fileItems,
     })
   }, [
@@ -235,7 +241,7 @@ const VeraDoc = () => {
     selectedChecklist,
     questions,
     customInstructions,
-    searchMode,
+    processingSettings.searchMode,
     fileItems,
     setReviewInputs,
   ])
@@ -248,7 +254,11 @@ const VeraDoc = () => {
     setSelectedChecklist(null)
     setQuestions("")
     setCustomInstructions("")
-    setSearchMode("vector")
+    setProcessingSettings({
+      searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+      visionAnalysis: user?.vision_analysis_enabled || false,
+      pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+    })
     setFileItems([])
   }
 
@@ -646,7 +656,7 @@ const VeraDoc = () => {
       selectedChecklist,
       questions,
       customInstructions,
-      searchMode,
+      searchMode: processingSettings.searchMode,
       fileItems,
     })
 
@@ -658,7 +668,7 @@ const VeraDoc = () => {
       files: fileItems.map((item) => item.file), // Send ALL files for optimized processing
       handwrittenFiles: [],
       customInstructions: customInstructions.trim() || undefined,
-      searchMode: searchMode,
+      searchMode: processingSettings.searchMode,
     }
 
     mutation.mutate(requestData)
@@ -921,15 +931,21 @@ const VeraDoc = () => {
               </Text>
             </Box>
 
-            {/* Search Mode Toggle */}
+            {/* Processing Settings */}
             <Box width="100%" mt={4}>
-              <SearchModeToggle
-                searchMode={searchMode}
-                onSearchModeChange={setSearchMode}
-                helpKey="searchMode"
-              />
+              <HStack align="center">
+                <Text fontSize="sm" fontWeight="medium">
+                  {t("processingSettings.title")}
+                </Text>
+                <ProcessingSettingsPopup
+                  settings={processingSettings}
+                  onSettingsChange={setProcessingSettings}
+                  disabled={loading}
+                />
+                <HelpTooltip helpKey="searchMode" />
+              </HStack>
               <Text fontSize="xs" color="gray.500" mt={1}>
-                {t("review.searchModeHelp")}
+                {t("processingSettings.configure")}
               </Text>
             </Box>
           </VStack>

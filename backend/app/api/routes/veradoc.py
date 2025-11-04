@@ -669,7 +669,7 @@ async def prefetch_knowledge_base_context(
 
 
 def extract_text_from_file(
-    file_content: bytes, filename: str, current_user=None
+    file_content: bytes, filename: str, current_user=None, pdf_parsing_mode: str = None
 ) -> str:
     """Extract text from various file formats using unified document processing."""
     from app.services.document_utils import extract_text_from_file_unified
@@ -681,14 +681,17 @@ def extract_text_from_file(
     else:
         print(f"[VERADOC] extract_text_from_file called for {filename} with NO user")
 
-    # Uses settings.PDF_PARSING_MODE by default, or user preference if current_user provided
+    # Pass pdf_parsing_mode override if provided, otherwise uses user preference or settings default
     return extract_text_from_file_unified(
-        file_content, filename, current_user=current_user
+        file_content,
+        filename,
+        pdf_parsing_mode=pdf_parsing_mode,
+        current_user=current_user,
     )
 
 
 async def extract_text_from_file_async(
-    file_content: bytes, filename: str, current_user=None
+    file_content: bytes, filename: str, current_user=None, pdf_parsing_mode: str = None
 ) -> str:
     """
     Async wrapper for text extraction to prevent blocking on large files.
@@ -712,13 +715,23 @@ async def extract_text_from_file_async(
         # Process in thread pool to avoid blocking the event loop
         loop = asyncio.get_event_loop()
         with ThreadPoolExecutor(max_workers=1) as executor:
-            document_text = await loop.run_in_executor(
-                executor, extract_text_from_file, file_content, filename, current_user
+            # Use functools.partial to properly pass keyword arguments
+            from functools import partial
+
+            extract_func = partial(
+                extract_text_from_file,
+                file_content,
+                filename,
+                current_user=current_user,
+                pdf_parsing_mode=pdf_parsing_mode,
             )
+            document_text = await loop.run_in_executor(executor, extract_func)
         return document_text
     else:
         # For small non-DOCX files, process synchronously
-        return extract_text_from_file(file_content, filename, current_user)
+        return extract_text_from_file(
+            file_content, filename, current_user, pdf_parsing_mode
+        )
 
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
@@ -955,15 +968,24 @@ async def process_rag_checklist(
     files: List[UploadFile] = File(...),
     custom_instructions: Optional[str] = Form(None),
     search_mode: str = Form("vector"),
+    vision_analysis_enabled: Optional[bool] = Form(None),
+    pdf_parsing_preference: Optional[str] = Form(None),
     task_id: Optional[str] = Form(None),
     request: FastAPIRequest = None,
 ):
     """
     Process the uploaded files using RAG with a knowledge base.
     Includes real-time progress tracking similar to ReportGenie.
+
+    Args:
+        search_mode: "vector" or "full_scan" - controls retrieval strategy
+        vision_analysis_enabled: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_preference: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     print("process_rag_checklist function invoked!")
     print(f"Received search_mode: {search_mode}")
+    print(f"Received vision_analysis_enabled: {vision_analysis_enabled}")
+    print(f"Received pdf_parsing_preference: {pdf_parsing_preference}")
     print(
         f"Request data: knowledge_base_id={knowledge_base_id}, questions length={len(questions) if questions else 0}"
     )
@@ -1315,10 +1337,28 @@ async def process_rag_checklist(
             llm = get_default_llm(session, current_user)
             print("LLM successfully loaded.")
 
-            # Check if LLM supports vision
+            # Check if LLM supports vision and determine if vision analysis should be enabled
             from app.services.vision_service import VisionService
 
-            vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+            # Use parameter override if provided, otherwise use user default
+            if vision_analysis_enabled is not None:
+                # When parameter is provided, check if model supports vision
+                # We create a temporary user-like object with the override setting
+                class TempUser:
+                    def __init__(self, vision_enabled):
+                        self.vision_analysis_enabled = vision_enabled
+                        self.id = current_user.id if current_user else None
+
+                temp_user = TempUser(vision_analysis_enabled)
+                vision_enabled = VisionService.is_vision_enabled(llm, temp_user)
+                print(
+                    f"Vision analysis: Using parameter override = {vision_analysis_enabled} (final: {vision_enabled})"
+                )
+            else:
+                vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+                print(
+                    f"Vision analysis: Using user default = {current_user.vision_analysis_enabled if current_user else 'N/A'} (final: {vision_enabled})"
+                )
 
             # 5. Define the prompts for the different stages
             context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
@@ -1449,12 +1489,16 @@ async def process_rag_checklist(
                     is_docx_file = file.filename.lower().endswith((".docx", ".doc"))
                     needs_special_handling = is_large_file or is_docx_file
 
-                    # Extract text using unified processing
+                    # Extract text using unified processing with PDF parsing preference
                     print(
                         f"Processing file with unified text extraction: {file.filename}"
                     )
+                    if pdf_parsing_preference:
+                        print(
+                            f"Using PDF parsing preference override: {pdf_parsing_preference}"
+                        )
                     document_text = await extract_text_from_file_async(
-                        content, file.filename, current_user
+                        content, file.filename, current_user, pdf_parsing_preference
                     )
                     # Clean surrogates from document_text to prevent encoding issues
                     document_text = re.sub(r"[\ud800-\udfff]", "", document_text)

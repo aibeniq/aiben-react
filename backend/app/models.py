@@ -49,6 +49,7 @@ class UserUpdate(UserBase):
     preferred_language: str | None = Field(default=None, max_length=10)
     vision_analysis_enabled: bool | None = None
     pdf_parsing_preference: str | None = Field(default=None, max_length=20)
+    default_processing_mode: str | None = Field(default=None, max_length=20)
 
 
 class LanguageUpdate(SQLModel):
@@ -67,12 +68,27 @@ class PdfParsingPreferenceUpdate(SQLModel):
     )
 
 
+class ProcessingDefaultsUpdate(SQLModel):
+    """Unified update model for all processing defaults."""
+
+    default_processing_mode: str = Field(
+        max_length=20, description="Default search mode: 'vector' or 'full_scan'"
+    )
+    vision_analysis_enabled: bool = Field(
+        description="Enable vision analysis for documents"
+    )
+    pdf_parsing_preference: str = Field(
+        max_length=20, description="PDF parsing mode: 'enhanced' or 'basic'"
+    )
+
+
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
     preferred_language: str | None = Field(default=None, max_length=10)
     vision_analysis_enabled: bool | None = None
     pdf_parsing_preference: str | None = Field(default=None, max_length=20)
+    default_processing_mode: str | None = Field(default=None, max_length=20)
 
 
 class UpdatePassword(SQLModel):
@@ -122,6 +138,13 @@ class User(UserBase, table=True):
         description="PDF parsing mode preference: 'auto', 'enhanced', or 'basic'",
     )
 
+    # Default search mode preference - user can choose between vector and full_scan
+    default_processing_mode: str = Field(
+        default="vector",
+        max_length=20,
+        description="Default search mode preference: 'vector' or 'full_scan'",
+    )
+
     # Account lockout fields for security
     failed_login_attempts: int = Field(default=0)
     locked_until: Optional[datetime] = Field(default=None)
@@ -136,6 +159,7 @@ class UserPublic(UserBase):
     preferred_language: str
     vision_analysis_enabled: bool
     pdf_parsing_preference: str
+    default_processing_mode: str
 
 
 class UsersPublic(SQLModel):
