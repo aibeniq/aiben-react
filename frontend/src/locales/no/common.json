@@ -802,7 +802,12 @@
       "documentEvaluation": "Dokumentvurdering",
       "generatedDocument": "Generert dokument",
       "documentComparison": "Dokumentsammenligning",
-      "matchingResults": "Matchende resultater"
+      "matchingResults": "Matchende resultater",
+      "generatedOn": "Generert: {date} av bruker {name} - e-post: {email}",
+      "question": "Spørsmål",
+      "answer": "Svar",
+      "relevantPolicyContext": "Relevant Policykontekst",
+      "topic": "Emne"
     },
     "labels": {
       "questionsAndAnswers": "Spørsmål og svar",

@@ -613,7 +613,12 @@
       "documentEvaluation": "Đánh giá Tài liệu",
       "generatedDocument": "Tài liệu Được Tạo",
       "documentComparison": "So sánh Tài liệu",
-      "matchingResults": "Kết quả Đối chiếu"
+      "matchingResults": "Kết quả Đối chiếu",
+      "generatedOn": "Được tạo vào: {date} bởi người dùng {name} - email: {email}",
+      "question": "Câu hỏi",
+      "answer": "Câu trả lời",
+      "relevantPolicyContext": "Bối Cảnh Chính Sách Liên Quan",
+      "topic": "Chủ đề"
     },
     "labels": {
       "questionsAndAnswers": "Câu hỏi và Trả lời",

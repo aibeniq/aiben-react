@@ -715,7 +715,12 @@
       "documentEvaluation": "Pagsusuri ng Dokumento",
       "generatedDocument": "Nabuong Dokumento",
       "documentComparison": "Paghahambing ng Dokumento",
-      "matchingResults": "Mga Resulta ng Pag-match"
+      "matchingResults": "Mga Resulta ng Pag-match",
+      "generatedOn": "Nabuo noong: {date} ng user {name} - email: {email}",
+      "question": "Tanong",
+      "answer": "Sagot",
+      "relevantPolicyContext": "Kaugnay na Konteksto ng Patakaran",
+      "topic": "Paksa"
     },
     "labels": {
       "questionsAndAnswers": "Mga Tanong at Sagot",

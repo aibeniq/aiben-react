@@ -715,7 +715,12 @@
       "documentEvaluation": "การประเมินเอกสาร",
       "generatedDocument": "เอกสารที่สร้างขึ้น",
       "documentComparison": "การเปรียบเทียบเอกสาร",
-      "matchingResults": "ผลการจับคู่"
+      "matchingResults": "ผลการจับคู่",
+      "generatedOn": "สร้างเมื่อ: {date} โดยผู้ใช้ {name} - อีเมล: {email}",
+      "question": "คำถาม",
+      "answer": "คำตอบ",
+      "relevantPolicyContext": "บริบทนโยบายที่เกี่ยวข้อง",
+      "topic": "หัวข้อ"
     },
     "labels": {
       "questionsAndAnswers": "คำถามและคำตอบ",

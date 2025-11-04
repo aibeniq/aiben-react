@@ -13,10 +13,22 @@ import uuid
 from pathlib import Path
 from io import BytesIO, StringIO
 from datetime import datetime
+from typing import Any, Optional, List, Dict
+from fastapi import (
+    APIRouter,
+    Form,
+    HTTPException,
+    UploadFile,
+    File,
+    Query,
+    Request as FastAPIRequest,
+)
 from fastapi.responses import StreamingResponse
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from bs4 import BeautifulSoup
+from langchain_community.vectorstores import Chroma
+from sqlmodel import select
 
 from app.models import (
     ReportGenieRequest,
@@ -42,6 +54,7 @@ from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 from app.services.translation import translate_text_if_needed, translate
+from app.services.docx_translations import translate_docx_header
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -49,24 +62,79 @@ from app.services.enhanced_retrieval import SmartRetrieverFactory
 from app.services.text_processing import chunk_text, estimate_tokens
 from app.services.progress_tracker import progress_tracker
 
-from sqlmodel import select
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    UploadFile,
-    File,
-    Form,
-    Request as FastAPIRequest,
-    Query,
-)
-from typing import List, Dict, Any, Optional
+# Cache for frontend translations
+_frontend_translations_cache = None
 
-from langchain_community.vectorstores import Chroma
 
-# from langchain_community.document_loaders import PyPDFLoader, TextLoader  # Removed - using pypdf instead
-from langchain_community.document_loaders import TextLoader
-from app.services.pdf_utils import load_pdf_with_pypdf
+def _load_frontend_translations():
+    """
+    Load frontend translations from common.json files.
+    """
+    global _frontend_translations_cache
+    if _frontend_translations_cache is not None:
+        return _frontend_translations_cache
+
+    translations = {}
+    # In Docker, frontend locales are copied to /app/frontend/src/locales
+    locales_dir = Path("/app/frontend/src/locales")
+
+    # Fallback for development (not in Docker)
+    if not locales_dir.exists():
+        # Get to project root: backend/app/api/routes -> backend/app/api -> backend/app -> backend -> project_root
+        locales_dir = (
+            Path(__file__).parent.parent.parent.parent.parent
+            / "frontend"
+            / "src"
+            / "locales"
+        )
+
+    if locales_dir.exists():
+        for lang_dir in locales_dir.iterdir():
+            if lang_dir.is_dir() and (lang_dir / "common.json").exists():
+                lang_code = lang_dir.name
+                with open(lang_dir / "common.json", "r", encoding="utf-8") as f:
+                    translations[lang_code] = json.load(f)
+    else:
+        print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+
+    _frontend_translations_cache = translations
+    return translations
+
+
+def translate_frontend(key, language="en", **kwargs):
+    """
+    Translate a key using frontend translations with parameter substitution.
+    """
+    translations = _load_frontend_translations()
+
+    # Get translations for the requested language, fallback to English
+    lang_translations = translations.get(language, translations.get("en", {}))
+
+    # Navigate to the nested key
+    keys = key.split(".")
+    value = lang_translations
+    for k in keys:
+        if isinstance(value, dict) and k in value:
+            value = value[k]
+        else:
+            # Fallback to English if key not found
+            en_translations = translations.get("en", {})
+            value = en_translations
+            for k in keys:
+                if isinstance(value, dict) and k in value:
+                    value = value[k]
+                else:
+                    return key  # Return key if not found
+
+    if not isinstance(value, str):
+        return key
+
+    # Substitute parameters
+    try:
+        return value.format(**kwargs)
+    except (KeyError, ValueError):
+        return value
+
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
 
@@ -3065,11 +3133,7 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                 task_id, "matching", "Document matching complete"
             )
             progress_tracker.update_stage_progress(
-                task_id,
-                "comparing",
-                0,
-                len(consulting_section_descriptions),
-                "Starting section comparison...",
+                task_id, "comparing", 0, 1, "Starting section comparison..."
             )
 
             # 7. Compare each section's generated content to its mapped ground-truth chunks
@@ -3249,11 +3313,11 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                 #     generated_content[:1000], session, current_user, llm
                 # )
                 # translated_ground_truth = await translate_text_if_needed(
-                #     ground_truth_context[:1000], session, current_user, llm
+                #     ground_truth_content[:1000], session, current_user, llm
                 # )
                 translated_reason = reason
                 translated_current_output = generated_content[:1000]
-                translated_ground_truth = ground_truth_context[:1000]
+                translated_ground_truth = ground_truth_content[:1000]
 
                 suggestions.append(
                     OutlineSuggestion(
@@ -3515,26 +3579,24 @@ async def generate_docx(
         doc = Document()
 
         print("Adding title and date to the document...")
-        # Determine language
-        language = (
-            request.language
-            or getattr(current_user, "preferred_language", "en")
-            or "en"
-        )
+        # Determine language - prioritize user's preferred language
+        user_preferred = getattr(current_user, "preferred_language", None)
+        language = user_preferred or request.language or "en"
 
         # Add a title - hard-coding it for ReportGenie because it's using the service for Compare functionality with 'Document Comparison' as title
         title_text = (
             request.title
             if request.title
-            else translate("generated_document", language)
+            else translate_docx_header("generatedDocument", language)
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add translated subtitle with metadata
         date_str = datetime.now().strftime("%B %d, %Y at %H:%M")
-        subtitle_template = translate("generated_on", language)
-        subtitle = subtitle_template.format(
+        subtitle = translate_docx_header(
+            "generatedOn",
+            language,
             date=date_str,
             name=current_user.full_name or current_user.email,
             email=current_user.email,

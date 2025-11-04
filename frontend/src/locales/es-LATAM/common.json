@@ -772,7 +772,12 @@
       "documentEvaluation": "Evaluación de Documento",
       "generatedDocument": "Documento Generado",
       "documentComparison": "Comparación de Documento",
-      "matchingResults": "Resultados de Coincidencia"
+      "matchingResults": "Resultados de Coincidencia",
+      "generatedOn": "Generado el: {date} por usuario {name} - email: {email}",
+      "question": "Pregunta",
+      "answer": "Respuesta",
+      "relevantPolicyContext": "Contexto de Política Relevante",
+      "topic": "Tema"
     },
     "labels": {
       "questionsAndAnswers": "Preguntas y Respuestas",

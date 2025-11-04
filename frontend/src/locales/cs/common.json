@@ -682,7 +682,12 @@
       "documentEvaluation": "Hodnocení Dokumentu",
       "generatedDocument": "Vygenerovaný Dokument",
       "documentComparison": "Porovnání Dokumentů",
-      "matchingResults": "Výsledky Shody"
+      "matchingResults": "Výsledky Shody",
+      "generatedOn": "Vygenerováno: {date} uživatelem {name} - email: {email}",
+      "question": "Otázka",
+      "answer": "Odpověď",
+      "relevantPolicyContext": "Relevantní Kontext Politiky",
+      "topic": "Téma"
     },
     "labels": {
       "questionsAndAnswers": "Otázky a Odpovědi",

@@ -731,7 +731,12 @@
       "documentEvaluation": "Dokumenta novērtējums",
       "generatedDocument": "Ģenerēts dokuments",
       "documentComparison": "Dokumentu salīdzinājums",
-      "matchingResults": "Saskaitīšanas rezultāti"
+      "matchingResults": "Saskaitīšanas rezultāti",
+      "generatedOn": "Ģenerēts: {date} lietotājs {name} - e-pasts: {email}",
+      "question": "Jautājums",
+      "answer": "Atbilde",
+      "relevantPolicyContext": "Atbilstošs Politikas Konteksts",
+      "topic": "Tēma"
     },
     "labels": {
       "questionsAndAnswers": "Jautājumi un atbildes",

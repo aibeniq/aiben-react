@@ -731,7 +731,12 @@
       "documentEvaluation": "Процена документа",
       "generatedDocument": "Генерисани документ",
       "documentComparison": "Поређење докумената",
-      "matchingResults": "Подударајући резултати"
+      "matchingResults": "Подударајући резултати",
+      "generatedOn": "Generisano: {date} od strane korisnika {name} - email: {email}",
+      "question": "Питање",
+      "answer": "Одговор",
+      "relevantPolicyContext": "Релевантан Контекст Политике",
+      "topic": "Тема"
     },
     "labels": {
       "questionsAndAnswers": "Питања и одговори",

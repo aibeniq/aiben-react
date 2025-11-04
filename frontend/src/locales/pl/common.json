@@ -750,7 +750,12 @@
       "documentEvaluation": "Ocena Dokumentu",
       "generatedDocument": "Wygenerowany Dokument",
       "documentComparison": "Porównanie Dokumentów",
-      "matchingResults": "Wyniki Dopasowania"
+      "matchingResults": "Wyniki Dopasowania",
+      "generatedOn": "Wygenerowano: {date} przez użytkownika {name} - email: {email}",
+      "question": "Pytanie",
+      "answer": "Odpowiedź",
+      "relevantPolicyContext": "Odpowiedni Kontekst Polityki",
+      "topic": "Temat"
     },
     "labels": {
       "questionsAndAnswers": "Pytania i Odpowiedzi",

@@ -731,7 +731,12 @@
       "documentEvaluation": "Dokumendi hindamine",
       "generatedDocument": "Genereeritud dokument",
       "documentComparison": "Dokumendi võrdlus",
-      "matchingResults": "Sobivad tulemused"
+      "matchingResults": "Sobivad tulemused",
+      "generatedOn": "Loodud: {date} kasutaja {name} poolt - email: {email}",
+      "question": "Question",
+      "answer": "Answer",
+      "relevantPolicyContext": "Relevant Policy Context",
+      "topic": "Topic"
     },
     "labels": {
       "questionsAndAnswers": "Küsimused ja vastused",

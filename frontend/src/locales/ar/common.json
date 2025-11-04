@@ -700,7 +700,12 @@
       "documentEvaluation": "تقييم الوثيقة",
       "generatedDocument": "الوثيقة المولدة",
       "documentComparison": "مقارنة الوثيقة",
-      "matchingResults": "نتائج المطابقة"
+      "matchingResults": "نتائج المطابقة",
+      "generatedOn": "تم إنشاؤه في: {date} بواسطة المستخدم {name} - البريد الإلكتروني: {email}",
+      "question": "سؤال",
+      "answer": "إجابة",
+      "relevantPolicyContext": "سياق السياسة ذات الصلة",
+      "topic": "موضوع"
     },
     "labels": {
       "questionsAndAnswers": "الأسئلة والأجوبة",

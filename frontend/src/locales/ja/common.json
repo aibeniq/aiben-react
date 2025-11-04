@@ -706,7 +706,12 @@
       "documentEvaluation": "ドキュメント評価",
       "generatedDocument": "生成されたドキュメント",
       "documentComparison": "ドキュメント比較",
-      "matchingResults": "一致結果"
+      "matchingResults": "一致結果",
+      "generatedOn": "生成日時: {date} ユーザー {name} - メール: {email}",
+      "question": "質問",
+      "answer": "回答",
+      "relevantPolicyContext": "関連するポリシーコンテキスト",
+      "topic": "トピック"
     },
     "labels": {
       "questionsAndAnswers": "質問と回答",

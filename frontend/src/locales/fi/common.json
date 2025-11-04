@@ -793,12 +793,17 @@
     "docxHeaders": {
       "evaluationSummary": "Arvioinnin yhteenveto",
       "questionAnswerDetails": "Kysymys-vastaus yksityiskohdat",
+      "question": "Kysymys",
+      "answer": "Vastaus",
+      "relevantPolicyContext": "Relevantti käytäntökonteksti",
       "summary": "Yhteenveto",
       "topicAnalysis": "Aiheanalyysi",
+      "topic": "Aihe",
       "documentEvaluation": "Asiakirjan arviointi",
       "generatedDocument": "Luotu asiakirja",
       "documentComparison": "Asiakirjojen vertailu",
-      "matchingResults": "Vastaavuustulokset"
+      "matchingResults": "Vastaavuustulokset",
+      "generatedOn": "Luotu: {date} käyttäjältä {name} - sähköposti: {email}"
     },
     "labels": {
       "questionsAndAnswers": "Kysymykset ja vastaukset",

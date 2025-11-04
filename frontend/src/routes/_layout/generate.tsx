@@ -37,7 +37,7 @@ import { copyToClipboard } from "../../utils/copyToClipboard"
 import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 const ReportGenie = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
     generateResult,
@@ -207,7 +207,10 @@ const ReportGenie = () => {
       setLoadingDownload(true)
 
       const response = await ReportgenieService.generateDocx({
-        requestBody: { content: generateResult?.full_report || "" },
+        requestBody: {
+          content: generateResult?.full_report || "",
+          language: i18n.language,
+        },
       })
 
       console.log("Received DOCX response:", response)

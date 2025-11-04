@@ -793,7 +793,12 @@
       "documentEvaluation": "Dokument Evaluering",
       "generatedDocument": "Genereret Dokument",
       "documentComparison": "Dokument Sammenligning",
-      "matchingResults": "Matchende Resultater"
+      "matchingResults": "Matchende Resultater",
+      "generatedOn": "Genereret: {date} af bruger {name} - email: {email}",
+      "question": "Spørgsmål",
+      "answer": "Svar",
+      "relevantPolicyContext": "Relevant Politikkontekst",
+      "topic": "Emne"
     },
     "labels": {
       "questionsAndAnswers": "Spørgsmål og Svar",

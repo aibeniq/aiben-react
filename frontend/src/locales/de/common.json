@@ -516,7 +516,12 @@
       "documentEvaluation": "Dokumentbewertung",
       "generatedDocument": "Generiertes Dokument",
       "documentComparison": "Dokumentenvergleich",
-      "matchingResults": "Übereinstimmungsergebnisse"
+      "matchingResults": "Übereinstimmungsergebnisse",
+      "generatedOn": "Generiert am: {date} von Benutzer {name} - E-Mail: {email}",
+      "question": "Frage",
+      "answer": "Antwort",
+      "relevantPolicyContext": "Relevanter Richtlinienkontext",
+      "topic": "Thema"
     },
     "labels": {
       "questionsAndAnswers": "Fragen und Antworten",

@@ -715,7 +715,12 @@
       "documentEvaluation": "Tathmini ya Hati",
       "generatedDocument": "Hati Iliyotengenezwa",
       "documentComparison": "Ulinganishi wa Hati",
-      "matchingResults": "Matokeo Yanayolingana"
+      "matchingResults": "Matokeo Yanayolingana",
+      "generatedOn": "Imezalishwa: {date} na mtumiaji {name} - barua pepe: {email}",
+      "question": "Swali",
+      "answer": "Jibu",
+      "relevantPolicyContext": "Muktadha wa Sera Husika",
+      "topic": "Mada"
     },
     "labels": {
       "questionsAndAnswers": "Maswali na Majibu",

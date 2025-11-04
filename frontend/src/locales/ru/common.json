@@ -799,7 +799,12 @@
       "documentEvaluation": "Оценка Документа",
       "generatedDocument": "Созданный Документ",
       "documentComparison": "Сравнение Документов",
-      "matchingResults": "Результаты Сопоставления"
+      "matchingResults": "Результаты Сопоставления",
+      "generatedOn": "Создано: {date} пользователем {name} - email: {email}",
+      "question": "Вопрос",
+      "answer": "Ответ",
+      "relevantPolicyContext": "Соответствующий Контекст Политики",
+      "topic": "Тема"
     },
     "labels": {
       "questionsAndAnswers": "Вопросы и Ответы",

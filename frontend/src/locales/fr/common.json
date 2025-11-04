@@ -515,7 +515,12 @@
       "documentEvaluation": "Évaluation de Document",
       "generatedDocument": "Document Généré",
       "documentComparison": "Comparaison de Document",
-      "matchingResults": "Résultats de Correspondance"
+      "matchingResults": "Résultats de Correspondance",
+      "generatedOn": "Généré le: {date} par utilisateur {name} - email: {email}",
+      "question": "Question",
+      "answer": "Réponse",
+      "relevantPolicyContext": "Contexte de Politique Pertinent",
+      "topic": "Sujet"
     },
     "labels": {
       "questionsAndAnswers": "Questions et Réponses",
