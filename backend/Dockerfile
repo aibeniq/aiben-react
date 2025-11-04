@@ -1,4 +1,4 @@
-FROM python:3.10-slim AS builder
+FROM python:3.14-slim AS builder
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
@@ -42,7 +42,7 @@ COPY ./app /app/app
 RUN TMPDIR=/tmp uv sync
 
 # Production stage
-FROM python:3.10-slim
+FROM python:3.14-slim
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
