@@ -589,7 +589,10 @@
       },
       "add": {
         "title": "ナレッジベースを追加",
-        "description": "詳細を提供し、以下のドキュメントをアップロードして新しいナレッジベースを作成してください。"
+        "description": "詳細を提供し、以下のドキュメントをアップロードして新しいナレッジベースを作成してください。",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "ナレッジベースを編集",

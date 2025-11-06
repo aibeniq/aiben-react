@@ -16,12 +16,13 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
 import type { FormConnectForm, KnowledgeBasePublic } from "../../client"
+import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
 import { useKnowledgeBases } from "../../hooks/useKnowledgeBases"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import FileUpload, { type FileItem } from "../Common/FileUpload"
 import KnowledgeBaseSelectionModal from "../Common/KnowledgeBaseSelectionModal"
-import SearchModeToggle from "../Common/SearchModeToggle"
+import ProcessingSettingsPopup, { type ProcessingSettings } from "../Common/ProcessingSettingsPopup"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import { Field } from "../ui/field"
@@ -54,9 +55,9 @@ const FormTemplateModal = ({
   onFieldsChange,
 }: FormTemplateModalProps) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } =
-    useKnowledgeBases()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -119,14 +120,18 @@ const FormTemplateModal = ({
 
   const [suggesting, setSuggesting] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
-  const [referenceMode, setReferenceMode] = useState<
-    "files" | "knowledge-base"
-  >("files")
-  const [referenceKnowledgeBase, setReferenceKnowledgeBase] =
-    useState<KnowledgeBasePublic | null>(null)
-  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] =
-    useState(false)
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
+
+  // Processing settings state - initialized from user defaults
+  const [processingSettings, setProcessingSettings] = useState<ProcessingSettings>({
+    searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+    visionAnalysis: user?.vision_analysis_enabled || false,
+    pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+  })
 
   const handleSuggestFields = async () => {
     if (!formDescription.trim()) {
@@ -136,9 +141,7 @@ const FormTemplateModal = ({
 
     // Validate minimum length requirement
     if (formDescription.trim().length < 10) {
-      showErrorToast(
-        "Please enter a more detailed description (at least 10 characters)",
-      )
+      showErrorToast("Please enter a more detailed description (at least 10 characters)")
       return
     }
 
@@ -146,9 +149,7 @@ const FormTemplateModal = ({
     if (referenceMode === "files" && exampleFiles.length === 0) {
       // Files mode but no files - this is okay, just use description
     } else if (referenceMode === "knowledge-base" && !referenceKnowledgeBase) {
-      showErrorToast(
-        "Please select a Knowledge Base or switch to file upload mode",
-      )
+      showErrorToast("Please select a Knowledge Base or switch to file upload mode")
       return
     }
 
@@ -167,7 +168,9 @@ const FormTemplateModal = ({
         const formData = new FormData()
         formData.append("description", formDescription.trim())
         formData.append("num_fields", "15")
-        formData.append("search_mode", searchMode)
+        formData.append("search_mode", processingSettings.searchMode)
+        formData.append("vision_analysis_override", processingSettings.visionAnalysis.toString())
+        formData.append("pdf_parsing_override", processingSettings.pdfParsing)
 
         // Add files to formData
         exampleFiles.forEach((item) => {
@@ -188,7 +191,9 @@ const FormTemplateModal = ({
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
           knowledge_base_id: referenceKnowledgeBase.id,
-          search_mode: searchMode,
+          search_mode: processingSettings.searchMode,
+          vision_analysis_override: processingSettings.visionAnalysis,
+          pdf_parsing_override: processingSettings.pdfParsing,
         }
 
         const headers: Record<string, string> = {
@@ -209,7 +214,9 @@ const FormTemplateModal = ({
         const requestData = {
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
-          search_mode: searchMode,
+          search_mode: processingSettings.searchMode,
+          vision_analysis_override: processingSettings.visionAnalysis,
+          pdf_parsing_override: processingSettings.pdfParsing,
         }
 
         const headers: Record<string, string> = {
@@ -243,15 +250,12 @@ const FormTemplateModal = ({
         }
 
         const searchMethodText =
-          searchMode === "vector" ? "vector search" : "full document scan"
+          processingSettings.searchMode === "vector" ? "vector search" : "full document scan"
         let referenceText = ""
 
         if (referenceMode === "files" && exampleFiles.length > 0) {
           referenceText = ` using ${searchMethodText} on ${exampleFiles.length} uploaded file(s)`
-        } else if (
-          referenceMode === "knowledge-base" &&
-          referenceKnowledgeBase
-        ) {
+        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
           referenceText = ` using ${searchMethodText} on knowledge base`
         }
 
@@ -259,9 +263,7 @@ const FormTemplateModal = ({
           `Suggested ${suggestedFields.length} form fields from description${referenceText}`,
         )
       } else {
-        showErrorToast(
-          "No fields were suggested. Please try with a more detailed description.",
-        )
+        showErrorToast("No fields were suggested. Please try with a more detailed description.")
       }
     } catch (error: any) {
       console.error("Error suggesting fields:", error)
@@ -273,17 +275,11 @@ const FormTemplateModal = ({
       } else if (error.status === 401) {
         showErrorToast("You need to be logged in to suggest fields.")
       } else if (error.status === 404) {
-        showErrorToast(
-          "Suggest fields feature is not available. Please contact support.",
-        )
+        showErrorToast("Suggest fields feature is not available. Please contact support.")
       } else if (error.status === 500) {
-        showErrorToast(
-          "Server error. Please try again later or contact support.",
-        )
+        showErrorToast("Server error. Please try again later or contact support.")
       } else {
-        showErrorToast(
-          `Failed to suggest fields: ${error.message || "Unknown error"}`,
-        )
+        showErrorToast(`Failed to suggest fields: ${error.message || "Unknown error"}`)
       }
     } finally {
       setSuggesting(false)
@@ -340,7 +336,7 @@ const FormTemplateModal = ({
     <Portal>
       <Dialog.Root open={isOpen} onOpenChange={handleMainModalClose}>
         <Dialog.Backdrop />
-        <Dialog.Positioner style={{ zIndex: 1500 }}>
+        <Dialog.Positioner style={{ zIndex: 2000 }}>
           <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
               <HStack align="center" gap={2}>
@@ -362,9 +358,7 @@ const FormTemplateModal = ({
                       <Input
                         value={formName}
                         onChange={(e) => handleNameChange(e.target.value)}
-                        placeholder={t(
-                          "editFormTemplateModal.formTemplateNamePlaceholder",
-                        )}
+                        placeholder={t("editFormTemplateModal.formTemplateNamePlaceholder")}
                       />
                     </Field>
 
@@ -375,28 +369,27 @@ const FormTemplateModal = ({
                     >
                       <Textarea
                         value={formDescription}
-                        onChange={(e) =>
-                          handleDescriptionChange(e.target.value)
-                        }
-                        placeholder={t(
-                          "editFormTemplateModal.descriptionPlaceholder",
-                        )}
+                        onChange={(e) => handleDescriptionChange(e.target.value)}
+                        placeholder={t("editFormTemplateModal.descriptionPlaceholder")}
                         resize="vertical"
                         rows={3}
                       />
                     </Field>
 
-                    <SearchModeToggle
-                      searchMode={searchMode}
-                      onSearchModeChange={setSearchMode}
-                    />
+                    <HStack align="center" gap={2}>
+                      <Text fontSize="sm" color="gray.600">
+                        {t("processingSettings.title")}
+                      </Text>
+                      <ProcessingSettingsPopup
+                        settings={processingSettings}
+                        onSettingsChange={setProcessingSettings}
+                      />
+                    </HStack>
 
                     <Field
                       label={
                         <HStack align="center" gap={2}>
-                          <span>
-                            {t("editFormTemplateModal.referenceDocuments")}
-                          </span>
+                          <span>{t("editFormTemplateModal.referenceDocuments")}</span>
                           <HelpTooltip helpKey="referenceDocuments" />
                         </HStack>
                       }
@@ -406,23 +399,15 @@ const FormTemplateModal = ({
                         <HStack gap={2}>
                           <Button
                             size="sm"
-                            variant={
-                              referenceMode === "files" ? "solid" : "outline"
-                            }
+                            variant={referenceMode === "files" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("files")}
                           >
                             {t("editFormTemplateModal.uploadFiles")}
                           </Button>
                           <Button
                             size="sm"
-                            variant={
-                              referenceMode === "knowledge-base"
-                                ? "solid"
-                                : "outline"
-                            }
-                            onClick={() =>
-                              handleReferenceModeChange("knowledge-base")
-                            }
+                            variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
+                            onClick={() => handleReferenceModeChange("knowledge-base")}
                           >
                             {t("editFormTemplateModal.knowledgeBase")}
                           </Button>
@@ -448,13 +433,9 @@ const FormTemplateModal = ({
                               maxFiles={5}
                             />
                             {exampleFiles.length > 0 && (
-                              <Text
-                                fontSize="xs"
-                                color="green.600"
-                                fontWeight="medium"
-                              >
-                                ✅ {exampleFiles.length} file(s) will be
-                                analyzed to suggest relevant form fields
+                              <Text fontSize="xs" color="green.600" fontWeight="medium">
+                                ✅ {exampleFiles.length} file(s) will be analyzed to suggest
+                                relevant form fields
                               </Text>
                             )}
                           </VStack>
@@ -464,25 +445,17 @@ const FormTemplateModal = ({
                           <Box>
                             <Button
                               w="full"
-                              variant={
-                                referenceKnowledgeBase ? "solid" : "outline"
-                              }
-                              onClick={() =>
-                                setShowReferenceKnowledgeBaseModal(true)
-                              }
+                              variant={referenceKnowledgeBase ? "solid" : "outline"}
+                              onClick={() => setShowReferenceKnowledgeBaseModal(true)}
                               justifyContent="flex-start"
                               textAlign="left"
-                              color={
-                                referenceKnowledgeBase ? "white" : "gray.600"
-                              }
+                              color={referenceKnowledgeBase ? "white" : "gray.600"}
                             >
-                              {referenceKnowledgeBase?.title ||
-                                t("dropdowns.selectKnowledgeBase")}
+                              {referenceKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
                             </Button>
                             {!knowledgeBases || knowledgeBases.length === 0 ? (
                               <Text fontSize="sm" color="orange.600">
-                                No Knowledge Bases available. Create one first
-                                to use this feature.
+                                No Knowledge Bases available. Create one first to use this feature.
                               </Text>
                             ) : null}
                           </Box>
@@ -491,8 +464,7 @@ const FormTemplateModal = ({
                         {formDescription.trim().length < 10 &&
                           formDescription.trim().length > 0 && (
                             <Text fontSize="sm" color="gray.500">
-                              Description must be at least 10 characters to
-                              suggest fields
+                              Description must be at least 10 characters to suggest fields
                             </Text>
                           )}
                       </VStack>
@@ -518,18 +490,14 @@ const FormTemplateModal = ({
                             title={
                               formDescription.trim().length < 10
                                 ? "Description must be at least 10 characters to suggest fields"
-                                : referenceMode === "files" &&
-                                    exampleFiles.length > 0
+                                : referenceMode === "files" && exampleFiles.length > 0
                                   ? `Suggest fields based on description and ${exampleFiles.length} uploaded file(s)`
-                                  : referenceMode === "knowledge-base" &&
-                                      referenceKnowledgeBase
+                                  : referenceMode === "knowledge-base" && referenceKnowledgeBase
                                     ? "Suggest fields based on description and knowledge base"
                                     : "Suggest fields based on the description"
                             }
                           >
-                            {suggesting
-                              ? "Suggesting..."
-                              : t("editFormTemplateModal.suggest")}
+                            {suggesting ? "Suggesting..." : t("editFormTemplateModal.suggest")}
                           </Button>
                           <HelpTooltip helpKey="suggestFormTemplateFields" />
 
@@ -541,10 +509,7 @@ const FormTemplateModal = ({
                             title="Copy all fields as text"
                             disabled={
                               !fields.trim() ||
-                              fields
-                                .split("\n")
-                                .filter((line) => line.trim() !== "").length ===
-                                0
+                              fields.split("\n").filter((line) => line.trim() !== "").length === 0
                             }
                           >
                             <FiCopy size={12} />
@@ -579,9 +544,7 @@ const FormTemplateModal = ({
                             }))
                           }
                         }}
-                        placeholder={t(
-                          "editFormTemplateModal.fieldPlaceholder",
-                        )}
+                        placeholder={t("editFormTemplateModal.fieldPlaceholder")}
                       />
                     </VStack>
                   </Field>

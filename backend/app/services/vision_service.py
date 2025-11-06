@@ -17,16 +17,19 @@ class VisionService:
     """Centralized service for handling vision-enabled document processing"""
 
     @staticmethod
-    def is_vision_enabled(llm, current_user=None) -> bool:
+    def is_vision_enabled(
+        llm, current_user=None, vision_analysis_override: Optional[bool] = None
+    ) -> bool:
         """
         Check if vision analysis should be performed.
 
         Args:
             llm: The LLM instance to check
             current_user: Current user object (optional for backward compatibility)
+            vision_analysis_override: Optional override for user's vision analysis preference
 
         Returns:
-            bool: True if BOTH model supports vision AND user has enabled it
+            bool: True if BOTH model supports vision AND user has enabled it (or override is True)
         """
         if not llm:
             return False
@@ -61,7 +64,17 @@ class VisionService:
             return False
 
         # Check 2: Has the user enabled vision analysis?
-        if current_user is not None:
+        # If override is provided, use it; otherwise check user preference
+        if vision_analysis_override is not None:
+            logger.info(
+                f"Using vision_analysis_override={vision_analysis_override} (user_id: {getattr(current_user, 'id', 'unknown') if current_user else 'unknown'})"
+            )
+            if not vision_analysis_override:
+                logger.info(
+                    f"Vision analysis disabled by override (user_id: {getattr(current_user, 'id', 'unknown') if current_user else 'unknown'})"
+                )
+                return False
+        elif current_user is not None:
             user_enabled_vision = getattr(
                 current_user, "vision_analysis_enabled", False
             )

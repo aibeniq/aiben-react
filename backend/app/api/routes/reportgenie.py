@@ -222,7 +222,7 @@ async def get_reportgenie_progress(
             if isinstance(stage_data, dict)
             else False
         )
-        print(f"🔍 STAGE {stage_name}: completed={completed}")
+        # print(f"🔍 STAGE {stage_name}: completed={completed}")
 
     # Yield control to allow other async operations (like this API call) to run
     await asyncio.sleep(0)
@@ -345,6 +345,20 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
         )
 
 
+async def extract_text_from_file_async(file_content: bytes, filename: str) -> str:
+    """Async extract text from various file formats using unified document processing."""
+    from app.api.routes.veradoc import (
+        extract_text_from_file_async as veradoc_extract_async,
+    )
+
+    try:
+        return await veradoc_extract_async(file_content, filename)
+    except Exception as e:
+        raise HTTPException(
+            status_code=400, detail=f"Error extracting text from {filename}: {str(e)}"
+        )
+
+
 @router.post("/generate", response_model=ReportGenieResponse)
 async def generate_report(
     session: SessionDep,
@@ -354,17 +368,26 @@ async def generate_report(
     outline_id: str = Form(...),
     search_mode: str = Form("vector"),  # Default to vector search
     custom_instructions: Optional[str] = Form(None),
+    vision_analysis_override: Optional[bool] = Form(None),
+    pdf_parsing_override: Optional[str] = Form(None),
     request: FastAPIRequest = None,
     task_id: Optional[str] = Form(None),
 ):
     """
     Generate a report based on sections outline and knowledge base search results.
     Includes real-time progress tracking.
+
+    Args:
+        search_mode: "vector" or "full_scan" - controls retrieval strategy
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     try:
         # Debug: Log custom instructions if provided
         if custom_instructions:
             print(f"Custom instructions received for generate: {custom_instructions}")
+        print(f"Received vision_analysis_override: {vision_analysis_override}")
+        print(f"Received pdf_parsing_override: {pdf_parsing_override}")
 
         # 1. Retrieve knowledge base from database
         kb = session.get(KnowledgeBase, knowledge_base_id)
@@ -460,56 +483,158 @@ async def generate_report(
 
                 if consult_documents:
                     if search_mode == "full_text":
-                        # Full Text Scan Logic
+                        # Full Text Scan Logic (per-source chunking + provenance)
                         print(f"Performing Full Text Scan for: {section_description}")
-                        all_source_text = ""
+
                         sources = session.exec(
                             select(Source).where(Source.knowledge_base_id == kb.id)
                         ).all()
+
+                        print(
+                            f"📚 Processing {len(sources)} sources from knowledge base"
+                        )
+
+                        # We'll build chunks per source so we can track provenance
+                        text_chunks: List[str] = []
+                        chunk_provenance: List[Dict[str, Any]] = []
+
                         for source in sources:
-                            # Get source data
                             source_data = session.get(SourceData, source.source_data_id)
-                            if not source_data:
-                                print(f"No source data found for source {source.name}")
+                            if not source_data or not getattr(
+                                source_data, "data", None
+                            ):
+                                print(
+                                    f"⚠️ No source data found for source {getattr(source,'name','unknown')}"
+                                )
                                 continue
 
                             try:
-                                # Extract text from the source data
-                                if not source_data.data.startswith(b"PK"):
-                                    # Direct file extraction
-                                    file_content = extract_text_from_file(
-                                        source_data.data, source.name
-                                    )
-                                else:
-                                    # Extract from ZIP file
+                                print(
+                                    f"📄 Extracting text from {getattr(source,'name','unknown')} ({len(source_data.data) if source_data.data else 0} bytes)"
+                                )
+
+                                # Handle ZIP-encoded source_data (multiple files) or direct file bytes
+                                file_text = ""
+                                if isinstance(
+                                    source_data.data, (bytes, bytearray)
+                                ) and source_data.data.startswith(b"PK"):
                                     zip_data = BytesIO(source_data.data)
                                     with zipfile.ZipFile(zip_data, "r") as zip_file:
-                                        file_info = zip_file.infolist()[0]
-                                        raw_file_content = zip_file.read(
-                                            file_info.filename
+                                        for info in zip_file.infolist():
+                                            try:
+                                                raw = zip_file.read(info.filename)
+                                                part_text = (
+                                                    await extract_text_from_file_async(
+                                                        raw, info.filename
+                                                    )
+                                                )
+                                                if part_text:
+                                                    file_text += "\n\n" + part_text
+                                            except Exception as e:
+                                                print(
+                                                    f"Warning: failed to extract entry {info.filename} from {getattr(source,'name','unknown')}: {e}"
+                                                )
+                                else:
+                                    try:
+                                        file_text = await extract_text_from_file_async(
+                                            source_data.data,
+                                            getattr(source, "name", "unknown"),
                                         )
-                                        file_content = extract_text_from_file(
-                                            raw_file_content, source.name
+                                    except Exception as e:
+                                        print(
+                                            f"Warning: failed to extract text from {getattr(source,'name','unknown')}: {e}"
                                         )
 
-                                all_source_text += f"\n\n--- Source: {source.name} ---\n\n{file_content}"
+                                if not file_text or not file_text.strip():
+                                    print(
+                                        f"⚠️ WARNING: Empty content extracted from {getattr(source,'name','unknown')}"
+                                    )
+                                    continue
+
+                                # Chunk this source independently so provenance is per-chunk
+                                per_source_chunks = chunk_text(
+                                    file_text,
+                                    max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
+                                )
+
+                                print(
+                                    f"🔗 Created {len(per_source_chunks)} chunks from source {getattr(source,'name','unknown')}"
+                                )
+
+                                for j, chunk in enumerate(per_source_chunks):
+                                    text_chunks.append(chunk)
+                                    chunk_provenance.append(
+                                        {
+                                            "source": getattr(
+                                                source, "name", "Unknown"
+                                            ),
+                                            "source_data_id": getattr(
+                                                source, "source_data_id", ""
+                                            ),
+                                            "page": getattr(source, "page", ""),
+                                            "chunk_index_within_source": j,
+                                        }
+                                    )
+
                             except Exception as e:
                                 print(
-                                    f"Error extracting content from {source.name}: {e}"
+                                    f"❌ Error extracting content from {getattr(source,'name','unknown')}: {e}"
                                 )
-                                # Continue with other sources instead of failing completely
+                                traceback.print_exc()
                                 continue
 
-                        text_chunks = chunk_text(
-                            all_source_text,
-                            max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
+                        original_chunk_count = len(text_chunks)
+                        print(
+                            f"📊 Total chunks across all sources: {original_chunk_count}"
                         )
-                        chunk_analyses = []
-                        relevant_chunk_indices = []
+
+                        if not text_chunks:
+                            print(f"⚠️ WARNING: No chunks created from any source!")
+                            raise HTTPException(
+                                status_code=500,
+                                detail="Failed to create text chunks from knowledge base content",
+                            )
+
+                        # Show preview of first chunk if available
+                        if text_chunks:
+                            first_chunk_preview = (
+                                text_chunks[0][:200]
+                                if len(text_chunks[0]) > 200
+                                else text_chunks[0]
+                            )
+                            print(
+                                f"🔍 First chunk preview ({len(text_chunks[0])} chars): {first_chunk_preview}..."
+                            )
+
+                        chunk_analyses: List[str] = []
+                        relevant_chunk_indices: List[int] = []
 
                         if settings.RAG_ENABLE_LLM_RELEVANCE_FILTER:
+                            print(
+                                f"🔍 Starting relevance filtering for {len(text_chunks)} chunks..."
+                            )
+
                             for i, chunk in enumerate(text_chunks):
-                                # Add delay between chunk processing to prevent rate limit exhaustion
+                                # Update progress to show which chunk we're analyzing
+                                section_preview = (
+                                    section_description[:40] + "..."
+                                    if len(section_description) > 40
+                                    else section_description
+                                )
+                                progress_tracker.update_stage_progress(
+                                    task_id,
+                                    "generating",
+                                    idx,  # Current section index
+                                    len(section_items),
+                                    f"Section {idx + 1}/{len(section_items)}: Analyzing chunk {i+1}/{len(text_chunks)} - {section_preview}",
+                                )
+
+                                if not chunk or not chunk.strip():
+                                    print(
+                                        f"⚠️ WARNING: Chunk {i + 1} is empty, skipping"
+                                    )
+                                    continue
+
                                 if (
                                     i > 0
                                     and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS
@@ -518,55 +643,80 @@ async def generate_report(
                                         settings.PROCESSING_DELAY_BETWEEN_CHUNKS
                                     )
 
-                                # CRITICAL: Check if client has disconnected before processing each chunk
                                 try:
-                                    if request and await request.is_disconnected():
-                                        print(
-                                            f"❌ CLIENT DISCONNECTED - Stopping at chunk {i + 1}"
-                                        )
-                                        return ReportGenieResponse(
-                                            results={
-                                                "status": "cancelled",
-                                                "message": "Request cancelled - client disconnected during chunk processing",
-                                            }
-                                        )
-                                except Exception as e:
-                                    print(
-                                        f"Warning: Could not check disconnect status: {e}"
+                                    analysis = invoke_llm(
+                                        llm,
+                                        settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                        {
+                                            "chunk": chunk,
+                                            "question": section_description,
+                                        },
                                     )
-
-                                # Use relevance filter to check if chunk is relevant
-                                analysis = invoke_llm(
-                                    llm,
-                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                    {"chunk": chunk, "question": section_description},
-                                )
-
-                                # CRITICAL: Check if client disconnected after LLM call
-                                try:
-                                    if request and await request.is_disconnected():
-                                        print(
-                                            f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}"
-                                        )
-                                        return ReportGenieResponse(
-                                            results={
-                                                "status": "cancelled",
-                                                "message": "Request cancelled - client disconnected after LLM call",
-                                            }
-                                        )
                                 except Exception as e:
-                                    print(
-                                        f"Warning: Could not check disconnect status: {e}"
+                                    print(f"❌ Error analyzing chunk {i + 1}: {e}")
+                                    traceback.print_exc()
+                                    chunk_analyses.append(
+                                        f"Analysis failed for chunk {i + 1}, including content anyway."
                                     )
+                                    relevant_chunk_indices.append(i)
+                                    continue
 
-                                # Only include relevant chunks
+                                if analysis is None:
+                                    print(
+                                        f"⚠️ WARNING: Chunk {i + 1} got None response from LLM, including it to be safe"
+                                    )
+                                    chunk_analyses.append(chunk)
+                                    relevant_chunk_indices.append(i)
+                                    continue
+
                                 if "No relevant information found" not in analysis:
                                     chunk_analyses.append(analysis)
                                     relevant_chunk_indices.append(i)
+                                else:
+                                    print(
+                                        f"❌ Chunk {i + 1} is not relevant - excluding from analysis"
+                                    )
+
+                        else:
+                            # No filtering - include all chunks
+                            for i, chunk in enumerate(text_chunks):
+                                if not chunk or not chunk.strip():
+                                    continue
+                                if (
+                                    i > 0
+                                    and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS
+                                ):
+                                    await asyncio.sleep(
+                                        settings.PROCESSING_DELAY_BETWEEN_CHUNKS
+                                    )
+                                try:
+                                    analysis = invoke_llm(
+                                        llm,
+                                        settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                                        {
+                                            "chunk": chunk,
+                                            "question": section_description,
+                                            "language_instruction": f"Respond in this language: {settings.SUPPORTED_LANGUAGES.get(current_user.preferred_language or 'en', 'English')}",
+                                            "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                                        },
+                                    )
+                                except Exception as e:
+                                    print(f"❌ Error analyzing chunk {i + 1}: {e}")
+                                    traceback.print_exc()
+                                    chunk_analyses.append(
+                                        f"Analysis failed for chunk {i + 1}, including content anyway."
+                                    )
+                                    relevant_chunk_indices.append(i)
+                                    continue
+
+                                chunk_analyses.append(
+                                    analysis if analysis is not None else chunk
+                                )
+                                relevant_chunk_indices.append(i)
 
                         # Synthesize the chunk analyses
                         print(
-                            f"📊 Relevance filtering: {len(chunk_analyses)} relevant chunks from {len(text_chunks)} total chunks"
+                            f"📊 Relevance filtering: {len(chunk_analyses)}/{original_chunk_count} chunks are relevant for analysis"
                         )
 
                         if not chunk_analyses:
@@ -574,14 +724,8 @@ async def generate_report(
                             section_content = "No relevant information found in the knowledge base to answer this question."
                             source_citations = []
                         else:
-                            chunk_analyses_text = "\n\n".join(chunk_analyses)
-                            print(
-                                f"Template variables: chunk_analyses={len(chunk_analyses_text)} chars, question={len(section_description)} chars"
-                            )
-
                             try:
-                                # Get user language and create language instruction
-                                user_language = current_user.language or "en"
+                                user_language = current_user.preferred_language or "en"
                                 language_name = settings.SUPPORTED_LANGUAGES.get(
                                     user_language, "English"
                                 )
@@ -596,10 +740,49 @@ async def generate_report(
                                         "chunk_analyses": "\n\n".join(chunk_analyses),
                                         "question": section_description,
                                         "language_instruction": language_instruction,
+                                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
                                     },
                                 )
 
-                                # CRITICAL: Check if client disconnected after synthesis LLM call
+                                section_content = synthesized_answer
+
+                                # Build citations from relevant chunks using provenance
+                                source_citations = []
+                                for idx in relevant_chunk_indices:
+                                    chunk_content = text_chunks[idx]
+                                    prov = (
+                                        chunk_provenance[idx]
+                                        if idx < len(chunk_provenance)
+                                        else {}
+                                    )
+                                    # Send full chunk content for citations (no backend truncation)
+                                    display_content = chunk_content
+                                    source_citations.append(
+                                        {
+                                            "content": display_content,
+                                            "metadata": {
+                                                "source": prov.get(
+                                                    "source", "Full Document Scan"
+                                                ),
+                                                "source_data_id": prov.get(
+                                                    "source_data_id", ""
+                                                ),
+                                                "page": prov.get("page", ""),
+                                                "chunk_index": prov.get(
+                                                    "chunk_index_within_source", idx
+                                                ),
+                                                "scan_type": "full_text",
+                                            },
+                                        }
+                                    )
+                            except Exception as e:
+                                print(f"Error in synthesis: {e}")
+                                print(
+                                    "Template: "
+                                    + str(
+                                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE
+                                    )
+                                )
                                 try:
                                     if request and await request.is_disconnected():
                                         print(
@@ -626,10 +809,8 @@ async def generate_report(
                                 source_citations = []
                                 for idx in relevant_chunk_indices:
                                     chunk_content = text_chunks[idx]
-                                    # Truncate to 500 chars for display
-                                    display_content = chunk_content[:500] + (
-                                        "..." if len(chunk_content) > 500 else ""
-                                    )
+                                    # Send full chunk content for citations (no backend truncation)
+                                    display_content = chunk_content
 
                                     source_citations.append(
                                         {
@@ -641,14 +822,7 @@ async def generate_report(
                                             },
                                         }
                                     )
-                            except Exception as e:
-                                print(f"Error in synthesis: {e}")
-                                print(
-                                    "Template: "
-                                    + str(
-                                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE
-                                    )
-                                )
+
                     else:
                         # Vector Search Logic
                         print(f"Performing Vector Search for: {section_description}")
@@ -671,6 +845,20 @@ async def generate_report(
 
                             filtered_results = []
                             for i, doc in enumerate(search_results):
+                                # Update progress to show which chunk we're analyzing
+                                section_preview = (
+                                    section_description[:40] + "..."
+                                    if len(section_description) > 40
+                                    else section_description
+                                )
+                                progress_tracker.update_stage_progress(
+                                    task_id,
+                                    "generating",
+                                    idx,  # Current section index
+                                    len(section_items),
+                                    f"Section {idx + 1}/{len(section_items)}: Analyzing chunk {i+1}/{len(search_results)} - {section_preview}",
+                                )
+
                                 print(
                                     f"Analyzing chunk {i+1}/{len(search_results)} for relevance..."
                                 )
@@ -683,6 +871,9 @@ async def generate_report(
                                         "question": section_description,
                                     },
                                 )
+
+                                # CRITICAL: Allow event loop to process other requests (like progress polling)
+                                await asyncio.sleep(0.01)
 
                                 if (
                                     "No relevant information found"
@@ -1613,6 +1804,8 @@ async def generate_outline(
                             llm,
                             purpose="outline generation",
                             current_user=current_user,
+                            vision_analysis_override=request.vision_analysis_override,
+                            pdf_parsing_override=request.pdf_parsing_override,
                         )
 
                         if file_text.strip():
@@ -1963,6 +2156,8 @@ async def optimize_outline(
     sections: str = Form(...),
     custom_instructions: Optional[str] = Form(None),
     search_mode: str = Form("vector"),  # Add search_mode as Form parameter
+    vision_analysis_override: Optional[bool] = Form(None),
+    pdf_parsing_override: Optional[str] = Form(None),
     files: List[UploadFile] = File(...),
     request: FastAPIRequest = None,
     task_id: Optional[str] = Form(None),
@@ -1971,8 +2166,15 @@ async def optimize_outline(
     Optimize outline sections by testing them against a ground-truth document.
     Generates a report with current outline and compares it to the ground-truth to suggest improvements.
     Includes real-time progress tracking.
+
+    Args:
+        search_mode: "vector" or "full_scan" - controls retrieval strategy
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     print("optimize_outline function invoked!")
+    print(f"Received vision_analysis_override: {vision_analysis_override}")
+    print(f"Received pdf_parsing_override: {pdf_parsing_override}")
 
     try:
         # Create progress tracking task
@@ -2069,7 +2271,21 @@ async def optimize_outline(
             # 3. Process the ground-truth document
             file = files[0]
             content = await file.read()
-            ground_truth_text = extract_text_from_file(content, file.filename)
+
+            # Use enhanced processing with vision capabilities and override parameters
+            from app.services.document_utils import (
+                extract_text_with_vision_enhancement,
+            )
+
+            ground_truth_text = await extract_text_with_vision_enhancement(
+                content,
+                file.filename or "unknown",
+                llm,
+                purpose="outline optimization",
+                current_user=current_user,
+                vision_analysis_override=vision_analysis_override,
+                pdf_parsing_override=pdf_parsing_override,
+            )
 
             # NEW: Sanitize the ground-truth text to prevent JSON parsing issues
             ground_truth_text = sanitize_text_for_json(ground_truth_text)
@@ -2165,56 +2381,140 @@ async def optimize_outline(
                             f"Performing Full Text Scan for section: {section_description[:50]}..."
                         )
 
-                        # Get all source documents
-                        all_source_text = ""
+                        # Build chunks per-source so we can record provenance for each chunk
+                        text_chunks = []
+                        chunk_provenance = (
+                            []
+                        )  # parallel list of metadata for each chunk
+
                         sources = session.exec(
                             select(Source).where(Source.knowledge_base_id == kb.id)
                         ).all()
+
+                        print(
+                            f"📚 Processing {len(sources)} sources from knowledge base"
+                        )
+
                         for source in sources:
-                            # Get source data
                             source_data = session.get(SourceData, source.source_data_id)
-                            if not source_data:
-                                print(f"No source data found for source {source.name}")
+                            if not source_data or not getattr(
+                                source_data, "data", None
+                            ):
+                                print(
+                                    f"⚠️ No source data found for source {getattr(source,'name','unknown')}"
+                                )
                                 continue
 
                             try:
-                                # Extract text from the source data
-                                if not source_data.data.startswith(b"PK"):
-                                    # Direct file extraction
-                                    file_content = extract_text_from_file(
-                                        source_data.data, source.name
-                                    )
-                                else:
-                                    # Extract from ZIP file
+                                print(
+                                    f"📄 Extracting text from {getattr(source,'name','unknown')} ({len(source_data.data) if source_data.data else 0} bytes)"
+                                )
+
+                                # Handle ZIP-encoded source_data (multiple files) or direct file bytes
+                                file_text = ""
+                                if isinstance(
+                                    source_data.data, (bytes, bytearray)
+                                ) and source_data.data.startswith(b"PK"):
                                     zip_data = BytesIO(source_data.data)
                                     with zipfile.ZipFile(zip_data, "r") as zip_file:
-                                        file_info = zip_file.infolist()[0]
-                                        raw_file_content = zip_file.read(
-                                            file_info.filename
+                                        for info in zip_file.infolist():
+                                            try:
+                                                raw = zip_file.read(info.filename)
+                                                part_text = (
+                                                    await extract_text_from_file_async(
+                                                        raw, info.filename
+                                                    )
+                                                )
+                                                if part_text:
+                                                    file_text += "\n\n" + part_text
+                                            except Exception as e:
+                                                print(
+                                                    f"Warning: failed to extract entry {info.filename} from {getattr(source,'name','unknown')}: {e}"
+                                                )
+                                else:
+                                    try:
+                                        file_text = await extract_text_from_file_async(
+                                            source_data.data,
+                                            getattr(source, "name", "unknown"),
                                         )
-                                        file_content = extract_text_from_file(
-                                            raw_file_content, source.name
+                                    except Exception as e:
+                                        print(
+                                            f"Warning: failed to extract text from {getattr(source,'name','unknown')}: {e}"
                                         )
 
-                                all_source_text += f"\n\n--- Source: {source.name} ---\n\n{file_content}"
+                                if not file_text or not file_text.strip():
+                                    print(
+                                        f"⚠️ WARNING: Empty content extracted from {getattr(source,'name','unknown')}"
+                                    )
+                                    continue
+
+                                # Chunk this source independently so we can track provenance per chunk
+                                per_source_chunks = chunk_text(
+                                    file_text,
+                                    max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
+                                )
+
+                                print(
+                                    f"🔗 Created {len(per_source_chunks)} chunks from source {getattr(source,'name','unknown')}"
+                                )
+
+                                for j, chunk in enumerate(per_source_chunks):
+                                    text_chunks.append(chunk)
+                                    chunk_provenance.append(
+                                        {
+                                            "source": getattr(
+                                                source, "name", "Unknown"
+                                            ),
+                                            "source_data_id": getattr(
+                                                source, "source_data_id", ""
+                                            ),
+                                            "page": getattr(source, "page", ""),
+                                            "chunk_index_within_source": j,
+                                        }
+                                    )
+
                             except Exception as e:
                                 print(
-                                    f"Error extracting content from {source.name}: {e}"
+                                    f"❌ Error extracting content from {getattr(source,'name','unknown')}: {e}"
                                 )
-                                # Continue with other sources instead of failing completely
+                                traceback.print_exc()
                                 continue
 
-                        # Split into chunks and analyze each chunk
-                        text_chunks = chunk_text(
-                            all_source_text,
-                            max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
+                        original_chunk_count = len(text_chunks)
+                        print(
+                            f"📊 Total chunks across all sources: {original_chunk_count}"
                         )
+
+                        if not text_chunks:
+                            print(f"⚠️ WARNING: No chunks created from any source!")
+                            raise HTTPException(
+                                status_code=500,
+                                detail="Failed to create text chunks from knowledge base content",
+                            )
+
+                        if not text_chunks:
+                            print(f"⚠️ WARNING: No chunks created from extracted text!")
+                            raise HTTPException(
+                                status_code=500,
+                                detail="Failed to create chunks from extracted text",
+                            )
+
+                        # Show preview of first chunk
+                        if text_chunks:
+                            first_chunk_preview = (
+                                text_chunks[0][:200]
+                                if len(text_chunks[0]) > 200
+                                else text_chunks[0]
+                            )
+                            print(
+                                f"🔍 First chunk preview ({len(text_chunks[0])} chars): {first_chunk_preview}..."
+                            )
 
                         # LLM-based relevance filtering for ReportGenie full text scan
                         # Filter chunks before analysis to avoid processing irrelevant content
                         if text_chunks:
                             print(
-                                f"🔍 Full Text Scan: Filtering {len(text_chunks)} chunks for relevance to section: {section_description[:50]}..."
+                                f"🔍 Full Text Scan: Filtering {len(text_chunks)} chunks for relevance to section: {section_description[:100]}..."
                             )
 
                             # Batch / concurrency settings with sensible defaults
@@ -2227,6 +2527,7 @@ async def optimize_outline(
 
                             loop = asyncio.get_running_loop()
                             filtered_chunks = []
+                            filter_errors = []
 
                             # Process chunks in batches to reduce total runtime while still being rate-limit friendly
                             for start in range(0, len(text_chunks), BATCH_SIZE):
@@ -2237,7 +2538,22 @@ async def optimize_outline(
                                 for j, chunk in enumerate(batch):
                                     chunk_idx = start + j
 
+                                    # Validate chunk before processing
+                                    if not chunk or not chunk.strip():
+                                        print(
+                                            f"⚠️ WARNING: Chunk {chunk_idx + 1} is empty, skipping"
+                                        )
+                                        continue
+
                                     async def _check(chunk=chunk, chunk_idx=chunk_idx):
+                                        # Debug: Show what we're analyzing
+                                        chunk_preview = (
+                                            chunk[:150] if len(chunk) > 150 else chunk
+                                        )
+                                        print(
+                                            f"🔍 Analyzing chunk {chunk_idx + 1}/{original_chunk_count} ({len(chunk)} chars): {chunk_preview}..."
+                                        )
+
                                         # run invoke_llm (sync) in a thread pool to allow concurrency
                                         try:
                                             relevance = await loop.run_in_executor(
@@ -2251,11 +2567,36 @@ async def optimize_outline(
                                                     },
                                                 ),
                                             )
-                                        except Exception as e:
-                                            # bubble up error to be handled by caller
-                                            raise e
 
-                                        return chunk_idx, chunk, relevance
+                                            # Debug: Show LLM response
+                                            relevance_preview = (
+                                                relevance[:200]
+                                                if relevance and len(relevance) > 200
+                                                else relevance
+                                            )
+                                            print(
+                                                f"📝 Chunk {chunk_idx + 1} LLM response: {relevance_preview}"
+                                            )
+
+                                            return (
+                                                chunk_idx,
+                                                chunk,
+                                                relevance,
+                                                None,
+                                            )  # No error
+
+                                        except Exception as e:
+                                            error_msg = f"Error analyzing chunk {chunk_idx + 1}: {str(e)}"
+                                            print(f"❌ {error_msg}")
+                                            import traceback
+
+                                            traceback.print_exc()
+                                            return (
+                                                chunk_idx,
+                                                chunk,
+                                                None,
+                                                error_msg,
+                                            )  # Return error
 
                                     tasks.append(asyncio.create_task(_check()))
 
@@ -2266,13 +2607,34 @@ async def optimize_outline(
 
                                 for res in results:
                                     if isinstance(res, Exception):
-                                        # On error, include the chunk to be safe (preserve previous behavior)
-                                        print(
-                                            f"Warning: error during batch relevance check: {res}"
-                                        )
+                                        # On error, log but continue
+                                        error_msg = f"Exception during batch relevance check: {str(res)}"
+                                        print(f"❌ {error_msg}")
+                                        filter_errors.append(error_msg)
+                                        import traceback
+
+                                        traceback.print_exc()
                                         continue
 
-                                    chunk_idx, chunk, relevance_check = res
+                                    chunk_idx, chunk, relevance_check, error = res
+
+                                    if error:
+                                        # LLM call failed, include chunk to be safe
+                                        print(
+                                            f"⚠️ Including chunk {chunk_idx + 1} despite error (to avoid data loss)"
+                                        )
+                                        filtered_chunks.append(chunk)
+                                        filter_errors.append(error)
+                                        continue
+
+                                    # Validate LLM response
+                                    if relevance_check is None:
+                                        print(
+                                            f"⚠️ WARNING: Chunk {chunk_idx + 1} got None response from LLM, including it to be safe"
+                                        )
+                                        filtered_chunks.append(chunk)
+                                        continue
+
                                     # Filter based on LLM response (same logic as before)
                                     if "No relevant information found" not in (
                                         relevance_check or ""
@@ -2291,13 +2653,27 @@ async def optimize_outline(
                             # Use filtered_chunks for analysis
                             text_chunks = filtered_chunks
                             print(
-                                f"📊 Relevance filtering: {len(filtered_chunks)}/{len(text_chunks)} chunks are relevant for analysis"
+                                f"📊 Relevance filtering: {len(filtered_chunks)}/{original_chunk_count} chunks are relevant for analysis"
                             )
+
+                            if filter_errors:
+                                print(
+                                    f"⚠️ {len(filter_errors)} errors occurred during filtering:"
+                                )
+                                for error in filter_errors[:5]:  # Show first 5
+                                    print(f"  - {error}")
+
+                            if not text_chunks:
+                                print(
+                                    f"⚠️ WARNING: All {original_chunk_count} chunks filtered out as irrelevant!"
+                                )
+                                print(f"Section description was: {section_description}")
+                                # Don't fail completely, just note it
 
                         chunk_analyses = []
                         for chunk in text_chunks:
                             # Get user language and create language instruction
-                            user_language = current_user.language or "en"
+                            user_language = current_user.preferred_language or "en"
                             language_name = settings.SUPPORTED_LANGUAGES.get(
                                 user_language, "English"
                             )
@@ -2328,6 +2704,7 @@ async def optimize_outline(
                                     "chunk_analyses": chunk_analyses_text,
                                     "question": section_description,
                                     "language_instruction": language_instruction,
+                                    "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
                                 },
                             )
                             # Translate the synthesized answer if needed
@@ -3313,11 +3690,11 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                 #     generated_content[:1000], session, current_user, llm
                 # )
                 # translated_ground_truth = await translate_text_if_needed(
-                #     ground_truth_content[:1000], session, current_user, llm
+                #     ground_truth_context[:1000], session, current_user, llm
                 # )
                 translated_reason = reason
                 translated_current_output = generated_content[:1000]
-                translated_ground_truth = ground_truth_content[:1000]
+                translated_ground_truth = ground_truth_context[:1000]
 
                 suggestions.append(
                     OutlineSuggestion(

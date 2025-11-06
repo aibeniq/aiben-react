@@ -399,7 +399,10 @@
     "modals": {
       "add": {
         "title": "Wissensbasis hinzufügen",
-        "description": "Erstellen Sie eine neue Wissensbasis, indem Sie Details eingeben und Dokumente unten hochladen."
+        "description": "Erstellen Sie eine neue Wissensbasis, indem Sie Details eingeben und Dokumente unten hochladen.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Wissensbasis bearbeiten",

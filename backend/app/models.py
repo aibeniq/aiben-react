@@ -380,6 +380,8 @@ class GenerateFormFieldsRequest(SQLModel):
     num_fields: Optional[int] = Field(default=None, ge=1, le=50)
     knowledge_base_id: Optional[uuid.UUID] = None
     search_mode: Literal["vector", "full_scan"] = Field(default="vector")
+    vision_analysis_override: Optional[bool] = Field(default=None)
+    pdf_parsing_override: Optional[str] = Field(default=None, max_length=20)
 
 
 class GenerateFormFieldsResponse(SQLModel):
@@ -834,6 +836,8 @@ class GenerateQuestionsRequest(SQLModel):
         default=None
     )  # Optional - Knowledge base to use as reference
     search_mode: Literal["vector", "full_scan"] = Field(default="vector")
+    vision_analysis_override: Optional[bool] = Field(default=None)
+    pdf_parsing_override: Optional[str] = Field(default=None, max_length=20)
 
 
 class GenerateQuestionsResponse(SQLModel):
@@ -853,6 +857,8 @@ class GenerateOutlineRequest(SQLModel):
         default=None
     )  # Optional - Knowledge base to use as reference
     search_mode: Literal["vector", "full_scan"] = Field(default="vector")
+    vision_analysis_override: Optional[bool] = Field(default=None)
+    pdf_parsing_override: Optional[str] = Field(default=None, max_length=20)
 
 
 class GenerateOutlineResponse(SQLModel):

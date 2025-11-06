@@ -629,7 +629,10 @@
       },
       "add": {
         "title": "Kennisbank toevoegen",
-        "description": "Maak een nieuwe kennisbank aan door hieronder details en documenten te verstrekken."
+        "description": "Maak een nieuwe kennisbank aan door hieronder details en documenten te verstrekken.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Kennisbank bewerken",

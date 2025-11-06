@@ -27,9 +27,7 @@ const SearchModeToggle = ({
         {helpKey && <HelpTooltip helpKey={helpKey} />}
       </HStack>
       <RadioGroup
-        onValueChange={(details) =>
-          onSearchModeChange(details.value as "vector" | "full_scan")
-        }
+        onValueChange={(details) => onSearchModeChange(details.value as "vector" | "full_scan")}
         value={searchMode}
         disabled={isDisabled}
       >

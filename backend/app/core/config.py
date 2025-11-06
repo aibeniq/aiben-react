@@ -65,7 +65,7 @@ class Settings(BaseSettings):
     RAG_MIN_QUALITY_SCORE: float = 0.3  # Minimum quality score for content chunks
     RAG_MAX_BIBLIOGRAPHY_CHUNKS: int = 0  # Maximum bibliography chunks to include
     RAG_ENABLE_LLM_RELEVANCE_FILTER: bool = (
-        False  # Enable LLM-based relevance filtering for vector search
+        True  # Enable LLM-based relevance filtering for vector search
     )
 
     # Embedding processing parameters
@@ -632,9 +632,11 @@ Based on the provided regulations/guideline citations, the following should be k
     INSTRUCTIONS:
     1. Use information from CONTEXT and the VISUAL_ANALYSIS block ONLY.
     2. If VISUAL_ANALYSIS provides observations or a summary that directly answers the question, use that.
-    3. If the context doesn't contain enough information to answer the question, respond with exactly: {insufficient_info_phrase}
+    3. If the context doesn't contain ANY relevant information to answer the question, you MUST respond with ONLY this exact text with no other words: {insufficient_info_phrase}
     4. Be concise and to the point, and cite whether your answer used text or visual evidence in a single short sentence.
     5. Don't make up information or use knowledge outside the provided context.
+    
+    CRITICAL: If you cannot answer from the context, return ONLY the phrase {insufficient_info_phrase} - nothing else!
     
     {language_instruction}
     ANSWER:

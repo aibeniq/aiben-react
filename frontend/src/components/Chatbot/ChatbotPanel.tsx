@@ -1,12 +1,15 @@
 import ChatMessages from "@/components/Chatbot/ChatMessages"
 import InputArea from "@/components/Chatbot/InputArea"
 import KnowledgeBaseSelectionModal from "@/components/Common/KnowledgeBaseSelectionModal"
+import ProcessingSettingsPopup, {
+  type ProcessingSettings,
+} from "@/components/Common/ProcessingSettingsPopup"
+import HelpTooltip from "@/components/ui/help-tooltip"
 import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import { Box, Button, HStack, Icon, Show, Text } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { FiTrash } from "react-icons/fi"
-import { Radio, RadioGroup } from "../ui/radio"
 import { Tooltip } from "../ui/tooltip"
 
 interface ChatMessage {
@@ -37,8 +40,8 @@ interface ChatbotPanelProps {
   setShowKnowledgeBaseModal: (show: boolean) => void
   clearChat: () => void
   handleSendMessage: () => Promise<void>
-  searchMode: "vector" | "full_text"
-  setSearchMode: (mode: "vector" | "full_text") => void
+  processingSettings: ProcessingSettings
+  setProcessingSettings: (settings: ProcessingSettings) => void
 }
 
 // Helper function to truncate text with ellipsis
@@ -64,12 +67,11 @@ const ChatbotPanel = ({
   setShowKnowledgeBaseModal,
   clearChat,
   handleSendMessage,
-  searchMode,
-  setSearchMode,
+  processingSettings,
+  setProcessingSettings,
 }: ChatbotPanelProps) => {
   const { t } = useTranslation()
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } =
-    useKnowledgeBases() // Respect All Users toggle state
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -120,38 +122,19 @@ const ChatbotPanel = ({
           </HStack>
         </Box>
 
-        {/* Search Mode Toggle */}
-        <Box
-          px={4}
-          pt={2}
-          pb={1}
-          bg="bg"
-          borderBottom="1px solid"
-          borderColor="gray.100"
-        >
-          <RadioGroup
-            value={searchMode}
-            onValueChange={(details) =>
-              setSearchMode(details.value as "vector" | "full_text")
-            }
-            size="sm"
-            colorPalette="teal"
-          >
-            <HStack gap={4}>
-              <Text fontSize="xs" color="gray.600" fontWeight="medium">
-                {t("chatbot.searchMode")}
-              </Text>
-              <Radio value="vector">
-                <Text fontSize="xs">{t("chatbot.vectorSearch")}</Text>
-              </Radio>
-              <Radio value="full_text">
-                <Text fontSize="xs">{t("chatbot.fullTextScan")}</Text>
-              </Radio>
-            </HStack>
-          </RadioGroup>
-          <Text fontSize="xs" color="gray.500" mt={1}>
-            {t("chatbot.searchModeDescription")}
-          </Text>
+        {/* Processing Settings */}
+        <Box px={4} pt={2} pb={1} bg="bg" borderBottom="1px solid" borderColor="gray.100">
+          <HStack align="center">
+            <Text fontSize="xs" fontWeight="medium">
+              {t("processingSettings.title")}
+            </Text>
+            <ProcessingSettingsPopup
+              settings={processingSettings}
+              onSettingsChange={setProcessingSettings}
+              disabled={isLoading}
+            />
+            <HelpTooltip helpKey="searchMode" />
+          </HStack>
         </Box>
 
         <Box p={4} overflowY="auto" flex="1" height="100%">
@@ -198,9 +181,7 @@ const ChatbotPanel = ({
             <Box flex="1" minW="0">
               {selectedKbId ? (
                 (() => {
-                  const kbTitle =
-                    knowledgeBases.find((kb) => kb.id === selectedKbId)
-                      ?.title || ""
+                  const kbTitle = knowledgeBases.find((kb) => kb.id === selectedKbId)?.title || ""
                   const truncatedTitle = truncateText(kbTitle)
                   const needsTooltip = kbTitle.length > 40
 
@@ -211,10 +192,7 @@ const ChatbotPanel = ({
                   )
 
                   return needsTooltip ? (
-                    <Tooltip
-                      content={`${t("chatbot.usingKnowledgeBase")} ${kbTitle}`}
-                      showArrow
-                    >
+                    <Tooltip content={`${t("chatbot.usingKnowledgeBase")} ${kbTitle}`} showArrow>
                       {content}
                     </Tooltip>
                   ) : (
@@ -282,9 +260,7 @@ const ChatbotPanel = ({
         title={t("chatbot.selectKnowledgeBase")}
         knowledgeBases={knowledgeBases}
         selectedKnowledgeBase={
-          selectedKbId
-            ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null
-            : null
+          selectedKbId ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null : null
         }
         onSelectionChange={(kb) => {
           setSelectedKbId(kb?.id || null)

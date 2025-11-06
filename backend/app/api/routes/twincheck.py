@@ -1522,6 +1522,8 @@ async def generate_topics(
     num_topics: Optional[int] = Form(None),
     search_mode: str = "vector",
     knowledge_base_id: Optional[str] = Form(None),
+    vision_analysis_override: Optional[bool] = Form(None),
+    pdf_parsing_override: Optional[str] = Form(None),
     files: List[UploadFile] = File(default=[]),
 ):
     """
@@ -1563,6 +1565,8 @@ async def generate_topics(
                     llm,
                     purpose="comparison topic generation",
                     current_user=current_user,
+                    vision_analysis_override=vision_analysis_override,
+                    pdf_parsing_override=pdf_parsing_override,
                 )
                 example_instruction = f" and use the uploaded example document ({file.filename}) as a reference for the appropriate scope and depth of comparison topics"
                 example_analysis_instruction = f" and explain how they align with the scope shown in the example document ({file.filename})"

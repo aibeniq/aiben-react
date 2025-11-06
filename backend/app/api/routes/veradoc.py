@@ -803,7 +803,7 @@ async def get_veradoc_progress(
             if isinstance(stage_data, dict)
             else False
         )
-        print(f"🔍 STAGE {stage_name}: completed={completed}")
+        # print(f"🔍 STAGE {stage_name}: completed={completed}")
 
     # Yield control to allow other async operations (like this API call) to run
     await asyncio.sleep(0)
@@ -1513,7 +1513,9 @@ async def process_rag_checklist(
 
                             _, document_images = (
                                 extract_documents_and_images_from_file_unified(
-                                    content, file.filename
+                                    content,
+                                    file.filename,
+                                    pdf_parsing_mode=pdf_parsing_preference,
                                 )
                             )
                             print(
@@ -2585,14 +2587,23 @@ async def optimize_checklist(
     target_answers: str = Form("yes"),
     custom_instructions: Optional[str] = Form(None),
     search_mode: str = Form("vector"),
+    vision_analysis_override: Optional[bool] = Form(None),
+    pdf_parsing_override: Optional[str] = Form(None),
     files: List[UploadFile] = File(...),
     request: FastAPIRequest = None,
 ):
     """
     Optimize checklist questions by testing them against a document that should meet all requirements.
     Suggests revisions for questions that resulted in negative answers.
+
+    Args:
+        search_mode: "vector" or "full_text" - controls retrieval strategy
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     print("optimize_checklist function invoked!")
+    print(f"Received vision_analysis_override: {vision_analysis_override}")
+    print(f"Received pdf_parsing_override: {pdf_parsing_override}")
     # Disconnect monitoring disabled due to false positives
 
     # Create request_data object for backward compatibility with rest of the code
@@ -2713,12 +2724,29 @@ async def optimize_checklist(
             # Initialize LLM
             llm = get_default_llm(session, current_user)
 
-            # 3. Process the test document
+            # 3. Process the test document with override parameters
             file = files[0]
             content = await file.read()
-            document_text = await extract_text_from_file_async(
-                content, file.filename, current_user
-            )
+
+            # Create temporary user if vision override is provided
+            if vision_analysis_override is not None:
+
+                class TempUser:
+                    def __init__(self, vision_enabled, user_id=None):
+                        self.vision_analysis_enabled = vision_enabled
+                        self.id = user_id
+
+                temp_user = TempUser(
+                    vision_analysis_override, current_user.id if current_user else None
+                )
+                document_text = await extract_text_from_file_async(
+                    content, file.filename, temp_user, pdf_parsing_override
+                )
+            else:
+                document_text = await extract_text_from_file_async(
+                    content, file.filename, current_user, pdf_parsing_override
+                )
+
             print(
                 f"Processing test document: {file.filename} ({len(document_text)} characters)"
             )
@@ -3338,15 +3366,24 @@ async def generate_questions_with_files(
     description: str = Form(...),
     checklist_type: str = Form(default="general"),
     num_questions: Optional[int] = Form(default=None),
+    vision_analysis_override: Optional[bool] = Form(None),
+    pdf_parsing_override: Optional[str] = Form(None),
     files: List[UploadFile] = File(default=[]),
 ):
     """
     Generate checklist questions based on a description using LLM, with optional reference documents.
+
+    Args:
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     from app.services.text_processing import chunk_text
     from app.core.config import settings
 
     try:
+        print(f"Received vision_analysis_override: {vision_analysis_override}")
+        print(f"Received pdf_parsing_override: {pdf_parsing_override}")
+
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
@@ -3372,6 +3409,8 @@ async def generate_questions_with_files(
                             llm,
                             purpose="checklist question generation",
                             current_user=current_user,
+                            vision_analysis_override=vision_analysis_override,
+                            pdf_parsing_override=pdf_parsing_override,
                         )
 
                         if file_text.strip():
@@ -3620,18 +3659,11 @@ Return only the final selected questions, one per line, numbered."""
             )
 
         # Apply user-specified limit if provided, otherwise use all generated questions
-        if request.num_questions:
-            questions = questions[: request.num_questions]
+        if num_questions:
+            questions = questions[:num_questions]
 
         if not analysis:
-            search_method = (
-                "vector search"
-                if request.search_mode == "vector"
-                else "full document scan"
-            )
-            analysis = f"Generated {len(questions)} checklist questions based on the provided description using {search_method}"
-            if request.knowledge_base_id:
-                analysis += " with knowledge base reference."
+            analysis = f"Generated {len(questions)} checklist questions based on the provided description"
 
         # Record the interaction
         record_llm_interaction(
@@ -3639,11 +3671,9 @@ Return only the final selected questions, one per line, numbered."""
             user_id=current_user.id,
             functionality="generate_checklist_questions",
             input_data={
-                "description": request.description,
-                "checklist_type": request.checklist_type,
-                "requested_questions": request.num_questions,
-                "knowledge_base_id": request.knowledge_base_id,
-                "search_mode": request.search_mode,
+                "description": description,
+                "checklist_type": checklist_type,
+                "requested_questions": num_questions,
             },
             output_data={
                 "questions_count": len(questions),

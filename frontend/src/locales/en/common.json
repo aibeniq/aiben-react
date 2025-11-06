@@ -456,7 +456,10 @@
     "modals": {
       "add": {
         "title": "Add Knowledge Base",
-        "description": "Create a new knowledge base by providing details and uploading documents below."
+        "description": "Create a new knowledge base by providing details and uploading documents below.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Edit Knowledge Base",
@@ -483,7 +486,8 @@
         "creating": "Creating..."
       },
       "validation": {
-        "titleRequired": "Title is required"
+        "titleRequired": "Title is required",
+        "atLeastOneFile": "Please select at least one file to create a knowledge base."
       },
       "messages": {
         "createSuccess": "Knowledge Base created successfully.",

@@ -635,7 +635,10 @@
       },
       "add": {
         "title": "Додати базу знань",
-        "description": "Створіть нову базу знань, надавши деталі та завантаживши документи нижче."
+        "description": "Створіть нову базу знань, надавши деталі та завантаживши документи нижче.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Редагувати базу знань",
