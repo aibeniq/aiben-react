@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CloseButton,
   Dialog,
   HStack,
   IconButton,
@@ -19,9 +20,11 @@ import {
   type VeraDocChecklist,
   VeradocService,
 } from "../../client"
+import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
 import FileUpload, { type FileItem } from "../Common/FileUpload"
-import SearchModeToggle from "../Common/SearchModeToggle"
+import ProcessingSettingsPopup from "../Common/ProcessingSettingsPopup"
+import type { ProcessingSettings } from "../Common/ProcessingSettingsPopup"
 import { Field } from "../ui/field"
 
 interface OptimizeChecklistModalProps {
@@ -41,19 +44,20 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
 }) => {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { user } = useAuth()
   const [fileItems, setFileItems] = useState<FileItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<ChecklistSuggestion[]>([])
-  const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(
-    new Set(),
-  )
+  const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
   const [isApplying, setIsApplying] = useState(false)
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [processingSettings, setProcessingSettings] = useState<ProcessingSettings>({
+    searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+    visionAnalysis: user?.vision_analysis_enabled ?? true,
+    pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "enhanced",
+  })
   const [customInstructions, setCustomInstructions] = useState("")
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
-  const [editingSuggestions, setEditingSuggestions] = useState<
-    Map<number, string>
-  >(new Map())
+  const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
   const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
   const [hasOptimized, setHasOptimized] = useState(false)
   const [expandedAnswers, setExpandedAnswers] = useState<Set<number>>(new Set())
@@ -77,10 +81,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
       return
     }
 
-    if (
-      fileItems.length === 0 ||
-      !fileItems.some((item) => item.file.size > 0)
-    ) {
+    if (fileItems.length === 0 || !fileItems.some((item) => item.file.size > 0)) {
       showErrorToast(t("toast.uploadAcceptedDocuments"))
       return
     }
@@ -101,7 +102,10 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
         knowledgeBaseId: selectedKnowledgeBase.id,
         questions: checklist.questions || "",
         customInstructions: customInstructions || undefined,
-        searchMode: searchMode === "full_scan" ? "full_text" : searchMode,
+        searchMode:
+          processingSettings.searchMode === "full_scan"
+            ? "full_text"
+            : processingSettings.searchMode,
         formData: {
           files: files,
         },
@@ -159,9 +163,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
     const suggestion = suggestions[index]
     if (suggestion) {
       setEditingSuggestions(
-        new Map(
-          editingSuggestions.set(index, suggestion.suggested_question || ""),
-        ),
+        new Map(editingSuggestions.set(index, suggestion.suggested_question || "")),
       )
       setEditingModes(new Set(editingModes.add(index)))
     }
@@ -182,9 +184,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
 
   const handleCancelEdit = (index: number) => {
     setEditingModes(new Set([...editingModes].filter((i) => i !== index)))
-    setEditingSuggestions(
-      new Map([...editingSuggestions].filter(([i]) => i !== index)),
-    )
+    setEditingSuggestions(new Map([...editingSuggestions].filter(([i]) => i !== index)))
   }
 
   const handleApplyOptimizations = () => {
@@ -240,10 +240,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
         headers.join(","),
         ...csvData.map((row) =>
           headers
-            .map(
-              (header) =>
-                `"${String(row[header as keyof typeof row]).replace(/"/g, '""')}"`,
-            )
+            .map((header) => `"${String(row[header as keyof typeof row]).replace(/"/g, '""')}"`)
             .join(","),
         ),
       ].join("\n")
@@ -292,7 +289,11 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
     setSuggestions([])
     setAcceptedSuggestions(new Set())
     setIsApplying(false)
-    setSearchMode("vector")
+    setProcessingSettings({
+      searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+      visionAnalysis: user?.vision_analysis_enabled ?? true,
+      pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "enhanced",
+    }) // Reset to user defaults
     setCustomInstructions("")
     setLoadingCsvDownload(false)
     setEditingSuggestions(new Map())
@@ -309,14 +310,14 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
       <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
         <Dialog.Backdrop />
         <Dialog.Positioner style={{ zIndex: 2500 }}>
-          <Dialog.Content
-            maxW="6xl"
-            maxH="90vh"
-            display="flex"
-            flexDirection="column"
-          >
+          <Dialog.Content maxW="6xl" maxH="90vh" display="flex" flexDirection="column">
             <Dialog.Header flexShrink={0}>
-              <Dialog.Title>{t("optimizeChecklistModal.title")}</Dialog.Title>
+              <HStack justify="space-between" align="center" w="full">
+                <Dialog.Title>{t("optimizeChecklistModal.title")}</Dialog.Title>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size="sm" />
+                </Dialog.CloseTrigger>
+              </HStack>
             </Dialog.Header>
             <Dialog.Body
               flex={1}
@@ -335,25 +336,26 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
               >
                 <HStack gap={6} align="flex-start">
                   <VStack flex={1} align="stretch" gap={4}>
-                    <SearchModeToggle
-                      searchMode={searchMode}
-                      onSearchModeChange={setSearchMode}
-                    />
+                    <HStack align="center" gap={2}>
+                      <Text fontSize="sm" color="gray.600">
+                        {t("processingSettings.title")}
+                      </Text>
+                      <ProcessingSettingsPopup
+                        settings={processingSettings}
+                        onSettingsChange={setProcessingSettings}
+                        contentZIndex={10050}
+                        backdropZIndex={10040}
+                      />
+                    </HStack>
 
                     <Field
-                      label={t(
-                        "optimizeChecklistModal.customInstructionsLabel",
-                      )}
-                      helperText={t(
-                        "optimizeChecklistModal.customInstructionsHelperText",
-                      )}
+                      label={t("optimizeChecklistModal.customInstructionsLabel")}
+                      helperText={t("optimizeChecklistModal.customInstructionsHelperText")}
                     >
                       <Textarea
                         value={customInstructions}
                         onChange={(e) => setCustomInstructions(e.target.value)}
-                        placeholder={t(
-                          "optimizeChecklistModal.customInstructionsPlaceholder",
-                        )}
+                        placeholder={t("optimizeChecklistModal.customInstructionsPlaceholder")}
                         rows={2}
                         maxLength={2000}
                       />
@@ -370,10 +372,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                     <Text fontSize="sm" color="gray.600" mb={2}>
                       {t("optimizeChecklistModal.uploadDocumentsHelperText")}
                     </Text>
-                    <FileUpload
-                      files={fileItems}
-                      onFilesChange={setFileItems}
-                    />
+                    <FileUpload files={fileItems} onFilesChange={setFileItems} />
                   </Box>
                 </HStack>
 
@@ -397,8 +396,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                     <HStack gap={2}>
                       <Text fontSize="sm" color="gray.600">
                         {t("optimizeChecklistModal.opportunitiesFound", {
-                          count: suggestions.filter((s) => s.needs_revision)
-                            .length,
+                          count: suggestions.filter((s) => s.needs_revision).length,
                           total: suggestions.length,
                         })}
                       </Text>
@@ -456,18 +454,14 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                     {/* Left Column: Suggestions that need revision */}
                     <VStack flex={1} align="stretch">
                       <Text fontWeight="semibold" color="blue.700" mb={3}>
-                        {t(
-                          "optimizeChecklistModal.questionsNeedingOptimization",
-                        )}{" "}
-                        ({suggestions.filter((s) => s.needs_revision).length})
+                        {t("optimizeChecklistModal.questionsNeedingOptimization")} (
+                        {suggestions.filter((s) => s.needs_revision).length})
                       </Text>
                       <Box pr={2}>
                         <VStack gap={4} align="stretch">
                           {suggestions
                             .map((suggestion, index) => ({ suggestion, index }))
-                            .filter(
-                              ({ suggestion }) => suggestion.needs_revision,
-                            )
+                            .filter(({ suggestion }) => suggestion.needs_revision)
                             .map(({ suggestion, index }) => (
                               <Box
                                 key={index}
@@ -478,10 +472,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                 bg="blue.50"
                               >
                                 <VStack align="stretch" gap={3}>
-                                  <HStack
-                                    justifyContent="space-between"
-                                    align="flex-start"
-                                  >
+                                  <HStack justifyContent="space-between" align="flex-start">
                                     <Text fontWeight="medium" color="gray.700">
                                       Question {index + 1}
                                     </Text>
@@ -490,9 +481,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                         aria-label="Edit suggestion"
                                         size="sm"
                                         variant="ghost"
-                                        onClick={() =>
-                                          handleEditSuggestion(index)
-                                        }
+                                        onClick={() => handleEditSuggestion(index)}
                                         disabled={editingModes.has(index)}
                                       >
                                         <FiEdit3 />
@@ -500,25 +489,16 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                       <Button
                                         size="sm"
                                         variant={
-                                          acceptedSuggestions.has(index)
-                                            ? "solid"
-                                            : "outline"
+                                          acceptedSuggestions.has(index) ? "solid" : "outline"
                                         }
                                         colorScheme={
-                                          acceptedSuggestions.has(index)
-                                            ? "green"
-                                            : "gray"
+                                          acceptedSuggestions.has(index) ? "green" : "gray"
                                         }
-                                        onClick={() =>
-                                          handleSuggestionToggle(index)
-                                        }
+                                        onClick={() => handleSuggestionToggle(index)}
                                       >
                                         {acceptedSuggestions.has(index) ? (
                                           <>
-                                            <FiCheck />{" "}
-                                            {t(
-                                              "optimizeChecklistModal.selected",
-                                            )}
+                                            <FiCheck /> {t("optimizeChecklistModal.selected")}
                                           </>
                                         ) : (
                                           t("optimizeChecklistModal.select")
@@ -528,12 +508,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                   </HStack>
 
                                   <Box>
-                                    <Text
-                                      fontSize="sm"
-                                      fontWeight="medium"
-                                      color="gray.600"
-                                      mb={1}
-                                    >
+                                    <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
                                       {t("optimizeChecklistModal.original")}:
                                     </Text>
                                     <Text
@@ -549,30 +524,17 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                   </Box>
 
                                   <Box>
-                                    <Text
-                                      fontSize="sm"
-                                      fontWeight="medium"
-                                      color="blue.600"
-                                      mb={1}
-                                    >
-                                      {t(
-                                        "optimizeChecklistModal.suggestedImprovement",
-                                      )}
-                                      :
+                                    <Text fontSize="sm" fontWeight="medium" color="blue.600" mb={1}>
+                                      {t("optimizeChecklistModal.suggestedImprovement")}:
                                     </Text>
                                     {editingModes.has(index) ? (
                                       <VStack align="stretch" gap={2}>
                                         <Textarea
-                                          value={
-                                            editingSuggestions.get(index) || ""
-                                          }
+                                          value={editingSuggestions.get(index) || ""}
                                           onChange={(e) =>
                                             setEditingSuggestions(
                                               new Map(
-                                                editingSuggestions.set(
-                                                  index,
-                                                  e.target.value,
-                                                ),
+                                                editingSuggestions.set(index, e.target.value),
                                               ),
                                             )
                                           }
@@ -584,18 +546,14 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                           <Button
                                             size="sm"
                                             colorScheme="green"
-                                            onClick={() =>
-                                              handleSaveSuggestion(index)
-                                            }
+                                            onClick={() => handleSaveSuggestion(index)}
                                           >
                                             <FiSave /> Save
                                           </Button>
                                           <Button
                                             size="sm"
                                             variant="ghost"
-                                            onClick={() =>
-                                              handleCancelEdit(index)
-                                            }
+                                            onClick={() => handleCancelEdit(index)}
                                           >
                                             <FiX /> Cancel
                                           </Button>
@@ -625,10 +583,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                         color="purple.600"
                                         mb={1}
                                       >
-                                        {t(
-                                          "optimizeChecklistModal.policyContext",
-                                        )}
-                                        :
+                                        {t("optimizeChecklistModal.policyContext")}:
                                       </Text>
                                       <Text
                                         fontSize="sm"
@@ -645,11 +600,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                           display: expandedAnswers.has(index)
                                             ? "block"
                                             : "-webkit-box",
-                                          WebkitLineClamp: expandedAnswers.has(
-                                            index,
-                                          )
-                                            ? "none"
-                                            : 2,
+                                          WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
                                           WebkitBoxOrient: "vertical" as const,
                                         }}
                                       >
@@ -666,10 +617,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                       color="orange.600"
                                       mb={1}
                                     >
-                                      {t(
-                                        "optimizeChecklistModal.currentAnswer",
-                                      )}
-                                      :
+                                      {t("optimizeChecklistModal.currentAnswer")}:
                                     </Text>
                                     <Text
                                       fontSize="sm"
@@ -680,17 +628,11 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                       borderColor="orange.200"
                                       color="gray.700"
                                       style={{
-                                        overflow: expandedAnswers.has(index)
-                                          ? "visible"
-                                          : "hidden",
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
                                         display: expandedAnswers.has(index)
                                           ? "block"
                                           : "-webkit-box",
-                                        WebkitLineClamp: expandedAnswers.has(
-                                          index,
-                                        )
-                                          ? "none"
-                                          : 2,
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
                                         WebkitBoxOrient: "vertical" as const,
                                       }}
                                     >
@@ -699,29 +641,18 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                   </Box>
 
                                   <Box>
-                                    <HStack
-                                      justifyContent="space-between"
-                                      align="center"
-                                    >
-                                      <Text
-                                        fontSize="sm"
-                                        fontWeight="medium"
-                                        color="gray.600"
-                                      >
+                                    <HStack justifyContent="space-between" align="center">
+                                      <Text fontSize="sm" fontWeight="medium" color="gray.600">
                                         {t("optimizeChecklistModal.analysis")}:
                                       </Text>
                                       <Button
                                         size="xs"
                                         variant="ghost"
-                                        onClick={() =>
-                                          toggleAnswerExpansion(index)
-                                        }
+                                        onClick={() => toggleAnswerExpansion(index)}
                                       >
                                         {expandedAnswers.has(index)
                                           ? t("optimizeChecklistModal.showLess")
-                                          : t(
-                                              "optimizeChecklistModal.showMore",
-                                            )}
+                                          : t("optimizeChecklistModal.showMore")}
                                       </Button>
                                     </HStack>
                                     <Text
@@ -733,17 +664,11 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                       border="1px solid"
                                       borderColor="gray.200"
                                       style={{
-                                        overflow: expandedAnswers.has(index)
-                                          ? "visible"
-                                          : "hidden",
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
                                         display: expandedAnswers.has(index)
                                           ? "block"
                                           : "-webkit-box",
-                                        WebkitLineClamp: expandedAnswers.has(
-                                          index,
-                                        )
-                                          ? "none"
-                                          : 3,
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 3,
                                         WebkitBoxOrient: "vertical" as const,
                                       }}
                                     >
@@ -760,16 +685,14 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                     {/* Right Column: Questions that are already good */}
                     <VStack flex={1} align="stretch">
                       <Text fontWeight="semibold" color="green.700" mb={3}>
-                        {t("optimizeChecklistModal.questionsAlreadyOptimized")}{" "}
-                        ({suggestions.filter((s) => !s.needs_revision).length})
+                        {t("optimizeChecklistModal.questionsAlreadyOptimized")} (
+                        {suggestions.filter((s) => !s.needs_revision).length})
                       </Text>
                       <Box pr={2}>
                         <VStack gap={4} align="stretch">
                           {suggestions
                             .map((suggestion, index) => ({ suggestion, index }))
-                            .filter(
-                              ({ suggestion }) => !suggestion.needs_revision,
-                            )
+                            .filter(({ suggestion }) => !suggestion.needs_revision)
                             .map(({ suggestion, index }) => (
                               <Box
                                 key={index}
@@ -780,29 +703,17 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                 bg="green.50"
                               >
                                 <VStack align="stretch" gap={3}>
-                                  <HStack
-                                    justifyContent="space-between"
-                                    align="flex-start"
-                                  >
+                                  <HStack justifyContent="space-between" align="flex-start">
                                     <Text fontWeight="medium" color="gray.700">
                                       Question {index + 1}
                                     </Text>
-                                    <Text
-                                      fontSize="sm"
-                                      color="green.600"
-                                      fontWeight="medium"
-                                    >
+                                    <Text fontSize="sm" color="green.600" fontWeight="medium">
                                       ✓ Optimized
                                     </Text>
                                   </HStack>
 
                                   <Box>
-                                    <Text
-                                      fontSize="sm"
-                                      fontWeight="medium"
-                                      color="gray.600"
-                                      mb={1}
-                                    >
+                                    <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
                                       Question:
                                     </Text>
                                     <Text
@@ -843,11 +754,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                           display: expandedAnswers.has(index)
                                             ? "block"
                                             : "-webkit-box",
-                                          WebkitLineClamp: expandedAnswers.has(
-                                            index,
-                                          )
-                                            ? "none"
-                                            : 2,
+                                          WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
                                           WebkitBoxOrient: "vertical" as const,
                                         }}
                                       >
@@ -864,10 +771,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                       color="green.600"
                                       mb={1}
                                     >
-                                      {t(
-                                        "optimizeChecklistModal.currentAnswer",
-                                      )}
-                                      :
+                                      {t("optimizeChecklistModal.currentAnswer")}:
                                     </Text>
                                     <Text
                                       fontSize="sm"
@@ -878,17 +782,11 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                       borderColor="orange.200"
                                       color="gray.700"
                                       style={{
-                                        overflow: expandedAnswers.has(index)
-                                          ? "visible"
-                                          : "hidden",
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
                                         display: expandedAnswers.has(index)
                                           ? "block"
                                           : "-webkit-box",
-                                        WebkitLineClamp: expandedAnswers.has(
-                                          index,
-                                        )
-                                          ? "none"
-                                          : 2,
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
                                         WebkitBoxOrient: "vertical" as const,
                                       }}
                                     >
@@ -897,29 +795,18 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                   </Box>
 
                                   <Box>
-                                    <HStack
-                                      justifyContent="space-between"
-                                      align="center"
-                                    >
-                                      <Text
-                                        fontSize="sm"
-                                        fontWeight="medium"
-                                        color="gray.600"
-                                      >
+                                    <HStack justifyContent="space-between" align="center">
+                                      <Text fontSize="sm" fontWeight="medium" color="gray.600">
                                         {t("optimizeChecklistModal.analysis")}:
                                       </Text>
                                       <Button
                                         size="xs"
                                         variant="ghost"
-                                        onClick={() =>
-                                          toggleAnswerExpansion(index)
-                                        }
+                                        onClick={() => toggleAnswerExpansion(index)}
                                       >
                                         {expandedAnswers.has(index)
                                           ? t("optimizeChecklistModal.showLess")
-                                          : t(
-                                              "optimizeChecklistModal.showMore",
-                                            )}
+                                          : t("optimizeChecklistModal.showMore")}
                                       </Button>
                                     </HStack>
                                     <Text
@@ -931,17 +818,11 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                                       border="1px solid"
                                       borderColor="gray.200"
                                       style={{
-                                        overflow: expandedAnswers.has(index)
-                                          ? "visible"
-                                          : "hidden",
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
                                         display: expandedAnswers.has(index)
                                           ? "block"
                                           : "-webkit-box",
-                                        WebkitLineClamp: expandedAnswers.has(
-                                          index,
-                                        )
-                                          ? "none"
-                                          : 3,
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 3,
                                         WebkitBoxOrient: "vertical" as const,
                                       }}
                                     >
@@ -958,22 +839,13 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
 
                   {/* Apply Optimizations Section */}
                   {acceptedSuggestions.size > 0 && (
-                    <Box
-                      mt={4}
-                      pt={4}
-                      borderTop="1px"
-                      borderColor="gray.200"
-                      flexShrink={0}
-                    >
+                    <Box mt={4} pt={4} borderTop="1px" borderColor="gray.200" flexShrink={0}>
                       <HStack justifyContent="space-between" align="center">
                         <Text fontSize="sm" color="gray.600">
                           {acceptedSuggestions.size}{" "}
-                          {t(
-                            "optimizeChecklistModal.optimizationsSelectedText",
-                            {
-                              count: acceptedSuggestions.size,
-                            },
-                          )}
+                          {t("optimizeChecklistModal.optimizationsSelectedText", {
+                            count: acceptedSuggestions.size,
+                          })}
                         </Text>
                         <Button
                           onClick={handleApplyOptimizations}
@@ -983,9 +855,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                         >
                           {isApplying
                             ? t("optimizeChecklistModal.applying")
-                            : t(
-                                "optimizeChecklistModal.applySelectedOptimizations",
-                              )}
+                            : t("optimizeChecklistModal.applySelectedOptimizations")}
                         </Button>
                       </HStack>
                     </Box>

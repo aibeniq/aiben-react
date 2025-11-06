@@ -152,6 +152,8 @@ async def extract_fields_from_digitized_document(
     llm=None,
     search_mode: str = "full_scan",
     current_user=None,
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Extract fields from a document using the LLM.
@@ -162,11 +164,25 @@ async def extract_fields_from_digitized_document(
 
     if search_mode == "vector":
         # TRUE VECTOR SEARCH IMPLEMENTATION
-        return await extract_fields_using_vector_search(file, content, template, llm)
+        return await extract_fields_using_vector_search(
+            file,
+            content,
+            template,
+            llm,
+            current_user,
+            vision_analysis_override,
+            pdf_parsing_override,
+        )
     else:
         # FULL TEXT MODE (existing implementation)
         return await extract_fields_using_full_text(
-            content, file.filename, template, llm, current_user
+            content,
+            file.filename,
+            template,
+            llm,
+            current_user,
+            vision_analysis_override,
+            pdf_parsing_override,
         )
 
 
@@ -176,6 +192,8 @@ async def extract_fields_using_vector_search(
     template: Dict[str, str],
     llm=None,
     current_user=None,
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Extract fields using vector search to find relevant document sections.
@@ -211,6 +229,22 @@ async def extract_fields_using_vector_search(
             f"Using embedding model: {embedding_info['model_id']} ({embedding_info['provider']})"
         )
 
+        # Create temporary user if vision override is provided
+        effective_user = current_user
+        if vision_analysis_override is not None:
+
+            class TempUser:
+                def __init__(self, vision_enabled, user_id=None):
+                    self.vision_analysis_enabled = vision_enabled
+                    self.id = user_id
+
+            effective_user = TempUser(
+                vision_analysis_override, current_user.id if current_user else None
+            )
+            print(
+                f"Using vision override: {vision_analysis_override} (PDF parsing: {pdf_parsing_override})"
+            )
+
         # Extract text and images from the document using enhanced unified processing
         from app.services.document_utils import (
             extract_text_from_file_unified,
@@ -219,14 +253,16 @@ async def extract_fields_using_vector_search(
         )
         from app.services.vision_service import VisionService
 
-        # First try regular text extraction
+        # First try regular text extraction with PDF parsing override
+        # Note: extract_text_from_file_unified doesn't support pdf_parsing_override directly
+        # It uses the user's settings from effective_user
         text = extract_text_from_file_unified(
-            content, file.filename or "unknown", current_user=current_user
+            content, file.filename or "unknown", current_user=effective_user
         )
 
         # Also extract images for vision-enhanced processing (for PDFs)
         document_images = []
-        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+        vision_enabled = VisionService.is_vision_enabled(llm, effective_user)
         file_ext = Path(file.filename or "").suffix.lower()
 
         if vision_enabled and file_ext == ".pdf":
@@ -235,7 +271,9 @@ async def extract_fields_using_vector_search(
                     f"🖼️ Extracting images from PDF for enhanced vector search: {file.filename}"
                 )
                 _, document_images = extract_documents_and_images_from_file_unified(
-                    content, file.filename or "unknown"
+                    content,
+                    file.filename or "unknown",
+                    pdf_parsing_mode=pdf_parsing_override,
                 )
                 if document_images:
                     print(
@@ -251,11 +289,13 @@ async def extract_fields_using_vector_search(
         if not text.strip():
             print("No text found, checking for images...")
             documents, images = extract_documents_and_images_from_file_unified(
-                content, file.filename or "unknown"
+                content,
+                file.filename or "unknown",
+                pdf_parsing_mode=pdf_parsing_override,
             )
 
             # Check if we have vision capabilities for image-only processing
-            if images and VisionService.is_vision_enabled(llm, current_user):
+            if images and VisionService.is_vision_enabled(llm, effective_user):
                 print(f"Found {len(images)} images, using vision extraction")
                 # Use VisionService for image-only extraction
                 try:
@@ -538,12 +578,24 @@ Extracted value:"""
     except Exception as e:
         print(f"❌ Vector search failed: {str(e)}. Falling back to full text mode.")
         return await extract_fields_using_full_text(
-            content, file.filename, template, llm, current_user
+            content,
+            filename,
+            template,
+            llm,
+            current_user,
+            vision_analysis_override,
+            pdf_parsing_override,
         )
 
 
 async def extract_fields_using_full_text(
-    content: bytes, filename: str, template: Dict[str, str], llm=None, current_user=None
+    content: bytes,
+    filename: str,
+    template: Dict[str, str],
+    llm=None,
+    current_user=None,
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Extract fields using full text processing with enhanced visual processing.
@@ -557,8 +609,24 @@ async def extract_fields_using_full_text(
     # Import vision service for image processing
     from app.services.vision_service import VisionService
 
+    # Create temporary user if vision override is provided
+    effective_user = current_user
+    if vision_analysis_override is not None:
+
+        class TempUser:
+            def __init__(self, vision_enabled, user_id=None):
+                self.vision_analysis_enabled = vision_enabled
+                self.id = user_id
+
+        effective_user = TempUser(
+            vision_analysis_override, current_user.id if current_user else None
+        )
+        print(
+            f"Using vision override: {vision_analysis_override} (PDF parsing: {pdf_parsing_override})"
+        )
+
     # Check if vision is enabled for this LLM
-    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+    vision_enabled = VisionService.is_vision_enabled(llm, effective_user)
     print(f"🔍 Vision processing enabled: {vision_enabled}")
 
     try:
@@ -569,7 +637,7 @@ async def extract_fields_using_full_text(
         )
 
         text = extract_text_from_file_unified(
-            content, filename, current_user=current_user
+            content, filename, current_user=effective_user
         )
         document_images = []
 
@@ -578,7 +646,7 @@ async def extract_fields_using_full_text(
             try:
                 print(f"🖼️ Extracting images from PDF: {filename}")
                 _, document_images = extract_documents_and_images_from_file_unified(
-                    content, filename
+                    content, filename, pdf_parsing_mode=pdf_parsing_override
                 )
                 if document_images:
                     print(f"✅ Extracted {len(document_images)} images from {filename}")
@@ -1244,6 +1312,8 @@ async def process_form(
     fields: str = Form(...),
     search_mode: Literal["vector", "full_scan"] = Form("vector"),
     form_name: Optional[str] = Form(None),
+    vision_analysis_override: Optional[bool] = Form(None),
+    pdf_parsing_override: Optional[str] = Form(None),
     digitized_files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
     request: FastAPIRequest = None,
@@ -1255,10 +1325,15 @@ async def process_form(
 
     Args:
         task_id: Optional task ID for progress tracking
+        search_mode: "vector" or "full_scan" - controls retrieval strategy
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     print("process_form function invoked!")
     print(f"Received search_mode: {search_mode}")
     print(f"Received task_id: {task_id}")
+    print(f"Received vision_analysis_override: {vision_analysis_override}")
+    print(f"Received pdf_parsing_override: {pdf_parsing_override}")
     print(f"Request data: fields={fields[:50]}...")
 
     # Get the default LLM
@@ -1366,12 +1441,24 @@ async def process_form(
             if search_mode == "vector":
                 # Use vector search with visual enhancement
                 extracted = await extract_fields_using_vector_search(
-                    file, file_content, template, llm, current_user
+                    file,
+                    file_content,
+                    template,
+                    llm,
+                    current_user,
+                    vision_analysis_override,
+                    pdf_parsing_override,
                 )
             else:
                 # Use full text processing with visual enhancement
                 extracted = await extract_fields_using_full_text(
-                    file_content, filename, template, llm, current_user
+                    file_content,
+                    filename,
+                    template,
+                    llm,
+                    current_user,
+                    vision_analysis_override,
+                    pdf_parsing_override,
                 )
 
             # CRITICAL: Check if client disconnected after field extraction
@@ -1993,12 +2080,21 @@ async def generate_form_fields_with_files(
     description: str = Form(...),
     num_fields: int = Form(15),
     search_mode: Literal["vector", "full_scan"] = Form("vector"),
+    vision_analysis_override: Optional[bool] = Form(None),
+    pdf_parsing_override: Optional[str] = Form(None),
     files: List[UploadFile] = File(...),
 ):
     """
     Generate form fields based on a description and uploaded reference documents.
+
+    Args:
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     try:
+        print(f"Received vision_analysis_override: {vision_analysis_override}")
+        print(f"Received pdf_parsing_override: {pdf_parsing_override}")
+
         if not files or len(files) == 0:
             raise HTTPException(
                 status_code=400, detail="At least one reference file must be uploaded."
@@ -2033,6 +2129,8 @@ async def generate_form_fields_with_files(
                     llm,
                     purpose="form field generation",
                     current_user=current_user,
+                    vision_analysis_override=vision_analysis_override,
+                    pdf_parsing_override=pdf_parsing_override,
                 )
 
                 if text.strip():

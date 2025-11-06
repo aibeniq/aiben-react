@@ -1,6 +1,8 @@
 import { ChatService } from "@/client"
 import ChatbotPanel from "@/components/Chatbot/ChatbotPanel"
 import FloatingChatButton from "@/components/Chatbot/FloatingChatButton"
+import type { ProcessingSettings } from "@/components/Common/ProcessingSettingsPopup"
+import useAuth from "@/hooks/useAuth"
 import { Drawer } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -18,6 +20,7 @@ interface ChatMessage {
 
 const ChatbotMain = () => {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedKbId, setSelectedKbId] = useState<string | null>(null)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
@@ -29,7 +32,13 @@ const ChatbotMain = () => {
   const [currentKbId, setCurrentKbId] = useState<string | null>(null)
   const [currentFileNames, setCurrentFileNames] = useState<string[]>([])
   const [sessionId, setSessionId] = useState<string>("")
-  const [searchMode, setSearchMode] = useState<"vector" | "full_text">("vector")
+
+  // Processing settings state - initialized from user defaults
+  const [processingSettings, setProcessingSettings] = useState<ProcessingSettings>({
+    searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+    visionAnalysis: user?.vision_analysis_enabled || false,
+    pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+  })
 
   const clearChat = () => {
     setMessages([])
@@ -100,10 +109,7 @@ const ChatbotMain = () => {
     // Check if sources have source_data_id
     if (response.sources && response.sources.length > 0) {
       console.log("First source metadata:", response.sources[0].metadata)
-      console.log(
-        "Source has ID:",
-        !!response.sources[0].metadata?.source_data_id,
-      )
+      console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id)
     }
 
     // You can show the rephrased question if you want
@@ -122,8 +128,7 @@ const ChatbotMain = () => {
       ...prev,
       {
         role: "assistant",
-        content:
-          response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
+        content: response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
         sources: response.sources,
         rephrasedQuestion: response.rephrased_question,
         sessionId: response.session_id,
@@ -166,8 +171,7 @@ const ChatbotMain = () => {
       const isFollowUp =
         sessionId &&
         ((selectedKbId && selectedKbId === currentKbId) ||
-          (uploadedFiles.length > 0 &&
-            currentFileNames.sort().join(",") === currentFileNamesStr))
+          (uploadedFiles.length > 0 && currentFileNames.sort().join(",") === currentFileNamesStr))
       console.log("Formatted chat history:", formattedChatHistory)
       console.log("Is follow-up:", isFollowUp)
 
@@ -198,7 +202,9 @@ const ChatbotMain = () => {
           useDefaultModels: true,
           sessionId: sessionId, // Make sure this is being sent correctly
           isFollowUp: !!(isFollowUp && sessionId), // Only true if we have a session ID
-          searchMode: searchMode, // Pass the search mode
+          searchMode: processingSettings.searchMode === "full_scan" ? "full_text" : "vector", // Map full_scan to full_text for chatbot
+          visionAnalysisOverride: processingSettings.visionAnalysis,
+          pdfParsingOverride: processingSettings.pdfParsing,
         })
 
         console.log("Response:", response)
@@ -217,18 +223,16 @@ const ChatbotMain = () => {
         }
 
         // Check for large files and adjust timeout
-        const hasVeryLargeFile = uploadedFiles.some(
-          (file) => file.size > 50 * 1024 * 1024,
-        ) // > 50MB
+        const hasVeryLargeFile = uploadedFiles.some((file) => file.size > 50 * 1024 * 1024) // > 50MB
 
-        if (hasVeryLargeFile && searchMode === "vector") {
+        if (hasVeryLargeFile && processingSettings.searchMode === "vector") {
           console.log("Large file detected, recommending full text mode")
           setMessages((prev) => [
             ...prev,
             {
               role: "assistant",
               content:
-                "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Text Scan' mode using the toggle above.",
+                "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Document Scan' mode using the gear icon above.",
             },
           ])
         }
@@ -236,7 +240,7 @@ const ChatbotMain = () => {
         const formData = new FormData()
         // For full-text mode, always send the files since they're needed for each query
         // For vector mode, only send the files if this is NOT a follow-up question
-        if (searchMode === "full_text" || !isFollowUp) {
+        if (processingSettings.searchMode === "full_scan" || !isFollowUp) {
           uploadedFiles.forEach((file) => {
             formData.append("files", file)
           })
@@ -249,10 +253,12 @@ const ChatbotMain = () => {
           sessionId: sessionId,
           isFollowUp: isFollowUp === true,
           formData:
-            searchMode === "full_text" || !isFollowUp
+            processingSettings.searchMode === "full_scan" || !isFollowUp
               ? { files: uploadedFiles }
               : undefined,
-          searchMode: searchMode, // Pass the search mode
+          searchMode: processingSettings.searchMode === "full_scan" ? "full_text" : "vector", // Map full_scan to full_text for chatbot
+          visionAnalysisOverride: processingSettings.visionAnalysis,
+          pdfParsingOverride: processingSettings.pdfParsing,
         })
 
         console.log("Response:", response)
@@ -273,13 +279,8 @@ const ChatbotMain = () => {
           errorObj.response?.data?.detail?.includes("session expired")
         ) {
           errorMessage = "Session expired. Please upload your documents again."
-        } else if (
-          errorObj.code === "ERR_NETWORK" ||
-          errorObj.message?.includes("timeout")
-        ) {
-          const hasLargeFiles = uploadedFiles.some(
-            (file) => file.size > 10 * 1024 * 1024,
-          )
+        } else if (errorObj.code === "ERR_NETWORK" || errorObj.message?.includes("timeout")) {
+          const hasLargeFiles = uploadedFiles.some((file) => file.size > 10 * 1024 * 1024)
           if (hasLargeFiles) {
             errorMessage = t("chatbot.errors.largeFileTimeout")
           } else {
@@ -295,10 +296,7 @@ const ChatbotMain = () => {
         }
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: errorMessage },
-      ])
+      setMessages((prev) => [...prev, { role: "assistant", content: errorMessage }])
     } finally {
       setIsLoading(false)
     }
@@ -310,9 +308,7 @@ const ChatbotMain = () => {
 
     if (isOpen) {
       // Ensure drawer content is properly visible
-      const drawerContent = document.querySelector(
-        '[data-scope="drawer"][data-part="content"]',
-      )
+      const drawerContent = document.querySelector('[data-scope="drawer"][data-part="content"]')
       if (drawerContent) {
         const contentEl = drawerContent as HTMLElement
         contentEl.style.opacity = "1"
@@ -393,8 +389,8 @@ const ChatbotMain = () => {
                 setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
                 clearChat={clearChat}
                 handleSendMessage={handleSendMessage}
-                searchMode={searchMode}
-                setSearchMode={setSearchMode}
+                processingSettings={processingSettings}
+                setProcessingSettings={setProcessingSettings}
               />
             </Drawer.Content>
           </Drawer.Positioner>

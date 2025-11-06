@@ -471,7 +471,10 @@
     "modals": {
       "add": {
         "title": "Добавить базу знаний",
-        "description": "Создайте новую базу знаний, предоставив детали и загрузив документы ниже."
+        "description": "Создайте новую базу знаний, предоставив детали и загрузив документы ниже.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Редактировать базу знаний",

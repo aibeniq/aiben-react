@@ -485,7 +485,10 @@
       },
       "add": {
         "title": "ज्ञान आधार जोड़ें",
-        "description": "नीचे विवरण प्रदान करके और दस्तावेज़ अपलोड करके एक नया ज्ञान आधार बनाएं।"
+        "description": "नीचे विवरण प्रदान करके और दस्तावेज़ अपलोड करके एक नया ज्ञान आधार बनाएं।",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "ज्ञान आधार संपादित करें",

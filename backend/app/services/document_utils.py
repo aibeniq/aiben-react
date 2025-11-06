@@ -6,7 +6,7 @@ Centralizes all document text extraction logic for consistent handling across th
 import tempfile
 import os
 from pathlib import Path
-from typing import List, Union, Any, Tuple
+from typing import List, Union, Any, Tuple, Optional
 from langchain_core.documents import Document
 from langchain_community.document_loaders import TextLoader
 
@@ -572,7 +572,7 @@ async def extract_documents_from_file_unified(
 
 
 async def extract_documents_and_images_from_file_unified(
-    file_content: bytes, filename: str, current_user=None
+    file_content: bytes, filename: str, pdf_parsing_mode: str = None, current_user=None
 ) -> Tuple[List[Document], List[str]]:
     """
     Enhanced unified extraction that returns both text documents and images.
@@ -580,6 +580,7 @@ async def extract_documents_and_images_from_file_unified(
     Args:
         file_content: Raw bytes of the file
         filename: Name of the file
+        pdf_parsing_mode: PDF parsing mode ('auto', 'enhanced', 'basic') - overrides user default
         current_user: Current user object (optional) for PDF parsing preference
 
     Returns:
@@ -592,7 +593,10 @@ async def extract_documents_and_images_from_file_unified(
 
     # Get existing text extraction (await since it's async)
     documents = await extract_documents_from_file_unified(
-        file_content, filename, current_user=current_user
+        file_content,
+        filename,
+        pdf_parsing_mode=pdf_parsing_mode,
+        current_user=current_user,
     )
 
     # Extract images based on file type
@@ -785,6 +789,8 @@ async def extract_text_with_vision_enhancement(
     llm,
     purpose: str = "analysis",
     current_user=None,
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
 ) -> str:
     """
     Enhanced document processing that combines text extraction with visual processing.
@@ -796,6 +802,8 @@ async def extract_text_with_vision_enhancement(
         llm: Language model instance
         purpose: Purpose of extraction (e.g., "checklist generation", "outline creation")
         current_user: Current user object for vision analysis permission check
+        vision_analysis_override: Optional override for vision analysis setting
+        pdf_parsing_override: Optional override for PDF parsing mode ("enhanced" or "basic")
 
     Returns:
         Combined text content from both text extraction and vision analysis
@@ -807,10 +815,37 @@ async def extract_text_with_vision_enhancement(
 
     # Always try text extraction first
     print(f"📄 Extracting text from {filename} for {purpose}")
-    text_content = extract_text_from_file_unified(file_content, filename)
+
+    # Pass PDF parsing override to text extraction if provided
+    if pdf_parsing_override:
+        print(f"Using PDF parsing override: {pdf_parsing_override}")
+        text_content = extract_text_from_file_unified(
+            file_content, filename, current_user, pdf_parsing_override
+        )
+    else:
+        text_content = extract_text_from_file_unified(file_content, filename)
 
     # Check if vision processing should be attempted
-    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+    # Use override if provided, otherwise check user settings
+    if vision_analysis_override is not None:
+        # Create temporary user-like object with override setting
+        class TempUser:
+            def __init__(self, vision_enabled, user_id=None):
+                self.vision_analysis_enabled = vision_enabled
+                self.id = user_id
+
+        temp_user = TempUser(
+            vision_analysis_override, current_user.id if current_user else None
+        )
+        vision_enabled = VisionService.is_vision_enabled(llm, temp_user)
+        print(
+            f"Vision analysis: Using override = {vision_analysis_override} (final: {vision_enabled})"
+        )
+    else:
+        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+        print(
+            f"Vision analysis: Using user default = {current_user.vision_analysis_enabled if current_user else 'N/A'} (final: {vision_enabled})"
+        )
 
     if not vision_enabled:
         print(f"ℹ️ Vision not enabled, using text-only extraction for {filename}")

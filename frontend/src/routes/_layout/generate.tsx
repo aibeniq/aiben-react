@@ -1,9 +1,12 @@
 import { type KnowledgeBasePublic, type ReportGenieOutline, ReportgenieService } from "@/client"
-import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import ProcessingSettingsPopup, {
+  type ProcessingSettings,
+} from "@/components/Common/ProcessingSettingsPopup"
 import SourceLink from "@/components/Common/SourceLink"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
+import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
@@ -38,6 +41,7 @@ import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 const ReportGenie = () => {
   const { t, i18n } = useTranslation()
+  const { user } = useAuth()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
     generateResult,
@@ -78,10 +82,12 @@ const ReportGenie = () => {
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
-  // Search mode state
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
-    generateInputs?.searchMode || "vector",
-  )
+  // Processing settings state - initialized from user defaults
+  const [processingSettings, setProcessingSettings] = useState<ProcessingSettings>({
+    searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+    visionAnalysis: user?.vision_analysis_enabled || false,
+    pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+  })
 
   // Custom instructions state
   const [customInstructions, setCustomInstructions] = useState(
@@ -154,14 +160,14 @@ const ReportGenie = () => {
       selectedOutline,
       sections,
       customInstructions,
-      searchMode,
+      searchMode: processingSettings.searchMode,
     })
   }, [
     selectedKnowledgeBase,
     selectedOutline,
     sections,
     customInstructions,
-    searchMode,
+    processingSettings.searchMode,
     setGenerateInputs,
   ])
 
@@ -173,7 +179,11 @@ const ReportGenie = () => {
     setSelectedOutline(null)
     setSections("")
     setCustomInstructions("")
-    setSearchMode("vector")
+    setProcessingSettings({
+      searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+      visionAnalysis: user?.vision_analysis_enabled || false,
+      pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+    })
   }
 
   // Debug effect to log context state
@@ -466,8 +476,10 @@ const ReportGenie = () => {
       sections: sections,
       knowledgeBaseId: selectedKnowledgeBase.id,
       outlineId: selectedOutline?.id,
-      searchMode: searchMode, // Pass the selected search mode to the backend
+      searchMode: processingSettings.searchMode, // Pass the selected search mode to the backend
       customInstructions: customInstructions.trim() || undefined,
+      visionAnalysisOverride: processingSettings.visionAnalysis,
+      pdfParsingOverride: processingSettings.pdfParsing,
     }
 
     setLoading(true)
@@ -569,11 +581,20 @@ const ReportGenie = () => {
               helpKey="documentOutline"
             />
 
-            <SearchModeToggle
-              searchMode={searchMode}
-              onSearchModeChange={setSearchMode}
-              helpKey="searchMode"
-            />
+            {/* Processing Settings */}
+            <Box width="100%">
+              <HStack align="center">
+                <Text fontSize="sm" fontWeight="medium">
+                  {t("processingSettings.title")}
+                </Text>
+                <ProcessingSettingsPopup
+                  settings={processingSettings}
+                  onSettingsChange={setProcessingSettings}
+                  disabled={loading}
+                />
+                <HelpTooltip helpKey="searchMode" />
+              </HStack>
+            </Box>
 
             {/* Custom Instructions Text Box */}
             <Box width="100%">

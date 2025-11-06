@@ -583,7 +583,10 @@
       },
       "add": {
         "title": "إضافة قاعدة معرفة",
-        "description": "أنشئ قاعدة معرفة جديدة بتقديم التفاصيل ورفع المستندات أدناه."
+        "description": "أنشئ قاعدة معرفة جديدة بتقديم التفاصيل ورفع المستندات أدناه.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "تحرير قاعدة المعرفة",

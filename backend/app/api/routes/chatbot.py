@@ -134,6 +134,8 @@ async def _handle_full_text_kb_query(
     use_default_models: bool = False,
     session_id: str = None,
     is_follow_up: bool = False,
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
 ):
     """Handle full text scan for knowledge base query."""
     from app.services.text_processing import chunk_text
@@ -149,7 +151,9 @@ async def _handle_full_text_kb_query(
     # Check if LLM supports vision
     from app.services.vision_service import VisionService
 
-    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+    vision_enabled = VisionService.is_vision_enabled(
+        llm, current_user, vision_analysis_override
+    )
 
     # Rephrase the question using chat history if available
     if chat_history:
@@ -191,7 +195,7 @@ async def _handle_full_text_kb_query(
         # Extract text from the source
         try:
             # The source_data.data contains the file as a ZIP, we need to extract it first
-            from app.api.routes.veradoc import extract_text_from_file
+            from app.api.routes.veradoc import extract_text_from_file_async
 
             # Debug: Check the first few bytes of the data
             data_header = source_data.data[:20] if source_data.data else b""
@@ -202,7 +206,7 @@ async def _handle_full_text_kb_query(
                 print(
                     f"WARNING: {source.name} does not appear to be a ZIP file, trying direct extraction"
                 )
-                file_content = extract_text_from_file(
+                file_content = await extract_text_from_file_async(
                     source_data.data, source.name, current_user=current_user
                 )
             else:
@@ -222,7 +226,7 @@ async def _handle_full_text_kb_query(
                     print(f"Extracted file header: {extracted_header}")
 
                     # Now extract text from the raw file content
-                    file_content = extract_text_from_file(
+                    file_content = await extract_text_from_file_async(
                         raw_file_content, source.name, current_user=current_user
                     )
 
@@ -234,7 +238,7 @@ async def _handle_full_text_kb_query(
             # Try direct extraction as fallback
             try:
                 print(f"Attempting direct text extraction for {source.name}")
-                file_content = extract_text_from_file(
+                file_content = await extract_text_from_file_async(
                     source_data.data, source.name, current_user=current_user
                 )
             except Exception as fallback_e:
@@ -375,10 +379,16 @@ async def _handle_full_text_kb_query(
         f"Full text synthesis - Text analysis insufficient: {text_analysis_insufficient}"
     )
 
-    # Only perform vision analysis if (text analysis was insufficient OR no relevant chunks found) AND vision is available AND we have processed sources
+    # Perform vision analysis if:
+    # 1. Vision analysis is explicitly enabled (override=True), OR
+    # 2. Text analysis was insufficient OR no relevant chunks found, AND vision is available
+    # AND we have processed sources
     vision_analysis_performed = False
     should_attempt_vision = (
-        (text_analysis_insufficient or not all_chunk_analyses)
+        (
+            vision_analysis_override is True
+            or (text_analysis_insufficient or not all_chunk_analyses)
+        )
         and vision_enabled
         and processed_sources
     )
@@ -485,6 +495,8 @@ async def _handle_full_text_kb_query(
                         {
                             "question": rephrased_question,
                             "chunk_analyses": enhanced_chunk_analyses,
+                            "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                            "language_instruction": language_instruction,
                         },
                     )
                 else:
@@ -556,6 +568,8 @@ async def _handle_full_text_document_query(
     use_default_models: bool = False,
     session_id: str = None,
     is_follow_up: bool = False,
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
 ):
     """Handle full text scan for document query with multiple files."""
     from app.services.text_processing import chunk_text, chunk_documents_with_metadata
@@ -566,7 +580,9 @@ async def _handle_full_text_document_query(
     # Check if LLM supports vision
     from app.services.vision_service import VisionService
 
-    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+    vision_enabled = VisionService.is_vision_enabled(
+        llm, current_user, vision_analysis_override
+    )
 
     # Rephrase the question using chat history if available
     if chat_history:
@@ -723,8 +739,16 @@ async def _handle_full_text_document_query(
                     "No relevant chunks found - will attempt vision analysis if available"
                 )
 
-            # Perform vision analysis if text analysis was insufficient OR no chunks were found
-            if text_analysis_insufficient and vision_enabled and file_images:
+            # Perform vision analysis if:
+            # 1. Vision analysis is explicitly enabled (override=True), OR
+            # 2. Text analysis is insufficient OR no chunks were found, AND vision is generally enabled
+            # AND we have images
+            should_perform_vision = (
+                vision_analysis_override is True
+                or (text_analysis_insufficient and vision_enabled)
+            ) and file_images
+
+            if should_perform_vision:
                 print(
                     f"Text analysis insufficient or no chunks found, performing vision analysis for {file.filename}"
                 )
@@ -742,6 +766,16 @@ async def _handle_full_text_document_query(
                     )
 
                 try:
+                    # Get user language and create language instruction
+                    user_language = (
+                        getattr(current_user, "preferred_language", None) or "en"
+                    )
+                    language_name = settings.SUPPORTED_LANGUAGES.get(
+                        user_language, "English"
+                    )
+                    language_instruction = f"Respond in this language: {language_name}."
+                    print(f"DEBUG: language_instruction = {language_instruction}")
+
                     vision_analysis = await VisionService.process_images_with_prompt(
                         llm=llm,
                         images=image_data_list,
@@ -752,6 +786,7 @@ async def _handle_full_text_document_query(
                             "image_count": len(image_data_list),
                             "source_files": file.filename,
                             "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                            "language_instruction": language_instruction,
                         },
                     )
 
@@ -949,12 +984,23 @@ async def query_knowledge_base(
     session_id: str = None,
     is_follow_up: bool = False,
     search_mode: str = "vector",  # Add search mode parameter
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
 ):
-    """Query a knowledge base with a question using either vector search or full text scan."""
+    """
+    Query a knowledge base with a question using either vector search or full text scan.
+
+    Args:
+        search_mode: "vector" or "full_text" - controls retrieval strategy
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
+    """
     try:
         print(
             f"Received request - session_id: {session_id}, is_follow_up: {is_follow_up}, search_mode: {search_mode}"
         )
+        print(f"Received vision_analysis_override: {vision_analysis_override}")
+        print(f"Received pdf_parsing_override: {pdf_parsing_override}")
 
         # Generate a session ID if not provided
         if not session_id:
@@ -978,6 +1024,8 @@ async def query_knowledge_base(
                 use_default_models,
                 session_id,
                 is_follow_up,
+                vision_analysis_override,
+                pdf_parsing_override,
             )
 
         # Continue with existing vector search implementation
@@ -1080,18 +1128,8 @@ async def query_knowledge_base(
 
                         # Get KB and LLM model
                         kb = session.get(KnowledgeBase, kb_id)
-                        if use_default_models:
-                            llm = get_default_llm(session, current_user)
-                        else:
-                            llm_model = session.get(LlmModel, kb.llm_model_id)
-                            if llm_model:
-                                llm = create_llm(
-                                    llm_model.provider,
-                                    llm_model.model_id,
-                                    temperature=0.0,
-                                )
-                            else:
-                                llm = get_default_llm(session, current_user)
+                        # Always use default LLM (llm_model_id no longer exists on KnowledgeBase)
+                        llm = get_default_llm(session, current_user)
                         print("Successfully rebuilt LLM")
 
                     # Update session cache with rebuilt objects
@@ -1195,17 +1233,9 @@ async def query_knowledge_base(
             )
 
             # 4. Get the LLM
-            if use_default_models:
-                llm = get_default_llm(session, current_user)
-                print("Default LLM model retrieved")
-            else:
-                llm_model = session.get(LlmModel, kb.llm_model_id)
-                if llm_model:
-                    llm = create_llm(
-                        llm_model.provider, llm_model.model_id, temperature=0.0
-                    )
-                else:
-                    llm = get_default_llm(session, current_user)
+            # Always use default LLM (llm_model_id no longer exists on KnowledgeBase)
+            llm = get_default_llm(session, current_user)
+            print("Default LLM model retrieved")
 
             # Cache the resources
             session_manager.set_session(
@@ -1333,7 +1363,9 @@ async def query_knowledge_base(
         # Check if LLM supports vision for potential vision analysis
         from app.services.vision_service import VisionService
 
-        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+        vision_enabled = VisionService.is_vision_enabled(
+            llm, current_user, vision_analysis_override
+        )
 
         # 7. Generate the answer - with potential vision analysis
         try:
@@ -1364,123 +1396,146 @@ async def query_knowledge_base(
 
             print(f"Text answer insufficient: {text_answer_insufficient}")
 
-            # Only perform vision analysis if text answer was insufficient AND vision is available AND we have relevant sources
+            # Perform vision analysis if:
+            # 1. Vision analysis is explicitly enabled (override=True), OR
+            # 2. Text answer is insufficient AND vision is generally enabled
+            should_perform_vision = vision_analysis_override is True or (
+                text_answer_insufficient and vision_enabled
+            )
+
             vision_analysis_performed = False
-            if text_answer_insufficient and vision_enabled and relevant_sources:
-                print(
-                    f"Text analysis insufficient, attempting vision analysis from {len(relevant_sources)} source files"
-                )
+            if should_perform_vision:
+                # Get all sources for this knowledge base for vision analysis
+                all_kb_sources = session.exec(
+                    select(SourceORM).where(SourceORM.knowledge_base_id == kb_id)
+                ).all()
 
-                # Extract images from relevant source files
-                all_images = []
-                for source_id, filename in relevant_sources.items():
-                    try:
-                        source_data = session.get(SourceData, source_id)
-                        if source_data and source_data.data:
-                            # Extract the raw file content from the ZIP first
-                            try:
-                                zip_data = BytesIO(source_data.data)
-                                with zipfile.ZipFile(zip_data, "r") as zip_file:
-                                    # Get the first file in the archive (there should only be one)
-                                    file_info = zip_file.infolist()[0]
-                                    raw_file_content = zip_file.read(file_info.filename)
+                if all_kb_sources:
+                    print(
+                        f"Text analysis insufficient, attempting vision analysis from {len(all_kb_sources)} source files in knowledge base"
+                    )
+
+                    # Extract images from ALL source files in the knowledge base
+                    all_images = []
+                    for source in all_kb_sources:
+                        try:
+                            source_data = session.get(SourceData, source.source_data_id)
+                            if source_data and source_data.data:
+                                # Extract the raw file content from the ZIP first
+                                try:
+                                    zip_data = BytesIO(source_data.data)
+                                    with zipfile.ZipFile(zip_data, "r") as zip_file:
+                                        # Get the first file in the archive (there should only be one)
+                                        file_info = zip_file.infolist()[0]
+                                        raw_file_content = zip_file.read(
+                                            file_info.filename
+                                        )
+                                        print(
+                                            f"Extracted {len(raw_file_content)} bytes from ZIP for source {source.id} ({source.name})"
+                                        )
+                                except zipfile.BadZipFile:
+                                    # If it's not a ZIP file, use the data directly
                                     print(
-                                        f"Extracted {len(raw_file_content)} bytes from ZIP for source {source_id}"
+                                        f"Source {source.id} is not a ZIP file, using data directly"
                                     )
-                            except zipfile.BadZipFile:
-                                # If it's not a ZIP file, use the data directly
+                                    raw_file_content = source_data.data
+
+                                # Extract images from the raw file content using the actual filename
+                                from app.services.document_utils import (
+                                    extract_documents_and_images_from_file_unified,
+                                )
+
+                                _, images = (
+                                    await extract_documents_and_images_from_file_unified(
+                                        raw_file_content,
+                                        source.name,  # Use actual filename with extension
+                                        current_user=current_user,
+                                    )
+                                )
+                                all_images.extend(images)
                                 print(
-                                    f"Source {source_id} is not a ZIP file, using data directly"
+                                    f"Extracted {len(images)} images from source {source.id} ({source.name})"
                                 )
-                                raw_file_content = source_data.data
-
-                            # Extract images from the raw file content using the actual filename
-                            from app.services.document_utils import (
-                                extract_documents_and_images_from_file_unified,
-                            )
-
-                            _, images = (
-                                await extract_documents_and_images_from_file_unified(
-                                    raw_file_content,
-                                    filename,  # Use actual filename with extension
-                                    current_user=current_user,
-                                )
-                            )
-                            all_images.extend(images)
+                        except Exception as e:
                             print(
-                                f"Extracted {len(images)} images from source {source_id} ({filename})"
+                                f"Error extracting images from source {source.id}: {e}"
                             )
-                    except Exception as e:
-                        print(f"Error extracting images from source {source_id}: {e}")
-                        continue
+                            continue
 
-                if all_images:
-                    print(f"Total images extracted: {len(all_images)}")
-                    try:
-                        # Convert base64 images to the format expected by VisionService
-                        vision_images = []
-                        for img_b64 in all_images:
-                            vision_images.append(
+                    if all_images:
+                        print(f"Total images extracted: {len(all_images)}")
+                        try:
+                            # Convert base64 images to the format expected by VisionService
+                            vision_images = []
+                            for img_b64 in all_images:
+                                vision_images.append(
+                                    {
+                                        "image_data": img_b64,
+                                        "metadata": {
+                                            "source": "knowledge_base_sources"
+                                        },
+                                    }
+                                )
+
+                            vision_result = VisionService.safe_vision_analysis(
+                                llm=llm,
+                                prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
+                                variables={
+                                    "image_count": len(all_images),
+                                    "source_files": "knowledge_base_sources",
+                                    "question": rephrased_question,
+                                    "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                                    "language_instruction": language_instruction,
+                                },
+                                images=vision_images,
+                            )
+
+                            print("Vision analysis result:", vision_result[:200])
+
+                            # Use combined analysis for knowledge base with vision content
+                            final_context = (
+                                VisionService.combine_text_and_vision_analysis(
+                                    text_analysis=context,
+                                    vision_analysis=vision_result,
+                                    combination_strategy="comprehensive",
+                                )
+                            )
+                            context = final_context
+                            vision_analysis_performed = True
+                            print(
+                                f"Enhanced context with vision analysis: {len(context)} chars"
+                            )
+
+                            # Regenerate answer with vision-enhanced context
+                            answer_content = invoke_llm(
+                                llm,
+                                qa_prompt_template,
                                 {
-                                    "image_data": img_b64,
-                                    "metadata": {"source": "knowledge_base_sources"},
-                                }
+                                    "context": context,
+                                    "question": rephrased_question,
+                                    "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                                    "language_instruction": language_instruction,
+                                },
+                            )
+                            print(
+                                f"Got vision-enhanced response: {answer_content[:100]}..."
                             )
 
-                        vision_result = VisionService.safe_vision_analysis(
-                            llm=llm,
-                            prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
-                            variables={
-                                "image_count": len(all_images),
-                                "source_files": "knowledge_base_sources",
-                                "question": rephrased_question,
-                                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
-                                "language_instruction": language_instruction,
-                            },
-                            images=vision_images,
-                        )
-
-                        print("Vision analysis result:", vision_result[:200])
-
-                        # Use combined analysis for knowledge base with vision content
-                        final_context = VisionService.combine_text_and_vision_analysis(
-                            text_analysis=context,
-                            vision_analysis=vision_result,
-                            combination_strategy="comprehensive",
-                        )
-                        context = final_context
-                        vision_analysis_performed = True
+                        except Exception as vision_error:
+                            print(f"Vision analysis failed: {vision_error}")
+                            # Keep the original text-only answer
+                    else:
                         print(
-                            f"Enhanced context with vision analysis: {len(context)} chars"
+                            "No images found in any source files in the knowledge base"
                         )
-
-                        # Regenerate answer with vision-enhanced context
-                        answer_content = invoke_llm(
-                            llm,
-                            qa_prompt_template,
-                            {
-                                "context": context,
-                                "question": rephrased_question,
-                                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
-                            },
-                        )
-                        print(
-                            f"Got vision-enhanced response: {answer_content[:100]}..."
-                        )
-
-                    except Exception as vision_error:
-                        print(f"Vision analysis failed: {vision_error}")
-                        # Keep the original text-only answer
                 else:
-                    print("No images found in relevant source files")
+                    print("No sources found in knowledge base for vision analysis")
             elif not text_answer_insufficient:
                 print(
                     "Text analysis appears sufficient, skipping vision analysis to save costs"
                 )
             else:
-                print(
-                    "Vision analysis not available or no relevant sources found, using text-only answer"
-                )
+                print("Vision analysis not available, using text-only answer")
 
         except Exception as e:
             print(f"Error generating answer: {e}")
@@ -1542,9 +1597,21 @@ async def query_document(
     session_id: str = None,
     is_follow_up: bool = False,
     search_mode: str = "vector",  # Add search mode parameter
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
     files: List[UploadFile] = File(None),
 ):
-    """Query uploaded documents with a question using either vector search or full text scan."""
+    """
+    Query uploaded documents with a question using either vector search or full text scan.
+
+    Args:
+        search_mode: "vector" or "full_text" - controls retrieval strategy
+        vision_analysis_override: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
+    """
+    print(f"Received vision_analysis_override: {vision_analysis_override}")
+    print(f"Received pdf_parsing_override: {pdf_parsing_override}")
+
     if not question:
         raise HTTPException(status_code=400, detail="Question is required")
 
@@ -1584,6 +1651,8 @@ async def query_document(
             use_default_models,
             session_id,
             is_follow_up,
+            vision_analysis_override,
+            pdf_parsing_override,
         )
 
     # Continue with existing vector search implementation
@@ -1793,7 +1862,10 @@ async def query_document(
 
                 documents, images = (
                     await extract_documents_and_images_from_file_unified(
-                        file_content, file.filename, current_user=current_user
+                        file_content,
+                        file.filename,
+                        pdf_parsing_mode=pdf_parsing_override,
+                        current_user=current_user,
                     )
                 )
 
@@ -2034,6 +2106,7 @@ async def query_document(
                                         extract_documents_and_images_from_file_unified(
                                             file_content,
                                             os.path.basename(temp_path),
+                                            pdf_parsing_mode=pdf_parsing_override,
                                             current_user=current_user,
                                         )
                                     )
@@ -2059,7 +2132,9 @@ async def query_document(
         # Decide whether to attempt vision analysis
         from app.services.vision_service import VisionService
 
-        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+        vision_enabled = VisionService.is_vision_enabled(
+            llm, current_user, vision_analysis_override
+        )
 
         # Check if any of the retrieved docs are vision fallbacks
         has_vision_fallbacks = any(
@@ -2103,8 +2178,16 @@ async def query_document(
 
         print(f"Text answer insufficient: {text_answer_insufficient}")
 
-        # SECOND: Only run vision analysis if text answer seems insufficient AND vision is available
-        if text_answer_insufficient and vision_enabled and all_images:
+        # SECOND: Perform vision analysis if:
+        # 1. Vision analysis is explicitly enabled (override=True), OR
+        # 2. Text answer is insufficient AND vision is generally enabled
+        # AND we have images to analyze
+        should_perform_vision = (
+            vision_analysis_override is True
+            or (text_answer_insufficient and vision_enabled)
+        ) and all_images
+
+        if should_perform_vision:
             print(
                 f"Text analysis insufficient, attempting vision analysis for {len(all_images)} images"
             )

@@ -745,11 +745,9 @@ const VeraDoc = () => {
                   {pair.source_citations.map((citation: any, cIndex: number) => {
                     const isExpanded = isCitationExpanded(resultIndex, pairIndex, cIndex)
                     const citationText = cleanRTFFormatting(citation.content)
-                    const shouldTruncate = citationText.length > 300
-                    const displayText =
-                      shouldTruncate && !isExpanded
-                        ? `${citationText.substring(0, 300)}...`
-                        : citationText
+                    // Do not truncate citation text in the UI; show full snippet
+                    const shouldTruncate = false
+                    const displayText = citationText
 
                     return (
                       <Box
@@ -801,17 +799,7 @@ const VeraDoc = () => {
                         >
                           {displayText}
                         </Box>
-                        {shouldTruncate && (
-                          <Button
-                            size="xs"
-                            variant="ghost"
-                            mt={1}
-                            onClick={() => toggleCitationExpansion(resultIndex, pairIndex, cIndex)}
-                            colorPalette="blue"
-                          >
-                            {isExpanded ? t("common.showLess") : t("common.readMore")}
-                          </Button>
-                        )}
+                        {/* No read-more/less button because we show full citations */}
                       </Box>
                     )
                   })}
@@ -944,9 +932,6 @@ const VeraDoc = () => {
                 />
                 <HelpTooltip helpKey="searchMode" />
               </HStack>
-              <Text fontSize="xs" color="gray.500" mt={1}>
-                {t("processingSettings.configure")}
-              </Text>
             </Box>
           </VStack>
         </HStack>

@@ -399,7 +399,10 @@
     "modals": {
       "add": {
         "title": "Ajouter une Base de Connaissances",
-        "description": "Créer une nouvelle base de connaissances en fournissant des détails et en téléchargeant des documents ci-dessous."
+        "description": "Créer une nouvelle base de connaissances en fournissant des détails et en téléchargeant des documents ci-dessous.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Modifier la Base de Connaissances",

@@ -354,7 +354,10 @@
     "modals": {
       "add": {
         "title": "Adicionar Base de Conhecimento",
-        "description": "Crie uma nova base de conhecimento fornecendo detalhes e carregando documentos abaixo."
+        "description": "Crie uma nova base de conhecimento fornecendo detalhes e carregando documentos abaixo.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Editar Base de Conhecimento",

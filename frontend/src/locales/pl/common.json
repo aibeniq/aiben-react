@@ -633,7 +633,10 @@
       },
       "add": {
         "title": "Dodaj bazę wiedzy",
-        "description": "Utwórz nową bazę wiedzy, podając szczegóły i przesyłając dokumenty poniżej."
+        "description": "Utwórz nową bazę wiedzy, podając szczegóły i przesyłając dokumenty poniżej.",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "Edytuj bazę wiedzy",

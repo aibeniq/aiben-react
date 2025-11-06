@@ -589,7 +589,10 @@
     "modals": {
       "add": {
         "title": "添加知识库",
-        "description": "通过提供详细信息并在下面上传文档来创建新的知识库。"
+        "description": "通过提供详细信息并在下面上传文档来创建新的知识库。",
+        "validation": {
+          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+        }
       },
       "edit": {
         "title": "编辑知识库",

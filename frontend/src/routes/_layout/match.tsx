@@ -1,6 +1,11 @@
 import { type FormConnectForm, FormconnectService, OpenAPI } from "@/client"
 import { request as __request } from "@/client/core/request"
+import ProcessingSettingsPopup, {
+  type ProcessingSettings,
+} from "@/components/Common/ProcessingSettingsPopup"
 import DownloadButton from "@/components/ui/download-button"
+import HelpTooltip from "@/components/ui/help-tooltip"
+import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useFormconnectProgress } from "@/hooks/useFormconnectProgress"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
@@ -14,7 +19,6 @@ import { FiCheck, FiCopy, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import FileUpload, { type FileItem } from "../../components/Common/FileUpload"
-import SearchModeToggle from "../../components/Common/SearchModeToggle"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import FeedbackButtons from "../../components/Feedback/FeedbackButtons"
@@ -24,6 +28,7 @@ import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const FormConnect = () => {
   const { t, i18n, ready } = useTranslation()
+  const { user } = useAuth()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { registerOperation } = useOperationCancellation()
   const { matchResult, setMatchResult, matchInputs, setMatchInputs, clearMatchResult } =
@@ -41,9 +46,12 @@ const FormConnect = () => {
   const [loading, setLoading] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
 
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
-    matchInputs?.searchMode || "vector",
-  )
+  // Processing settings state - initialized from user defaults
+  const [processingSettings, setProcessingSettings] = useState<ProcessingSettings>({
+    searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+    visionAnalysis: user?.vision_analysis_enabled || false,
+    pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+  })
 
   // Progress tracking
   const [taskId, setTaskId] = useState<string | null>(null)
@@ -102,9 +110,9 @@ const FormConnect = () => {
       fileItems,
       selectedForm,
       fields,
-      searchMode,
+      searchMode: processingSettings.searchMode,
     })
-  }, [fileItems, selectedForm, fields, searchMode, setMatchInputs])
+  }, [fileItems, selectedForm, fields, processingSettings.searchMode, setMatchInputs])
 
   // Clear inputs and restore from context when clear button is clicked
   const handleClearResults = () => {
@@ -113,7 +121,11 @@ const FormConnect = () => {
     setFileItems([])
     setSelectedForm(null)
     setFields("")
-    setSearchMode("vector")
+    setProcessingSettings({
+      searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+      visionAnalysis: user?.vision_analysis_enabled || false,
+      pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+    })
   }
 
   // Debug effect to log context state
@@ -382,8 +394,10 @@ const FormConnect = () => {
       fields: fields,
       digitized_files: files, // Temporarily use digitized_files until API types are regenerated
       handwritten_files: [], // Empty array for now
-      search_mode: searchMode,
+      search_mode: processingSettings.searchMode,
       form_name: selectedForm?.name,
+      vision_analysis_override: processingSettings.visionAnalysis,
+      pdf_parsing_override: processingSettings.pdfParsing,
     }
 
     setLoading(true) // Set loading to true
@@ -453,11 +467,20 @@ const FormConnect = () => {
 
             <FileUpload files={fileItems} onFilesChange={setFileItems} helpKey="fileUpload" />
 
-            <SearchModeToggle
-              searchMode={searchMode}
-              onSearchModeChange={setSearchMode}
-              helpKey="searchMode"
-            />
+            {/* Processing Settings */}
+            <Box width="100%">
+              <HStack align="center">
+                <Text fontSize="sm" fontWeight="medium">
+                  {t("processingSettings.title")}
+                </Text>
+                <ProcessingSettingsPopup
+                  settings={processingSettings}
+                  onSettingsChange={setProcessingSettings}
+                  disabled={loading}
+                />
+                <HelpTooltip helpKey="searchMode" />
+              </HStack>
+            </Box>
           </VStack>
         </HStack>
 
