@@ -102,7 +102,7 @@ const ChatbotMain = () => {
   }, [isOpen])
 
   const handleChatbotResponse = (response: any, userMessage: string) => {
-    if (!response?.answer) return
+    if (!response) return
 
     console.log("Sources from response:", response.sources)
 
@@ -110,6 +110,12 @@ const ChatbotMain = () => {
     if (response.sources && response.sources.length > 0) {
       console.log("First source metadata:", response.sources[0].metadata)
       console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id)
+    }
+
+    // Handle error_key - translate it to the user's language
+    let displayContent = response.answer
+    if (response.error_key) {
+      displayContent = t(response.error_key)
     }
 
     // You can show the rephrased question if you want
@@ -128,7 +134,7 @@ const ChatbotMain = () => {
       ...prev,
       {
         role: "assistant",
-        content: response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
+        content: displayContent + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
         sources: response.sources,
         rephrasedQuestion: response.rephrased_question,
         sessionId: response.session_id,
