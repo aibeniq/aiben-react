@@ -92,7 +92,8 @@
       "timeout": "Żądanie przekroczyło limit czasu. Spróbuj ponownie.",
       "largeFileTimeout": "Przetwarzanie dużego pliku przekroczyło limit czasu. Spróbuj przełączyć na tryb 'Pełne skanowanie tekstu' dla lepszej wydajności z dużymi plikami.",
       "fileSize": "Plik jest zbyt duży. Wybierz mniejsze pliki.",
-      "serverError": "Wystąpił błąd serwera. Spróbuj ponownie później."
+      "serverError": "Wystąpił błąd serwera. Spróbuj ponownie później.",
+      "insufficientContext": "Nie znaleziono odpowiednich informacji w bazie wiedzy, aby odpowiedzieć na to pytanie."
     }
   },
   "settings": {
@@ -204,6 +205,7 @@
     "minimumDescriptionLength": "Opis musi mieć co najmniej 10 znaków, aby zapewnić wystarczający kontekst dla sugestii AI"
   },
   "common": {
+    "user": "User",
     "loading": "Ładowanie...",
     "noData": "Brak dostępnych danych",
     "success": "Sukces!",

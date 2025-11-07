@@ -225,7 +225,8 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "networkError": "Network error. Please check your connection.",
     "unauthorized": "You are not authorized to perform this action.",
-    "notFound": "The requested resource was not found."
+    "notFound": "The requested resource was not found.",
+    "insufficientContext": "No relevant information found in the knowledge base to answer this question."
   },
   "help": {
     "dashboard": "Main overview page showing usage statistics and recent activity",
@@ -593,6 +594,7 @@
     }
   },
   "common": {
+    "user": "User",
     "loading": "Loading...",
     "noData": "No data available",
     "success": "Success!",

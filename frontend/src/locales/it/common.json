@@ -95,7 +95,8 @@
       "timeout": "Richiesta scaduta. Riprova.",
       "largeFileTimeout": "Elaborazione file di grandi dimensioni scaduta. Prova a passare alla modalità 'Scansione Completa del Testo' per prestazioni migliori con file di grandi dimensioni.",
       "fileSize": "Il file è troppo grande. Scegli file più piccoli.",
-      "serverError": "Si è verificato un errore del server. Riprova più tardi."
+      "serverError": "Si è verificato un errore del server. Riprova più tardi.",
+      "insufficientContext": "Nessuna informazione rilevante trovata nella base di conoscenza per rispondere a questa domanda."
     }
   },
   "settings": {
@@ -536,6 +537,7 @@
     }
   },
   "common": {
+    "user": "User",
     "loading": "Caricamento...",
     "noData": "Nessun dato disponibile",
     "success": "Successo!",

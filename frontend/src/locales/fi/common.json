@@ -96,7 +96,8 @@
       "timeout": "Pyyntö aikakatkaistiin. Yritä uudelleen.",
       "largeFileTimeout": "Suurten tiedostojen käsittely aikakatkaistiin. Kokeile 'Koko tekstin skannaus' -tilaa parempaa suorituskykyä varten suurille tiedostoille.",
       "fileSize": "Tiedosto on liian suuri. Valitse pienempiä tiedostoja.",
-      "serverError": "Palvelinvirhe tapahtui. Yritä myöhemmin uudelleen."
+      "serverError": "Palvelinvirhe tapahtui. Yritä myöhemmin uudelleen.",
+      "insufficientContext": "Tietokannasta ei löytynyt asiaankuuluvaa tietoa tämän kysymyksen vastaamiseen."
     }
   },
   "settings": {
@@ -263,6 +264,7 @@
     "minimumDescriptionLength": "Kuvausten on oltava vähintään 10 merkkiä pitkä, jotta AI-ehdotuksille saadaan riittävä konteksti"
   },
   "common": {
+    "user": "User",
     "loading": "Ladataan...",
     "noData": "Ei saatavilla olevia tietoja",
     "success": "Onnistui!",

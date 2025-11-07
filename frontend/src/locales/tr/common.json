@@ -95,7 +95,8 @@
       "timeout": "İstek zaman aşımına uğradı. Tekrar deneyin.",
       "largeFileTimeout": "Büyük dosya işleme zaman aşımına uğradı. Daha iyi performans için 'Tam Metin Tarama' moduna geçmeyi deneyin.",
       "fileSize": "Dosya çok büyük. Lütfen daha küçük dosyalar seçin.",
-      "serverError": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin."
+      "serverError": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.",
+      "insufficientContext": "İlgili bilgi bulunamadı. Lütfen daha spesifik bir soru sorun veya başka bir belge yükleyin."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "AI önerileri için yeterli bağlam sağlamak üzere açıklama en az 10 karakter uzunluğunda olmalıdır"
   },
   "common": {
+    "user": "User",
     "loading": "Yükleniyor...",
     "noData": "Kullanılabilir veri yok",
     "success": "Başarılı!",

@@ -65,7 +65,7 @@ class Settings(BaseSettings):
     RAG_MIN_QUALITY_SCORE: float = 0.3  # Minimum quality score for content chunks
     RAG_MAX_BIBLIOGRAPHY_CHUNKS: int = 0  # Maximum bibliography chunks to include
     RAG_ENABLE_LLM_RELEVANCE_FILTER: bool = (
-        True  # Enable LLM-based relevance filtering for vector search
+        False  # Enable LLM-based relevance filtering for vector search
     )
 
     # Embedding processing parameters

@@ -130,10 +130,10 @@ async def get_formconnect_progress(
     if not progress:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    print(
-        f"🔍 PROGRESS DATA: status={progress.get('status')}, percentage={progress.get('percentage')}, current_stage={progress.get('current_stage')}"
-    )
-    print(f"🔍 PROGRESS MESSAGE: {progress.get('message')}")
+    # print(
+    #    f"🔍 PROGRESS DATA: status={progress.get('status')}, percentage={progress.get('percentage')}, current_stage={progress.get('current_stage')}"
+    # )
+    # print(f"🔍 PROGRESS MESSAGE: {progress.get('message')}")
 
     return progress
 
@@ -1222,8 +1222,22 @@ async def format_single_document_result(
     # Use original filename
     clean_filename = file_name
 
-    # Convert dict to string, escaping any curly braces for the formatter
-    data_str = str(extracted_data).replace("{", "{{").replace("}", "}}")
+    # Convert dict to a safe JSON string for the prompt.
+    # Guard against extractor error strings (e.g. values that start with "Error:")
+    def _sanitize_doc_for_prompt(d: Dict[str, Any]) -> str:
+        sanitized = {}
+        for k, v in (d or {}).items():
+            # If extractor returned an error string, normalize to null so the LLM
+            # sees that the field wasn't successfully extracted rather than a
+            # literal error blob that may break formatting.
+            if isinstance(v, str) and v.strip().startswith("Error"):
+                sanitized[k] = None
+            else:
+                sanitized[k] = v
+        # Use json.dumps to produce stable, safe serialization (avoids brittle str() output)
+        return json.dumps(sanitized, ensure_ascii=False)
+
+    data_str = _sanitize_doc_for_prompt(extracted_data)
 
     # Use the single document template from config
     # Get user language and create language instruction
@@ -1265,8 +1279,18 @@ async def compare_multiple_documents(
         clean_filename = name
         clean_filenames.append(clean_filename)
 
-        # Convert dict to string, escaping any curly braces for the formatter
-        doc_str = str(doc).replace("{", "{{").replace("}", "}}")
+        # Convert dict to a safe JSON string for the prompt and guard against
+        # extractor error strings (normalize to null so the LLM sees missing fields)
+        def _sanitize_doc_for_prompt(d: Dict[str, Any]) -> str:
+            sanitized = {}
+            for k, v in (d or {}).items():
+                if isinstance(v, str) and v.strip().startswith("Error"):
+                    sanitized[k] = None
+                else:
+                    sanitized[k] = v
+            return json.dumps(sanitized, ensure_ascii=False)
+
+        doc_str = _sanitize_doc_for_prompt(doc)
         documents_str += f"Document: {clean_filename}\nExtracted Data: {doc_str}\n\n"
 
     print(

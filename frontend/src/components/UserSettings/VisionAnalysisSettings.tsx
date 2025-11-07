@@ -15,10 +15,7 @@ const VisionAnalysisSettings = () => {
   // Sync local state with user data when it changes
   useEffect(() => {
     if (user?.vision_analysis_enabled !== undefined) {
-      console.log(
-        "[VisionAnalysis] Syncing state from user:",
-        user.vision_analysis_enabled,
-      )
+      console.log("[VisionAnalysis] Syncing state from user:", user.vision_analysis_enabled)
       setEnabled(user.vision_analysis_enabled)
     }
   }, [user?.vision_analysis_enabled])
@@ -30,23 +27,16 @@ const VisionAnalysisSettings = () => {
         requestBody: { vision_analysis_enabled: visionEnabled },
       })
     },
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       console.log("[VisionAnalysis] Update successful, response:", data)
-      // Update the cache with the response data
+      // Update the cache with the response data from the server
       queryClient.setQueryData(["currentUser"], data)
-      // Also invalidate to ensure fresh data
-      await queryClient.invalidateQueries({ queryKey: ["currentUser"] })
     },
   })
 
   const handleToggle = () => {
     const newValue = !enabled
-    console.log(
-      "[VisionAnalysis] Toggle clicked, current:",
-      enabled,
-      "new:",
-      newValue,
-    )
+    console.log("[VisionAnalysis] Toggle clicked, current:", enabled, "new:", newValue)
     setEnabled(newValue)
     updateMutation.mutate(newValue)
   }
@@ -64,16 +54,8 @@ const VisionAnalysisSettings = () => {
             </Text>
           </Box>
 
-          <Box
-            p={3}
-            bg="blue.50"
-            borderRadius="md"
-            borderLeft="4px solid"
-            borderColor="blue.500"
-          >
-            <Text fontSize="sm">
-              {t("settings.visionAnalysis.costWarning")}
-            </Text>
+          <Box p={3} bg="blue.50" borderRadius="md" borderLeft="4px solid" borderColor="blue.500">
+            <Text fontSize="sm">{t("settings.visionAnalysis.costWarning")}</Text>
           </Box>
 
           <Field label={t("settings.visionAnalysis.enableLabel") as string}>

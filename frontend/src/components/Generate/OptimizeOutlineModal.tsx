@@ -407,7 +407,7 @@ const OptimizeOutlineModal = ({
                     )}
                   </Field>
 
-                  <HStack align="center" spacing={3}>
+                  <HStack align="center" gap={3}>
                     <Text fontSize="sm" color="gray.600">
                       {t("processingSettings.title")}
                     </Text>

@@ -92,7 +92,8 @@
       "timeout": "Zahtjev je istekao. Molimo pokušajte ponovno.",
       "largeFileTimeout": "Obrada velike datoteke je istekla. Pokušajte se prebaciti na način 'Potpuno skeniranje teksta' za bolje performanse s velikim datotekama.",
       "fileSize": "Datoteka je prevelika. Molimo odaberite manje datoteke.",
-      "serverError": "Došlo je do pogreške poslužitelja. Molimo pokušajte ponovno kasnije."
+      "serverError": "Došlo je do pogreške poslužitelja. Molimo pokušajte ponovno kasnije.",
+      "insufficientContext": "Nije pronađena relevantna informacija u bazi znanja za odgovor na ovo pitanje."
     }
   },
   "settings": {
@@ -204,6 +205,7 @@
     "minimumDescriptionLength": "Opisi moraju biti dugi najmanje 10 znakova kako bi pružili dovoljan kontekst za AI prijedloge"
   },
   "common": {
+    "user": "User",
     "loading": "Učitava se...",
     "noData": "Nema dostupnih podataka",
     "success": "Uspjeh!",

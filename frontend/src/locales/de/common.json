@@ -95,7 +95,8 @@
       "timeout": "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
       "largeFileTimeout": "Zeitüberschreitung bei der Verarbeitung großer Dateien. Versuchen Sie den 'Volltextsuche'-Modus für bessere Leistung mit großen Dateien.",
       "fileSize": "Datei ist zu groß. Bitte wählen Sie kleinere Dateien.",
-      "serverError": "Server-Fehler aufgetreten. Bitte versuchen Sie es später erneut."
+      "serverError": "Server-Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+      "insufficientContext": "Keine relevanten Informationen in der Wissensdatenbank gefunden, um diese Frage zu beantworten."
     }
   },
   "settings": {
@@ -536,6 +537,7 @@
     }
   },
   "common": {
+    "user": "User",
     "loading": "Laden...",
     "noData": "Keine Daten verfügbar",
     "success": "Erfolg!",

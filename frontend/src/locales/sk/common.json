@@ -92,7 +92,8 @@
       "timeout": "Žiadosť vypršala. Skúste to znovu.",
       "largeFileTimeout": "Spracovanie veľkého súboru vypršalo. Skúste prepnúť na režim 'Úplné skenovanie textu' pre lepší výkon s veľkými súbormi.",
       "fileSize": "Súbor je príliš veľký. Vyberte menšie súbory.",
-      "serverError": "Došlo k chybe servera. Skúste to neskôr."
+      "serverError": "Došlo k chybe servera. Skúste to neskôr.",
+      "insufficientContext": "V databáze znalostí sa nenašla žiadna relevantná informácia na odpoveď na túto otázku."
     }
   },
   "settings": {
@@ -204,6 +205,7 @@
     "minimumDescriptionLength": "Popis musí mať najmenej 10 znakov na poskytnutie dostatočného kontextu pre návrhy AI"
   },
   "common": {
+    "user": "User",
     "loading": "Načítavanie...",
     "noData": "Žiadne údaje nie sú k dispozícii",
     "success": "Úspech!",

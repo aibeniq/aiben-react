@@ -95,7 +95,8 @@
       "timeout": "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.",
       "largeFileTimeout": "Xử lý tệp lớn đã hết thời gian chờ. Hãy thử chuyển sang chế độ 'Quét toàn văn bản' để có hiệu suất tốt hơn với tệp lớn.",
       "fileSize": "Tệp quá lớn. Vui lòng chọn tệp nhỏ hơn.",
-      "serverError": "Đã xảy ra lỗi máy chủ. Vui lòng thử lại sau."
+      "serverError": "Đã xảy ra lỗi máy chủ. Vui lòng thử lại sau.",
+      "insufficientContext": "Không tìm thấy thông tin liên quan. Vui lòng đặt câu hỏi cụ thể hơn hoặc tải lên tài liệu khác."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Mô tả phải có ít nhất 10 ký tự để cung cấp ngữ cảnh đủ cho đề xuất AI"
   },
   "common": {
+    "user": "User",
     "loading": "Đang tải...",
     "noData": "Không có dữ liệu",
     "success": "Thành công!",

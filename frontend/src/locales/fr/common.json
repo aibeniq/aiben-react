@@ -95,7 +95,8 @@
       "timeout": "Délai d'attente dépassé. Veuillez réessayer.",
       "largeFileTimeout": "Délai de traitement des gros fichiers dépassé. Essayez de passer au mode 'Analyse Complète du Texte' pour de meilleures performances avec les gros fichiers.",
       "fileSize": "Le fichier est trop volumineux. Veuillez choisir des fichiers plus petits.",
-      "serverError": "Une erreur serveur s'est produite. Veuillez réessayer plus tard."
+      "serverError": "Une erreur serveur s'est produite. Veuillez réessayer plus tard.",
+      "insufficientContext": "Aucune information pertinente trouvée dans la base de connaissances pour répondre à cette question."
     }
   },
   "settings": {
@@ -535,6 +536,7 @@
     }
   },
   "common": {
+    "user": "User",
     "loading": "Chargement...",
     "noData": "Aucune donnée disponible",
     "success": "Succès !",

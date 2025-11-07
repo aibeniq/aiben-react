@@ -95,7 +95,8 @@
       "timeout": "Se agotó el tiempo de espera. Inténtalo de nuevo.",
       "largeFileTimeout": "Se agotó el tiempo de procesamiento de archivos grandes. Prueba cambiar al modo 'Escaneo de Texto Completo' para mejor rendimiento con archivos grandes.",
       "fileSize": "El archivo es demasiado grande. Elige archivos más pequeños.",
-      "serverError": "Ocurrió un error del servidor. Inténtalo de nuevo más tarde."
+      "serverError": "Ocurrió un error del servidor. Inténtalo de nuevo más tarde.",
+      "insufficientContext": "No se encontró información relevante. Haz una pregunta más específica o sube otro documento."
     }
   },
   "settings": {
@@ -220,6 +221,7 @@
     "notFound": "No se encontró el recurso solicitado."
   },
   "common": {
+    "user": "User",
     "loading": "Cargando...",
     "noData": "No hay datos disponibles",
     "success": "¡Éxito!",

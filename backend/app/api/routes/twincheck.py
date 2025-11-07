@@ -100,9 +100,22 @@ async def create_optimize_outline_task():
     return {"task_id": task_id}
 
 
-def extract_text_from_file(file: UploadFile, current_user=None) -> str:
+def extract_text_from_file(
+    file: UploadFile,
+    current_user=None,
+    search_mode: str = "full_scan",
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
+) -> str:
     """
     Extract text content from uploaded files using unified document processing.
+
+    Args:
+        file: The file to process
+        current_user: The current user (for settings)
+        search_mode: "vector" or "full_scan" (currently not used for extraction, but for consistency)
+        vision_analysis_override: Override user's vision analysis setting
+        pdf_parsing_override: Override user's PDF parsing preference ("enhanced" or "basic")
     """
     from app.services.document_utils import extract_text_from_file_unified
 
@@ -117,11 +130,88 @@ def extract_text_from_file(file: UploadFile, current_user=None) -> str:
         )
 
     try:
+        # Create temporary user if vision override is provided
+        effective_user = current_user
+        if vision_analysis_override is not None:
+
+            class TempUser:
+                def __init__(self, vision_enabled, user_id=None):
+                    self.vision_analysis_enabled = vision_enabled
+                    self.id = user_id
+
+            effective_user = TempUser(
+                vision_analysis_override, current_user.id if current_user else None
+            )
+            print(
+                f"Using vision override: {vision_analysis_override} (PDF parsing: {pdf_parsing_override})"
+            )
+
         return extract_text_from_file_unified(
-            file_content, file.filename or "unknown", current_user=current_user
+            file_content, file.filename or "unknown", current_user=effective_user
         )
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Error processing file {file.filename}: {str(e)}"
+        )
+
+
+async def extract_text_from_file_async(
+    file: UploadFile,
+    current_user=None,
+    search_mode: str = "full_scan",
+    vision_analysis_override: Optional[bool] = None,
+    pdf_parsing_override: Optional[str] = None,
+) -> str:
+    """
+    ASYNC version of extract_text_from_file.
+    Extract text content from uploaded files using unified document processing.
+    Use this from async contexts to avoid event loop conflicts.
+
+    Args:
+        file: The file to process
+        current_user: The current user (for settings)
+        search_mode: "vector" or "full_scan" (currently not used for extraction, but for consistency)
+        vision_analysis_override: Override user's vision analysis setting
+        pdf_parsing_override: Override user's PDF parsing preference ("enhanced" or "basic")
+    """
+    from app.services.document_utils import extract_text_from_file_unified_async
+
+    print(f"Processing file: {file.filename}")
+
+    # Read the file content
+    file_content = file.file.read()
+    if not file_content:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Uploaded file {file.filename} appears to be empty",
+        )
+
+    try:
+        # Create temporary user if vision override is provided
+        effective_user = current_user
+        if vision_analysis_override is not None:
+
+            class TempUser:
+                def __init__(self, vision_enabled, user_id=None):
+                    self.vision_analysis_enabled = vision_enabled
+                    self.id = user_id
+
+            effective_user = TempUser(
+                vision_analysis_override, current_user.id if current_user else None
+            )
+            print(
+                f"Using vision override: {vision_analysis_override} (PDF parsing: {pdf_parsing_override})"
+            )
+
+        return await extract_text_from_file_unified_async(
+            file_content,
+            file.filename or "unknown",
+            pdf_parsing_mode=pdf_parsing_override,
+            current_user=effective_user,
+        )
+    except Exception as e:
+        print(f"Error extracting text from {file.filename}: {str(e)}")
         raise HTTPException(
             status_code=400, detail=f"Error processing file {file.filename}: {str(e)}"
         )
@@ -233,6 +323,9 @@ async def compare_documents(
     document2: UploadFile = File(...),
     request: FastAPIRequest = None,
     task_id: Optional[str] = Form(None),
+    search_mode: str = Form("vector"),
+    vision_analysis_enabled: Optional[bool] = Form(None),
+    pdf_parsing_preference: Optional[str] = Form(None),
 ):
     """
     Compare two documents based on the provided comparison topics.
@@ -240,6 +333,9 @@ async def compare_documents(
 
     Args:
         task_id: Optional task ID for progress tracking
+        search_mode: "vector" or "full_scan" - controls retrieval strategy
+        vision_analysis_enabled: Whether to analyze images in PDFs/DOCX (overrides user default)
+        pdf_parsing_preference: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     # Generate unique operation ID for logging
     operation_id = str(uuid.uuid4())
@@ -256,19 +352,40 @@ async def compare_documents(
         # Check if LLM supports vision
         from app.services.vision_service import VisionService
 
-        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
+        # Determine if vision should be enabled
+        # 1. If explicitly overridden, use that
+        # 2. Otherwise use user setting or system default
+        effective_vision_enabled = vision_analysis_enabled
+        if effective_vision_enabled is None:
+            effective_vision_enabled = VisionService.is_vision_enabled(
+                llm, current_user
+            )
 
-        # Extract text from both documents
-        doc1_text = extract_text_from_file(document1, current_user)
+        print(f"Vision analysis enabled: {effective_vision_enabled}")
+
+        # Extract text from both documents with processing settings (using async version)
+        doc1_text = await extract_text_from_file_async(
+            document1,
+            current_user,
+            search_mode=search_mode,
+            vision_analysis_override=effective_vision_enabled,
+            pdf_parsing_override=pdf_parsing_preference,
+        )
 
         # Reset file pointer for document2
         document2.file.seek(0)
-        doc2_text = extract_text_from_file(document2, current_user)
+        doc2_text = await extract_text_from_file_async(
+            document2,
+            current_user,
+            search_mode=search_mode,
+            vision_analysis_override=effective_vision_enabled,
+            pdf_parsing_override=pdf_parsing_preference,
+        )
 
         # Extract images if vision is enabled
         doc1_images = []
         doc2_images = []
-        if vision_enabled:
+        if effective_vision_enabled:
             # Reset file pointers for image extraction
             document1.file.seek(0)
             document2.file.seek(0)
@@ -279,14 +396,18 @@ async def compare_documents(
             )
 
             doc1_content = document1.file.read()
-            _, doc1_images = extract_documents_and_images_from_file_unified(
-                doc1_content, document1.filename
+            _, doc1_images = await extract_documents_and_images_from_file_unified(
+                doc1_content,
+                document1.filename,
+                pdf_parsing_mode=pdf_parsing_preference,
             )
 
             document2.file.seek(0)
             doc2_content = document2.file.read()
-            _, doc2_images = extract_documents_and_images_from_file_unified(
-                doc2_content, document2.filename
+            _, doc2_images = await extract_documents_and_images_from_file_unified(
+                doc2_content,
+                document2.filename,
+                pdf_parsing_mode=pdf_parsing_preference,
             )
 
             print(f"Extracted {len(doc1_images)} images from {document1.filename}")
@@ -476,7 +597,7 @@ async def compare_documents(
                     # )
 
                     # Add vision analysis if images exist and LLM supports it
-                    if vision_enabled and (doc1_images or doc2_images):
+                    if effective_vision_enabled and (doc1_images or doc2_images):
                         print(f"  Adding vision analysis for chunked topic: {topic}")
 
                         # Prepare images for comparison
@@ -601,7 +722,7 @@ async def compare_documents(
                     )
 
                     # Add vision analysis if images exist and LLM supports it
-                    if vision_enabled and (doc1_images or doc2_images):
+                    if effective_vision_enabled and (doc1_images or doc2_images):
                         # Check for cancellation before vision processing
                         await asyncio.sleep(0.01)
                         print(f"  Adding vision analysis for topic: {topic}")

@@ -127,26 +127,14 @@ const VeraDoc = () => {
   })
 
   // State to track which citations are expanded - using object instead of Set
-  const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
+  // Citation expansion state (currently not used in UI)
+  // const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
 
-  // Function to toggle citation expansion
-  const toggleCitationExpansion = (
-    resultIndex: number,
-    pairIndex: number,
-    citationIndex: number,
-  ) => {
-    const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
-    setExpandedCitations((prev) => ({
-      ...prev,
-      [citationKey]: !prev[citationKey],
-    }))
-  }
-
-  // Function to check if a citation is expanded
-  const isCitationExpanded = (resultIndex: number, pairIndex: number, citationIndex: number) => {
-    const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
-    return expandedCitations[citationKey] || false
-  }
+  // Function to check if a citation is expanded (currently not used)
+  // const isCitationExpanded = (resultIndex: number, pairIndex: number, citationIndex: number) => {
+  //   const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
+  //   return expandedCitations[citationKey] || false
+  // }
 
   // Handle progress completion
   useEffect(() => {
@@ -743,10 +731,8 @@ const VeraDoc = () => {
                 </h2>
                 <Accordion.ItemContent pb={4} bg="surface">
                   {pair.source_citations.map((citation: any, cIndex: number) => {
-                    const isExpanded = isCitationExpanded(resultIndex, pairIndex, cIndex)
                     const citationText = cleanRTFFormatting(citation.content)
                     // Do not truncate citation text in the UI; show full snippet
-                    const shouldTruncate = false
                     const displayText = citationText
 
                     return (

@@ -95,7 +95,8 @@
       "timeout": "Užklausa baigėsi laiku. Bandykite dar kartą.",
       "largeFileTimeout": "Didelio failo apdorojimas baigėsi laiku. Bandykite perjungti į 'Viso teksto nuskaitymo' režimą geresniam našumui su dideliais failais.",
       "fileSize": "Failas per didelis. Prašome pasirinkti mažesnius failus.",
-      "serverError": "Įvyko serverio klaida. Bandykite dar kartą vėliau."
+      "serverError": "Įvyko serverio klaida. Bandykite dar kartą vėliau.",
+      "insufficientContext": "Žinių bazėje nerasta atitinkamos informacijos šiam klausimui atsakyti."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Aprašymas turi būti bent 10 simbolių ilgio, kad suteiktų pakankamai konteksto AI pasiūlymams"
   },
   "common": {
+    "user": "User",
     "loading": "Kraunama...",
     "noData": "Nėra prieinamų duomenų",
     "success": "Sėkmė!",

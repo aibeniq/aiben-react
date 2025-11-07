@@ -95,7 +95,8 @@
       "timeout": "请求超时。请再试一次。",
       "largeFileTimeout": "大文件处理超时。尝试切换到'全文扫描'模式以获得更好的大文件性能。",
       "fileSize": "文件太大。请选择较小的文件。",
-      "serverError": "服务器错误发生。请稍后再试。"
+      "serverError": "服务器错误发生。请稍后再试。",
+      "insufficientContext": "在知识库中未找到回答此问题的相关信息。"
     }
   },
   "settings": {
@@ -318,6 +319,7 @@
     }
   },
   "common": {
+    "user": "User",
     "loading": "加载中...",
     "noData": "无可用数据",
     "success": "成功！",

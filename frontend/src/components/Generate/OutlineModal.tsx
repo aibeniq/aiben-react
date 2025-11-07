@@ -195,13 +195,10 @@ const OutlineModal = ({
       } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
         // Use the new JSON endpoint with knowledge base reference
         response = await ReportgenieService.generateOutline({
-          requestBody: {
+          formData: {
             description: outlineDescription.trim(),
-            outline_type: "general",
-            knowledge_base_id: referenceKnowledgeBase.id,
-            search_mode: processingSettings.searchMode,
-            vision_analysis_override: processingSettings.visionAnalysis,
-            pdf_parsing_override: processingSettings.pdfParsing,
+            report_type: "general",
+            files: [],
           },
         })
       } else {
@@ -239,7 +236,7 @@ const OutlineModal = ({
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
           successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
         }
-        successMessage += ` (${searchMode === "vector" ? "vector search" : "full document scan"})`
+        successMessage += ` (${processingSettings.searchMode === "vector" ? "vector search" : "full document scan"})`
 
         showSuccessToast(successMessage)
       } else {

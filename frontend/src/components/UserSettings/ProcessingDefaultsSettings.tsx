@@ -43,12 +43,10 @@ const ProcessingDefaultsSettings = () => {
         requestBody: settings,
       })
     },
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       console.log("[ProcessingDefaults] Update successful, response:", data)
-      // Update the cache with the response data
+      // Update the cache with the response data from the server
       queryClient.setQueryData(["currentUser"], data)
-      // Also invalidate to ensure fresh data
-      await queryClient.invalidateQueries({ queryKey: ["currentUser"] })
     },
   })
 
