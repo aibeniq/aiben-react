@@ -172,6 +172,7 @@ class QueryResponse(BaseModel):
     sources: List[Source]
     session_id: str
     rephrased_question: str
+    error_key: Optional[str] = None  # i18n translation key for error messages
 
 
 class DocumentQueryResponse(BaseModel):
@@ -181,6 +182,7 @@ class DocumentQueryResponse(BaseModel):
     sources: List[Source]
     session_id: str
     rephrased_question: str
+    error_key: Optional[str] = None  # i18n translation key for error messages
 
 
 class TextQueryResponse(BaseModel):
@@ -189,6 +191,7 @@ class TextQueryResponse(BaseModel):
     answer: str
     session_id: str
     rephrased_question: str
+    error_key: Optional[str] = None  # i18n translation key for error messages
 
 
 # Create a simple cache for vector databases and retrievers
@@ -595,12 +598,11 @@ async def _handle_full_text_kb_query(
         else:
             print("No images found in processed source files")
 
-        # Replace the internal insufficient info phrase with a user-friendly translated message
+        # Check if LLM couldn't find sufficient context
+        error_key = None
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer:
-            user_language = current_user.preferred_language or "en"
-            final_answer = translate_frontend(
-                "errors.insufficientContext", language=user_language
-            )
+            error_key = "errors.insufficientContext"
+            final_answer = ""  # Clear the answer since it's an error
 
         # Record the interaction
         record_llm_interaction(
@@ -613,7 +615,7 @@ async def _handle_full_text_kb_query(
                 "kb_id": kb_id,
                 "search_mode": "full_text",
             },
-            output_data=final_answer,
+            output_data=final_answer if not error_key else f"ERROR: {error_key}",
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
@@ -622,6 +624,7 @@ async def _handle_full_text_kb_query(
                 "text_analysis_insufficient": text_analysis_insufficient,
                 "no_relevant_chunks_found": len(all_chunk_analyses) == 0,
                 "processed_sources_count": len(processed_sources),
+                "error_key": error_key,
             },
         )
 
@@ -630,6 +633,7 @@ async def _handle_full_text_kb_query(
         "sources": source_citations,
         "session_id": session_id,
         "rephrased_question": rephrased_question,
+        "error_key": error_key,
     }
 
 
@@ -979,12 +983,11 @@ async def _handle_full_text_document_query(
         #     final_answer, session, current_user, llm
         # )
 
-        # Replace the internal insufficient info phrase with a user-friendly translated message
+        # Check if LLM couldn't find sufficient context
+        error_key = None
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer:
-            user_language = current_user.preferred_language or "en"
-            final_answer = translate_frontend(
-                "errors.insufficientContext", language=user_language
-            )
+            error_key = "errors.insufficientContext"
+            final_answer = ""  # Clear the answer since it's an error
 
         # Record the interaction
         record_llm_interaction(
@@ -997,12 +1000,13 @@ async def _handle_full_text_document_query(
                 "documents": [file.filename for file in files] if files else [],
                 "search_mode": "full_text",
             },
-            output_data=final_answer,
+            output_data=final_answer if not error_key else f"ERROR: {error_key}",
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
                 "document_count": len(files) if files else 0,
                 "relevant_documents": len(all_document_analyses),
+                "error_key": error_key,
             },
         )
 
@@ -1011,6 +1015,7 @@ async def _handle_full_text_document_query(
             "sources": sources,
             "session_id": session_id,
             "rephrased_question": translated_rephrased_question,
+            "error_key": error_key,
         }
 
     finally:
@@ -1640,18 +1645,18 @@ async def query_knowledge_base(
             },
         )
 
-        # Replace the internal insufficient info phrase with a user-friendly translated message
+        # Check if LLM couldn't find sufficient context
+        error_key = None
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in answer_content:
-            user_language = current_user.preferred_language or "en"
-            answer_content = translate_frontend(
-                "errors.insufficientContext", language=user_language
-            )
+            error_key = "errors.insufficientContext"
+            answer_content = ""  # Clear the answer since it's an error
 
         return {
             "answer": answer_content,
             "sources": sources,
             "session_id": session_id,  # Return session ID for client to use in follow-ups
             "rephrased_question": rephrased_question,
+            "error_key": error_key,
         }
 
     except HTTPException:
@@ -2444,18 +2449,18 @@ async def query_document(
             },
         )
 
-        # Replace the internal insufficient info phrase with a user-friendly translated message
+        # Check if LLM couldn't find sufficient context
+        error_key = None
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in answer_content:
-            user_language = current_user.preferred_language or "en"
-            answer_content = translate_frontend(
-                "errors.insufficientContext", language=user_language
-            )
+            error_key = "errors.insufficientContext"
+            answer_content = ""  # Clear the answer since it's an error
 
         return {
             "answer": answer_content,
             "sources": sources,
             "session_id": session_id,
             "rephrased_question": translated_rephrased_question,
+            "error_key": error_key,
         }
 
     except Exception as e:
