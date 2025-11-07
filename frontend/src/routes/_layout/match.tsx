@@ -295,6 +295,14 @@ const FormConnect = () => {
     fetchForms()
   }, [])
 
+  // Sync fields when selectedForm is restored from context
+  useEffect(() => {
+    if (selectedForm && !fields.trim() && selectedForm.fields) {
+      console.log("🔄 Restoring fields from selectedForm:", selectedForm.name)
+      setFields(selectedForm.fields)
+    }
+  }, [selectedForm, forms]) // Run when selectedForm or forms change
+
   const mutation = useMutation({
     mutationFn: async (data: {
       fields: string

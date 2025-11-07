@@ -236,7 +236,7 @@ const OutlineModal = ({
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
           successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
         }
-        successMessage += ` (${processingSettings.searchMode === "vector" ? "vector search" : "full document scan"})`
+        successMessage += ` (${processingSettings.searchMode === "vector" ? "fast search" : "deep search"})`
 
         showSuccessToast(successMessage)
       } else {

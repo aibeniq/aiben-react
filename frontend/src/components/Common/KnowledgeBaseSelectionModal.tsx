@@ -1,12 +1,5 @@
 import type { KnowledgeBasePublic } from "@/client"
-import {
-  CloseButton,
-  Dialog,
-  HStack,
-  Portal,
-  Switch,
-  Text,
-} from "@chakra-ui/react"
+import { CloseButton, Dialog, HStack, Portal, Switch, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import ConfirmButton from "../ui/confirm-button"
 import HelpTooltip from "../ui/help-tooltip"
@@ -43,12 +36,9 @@ const KnowledgeBaseSelectionModal = ({
 
   return (
     <Portal>
-      <Dialog.Root
-        open={isOpen}
-        onOpenChange={({ open }) => !open && onClose()}
-      >
+      <Dialog.Root open={isOpen} onOpenChange={({ open }) => !open && onClose()}>
         <Dialog.Backdrop />
-        <Dialog.Positioner style={{ zIndex: 2000 }}>
+        <Dialog.Positioner style={{ zIndex: 3100 }}>
           <Dialog.Content maxW="4xl" maxH="80vh">
             <Dialog.Header>
               <HStack justify="space-between" align="center" w="full">
@@ -61,11 +51,9 @@ const KnowledgeBaseSelectionModal = ({
               <HStack justifyContent="flex-end" mt={2}>
                 <Tooltip
                   content={
-                    showAllUsers
-                      ? t("archive.viewingAllUsers")
-                      : t("archive.viewingMyHistory")
+                    showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")
                   }
-                  contentProps={{ zIndex: 2100 }}
+                  contentProps={{ zIndex: 3200 }}
                 >
                   <HStack gap={2}>
                     <HStack gap={1} align="center">
@@ -80,13 +68,8 @@ const KnowledgeBaseSelectionModal = ({
                       colorPalette="blue"
                       checked={showAllUsers}
                     >
-                      <Switch.HiddenInput
-                        checked={showAllUsers}
-                        onChange={toggleShowAllUsers}
-                      />
-                      <Switch.Control
-                        data-state={showAllUsers ? "checked" : "unchecked"}
-                      >
+                      <Switch.HiddenInput checked={showAllUsers} onChange={toggleShowAllUsers} />
+                      <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
                         <Switch.Thumb />
                       </Switch.Control>
                     </Switch.Root>

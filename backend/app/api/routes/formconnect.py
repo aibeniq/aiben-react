@@ -2038,9 +2038,7 @@ async def generate_form_fields(
 
         if not analysis:
             search_method = (
-                "vector search"
-                if request.search_mode == "vector"
-                else "full document scan"
+                "fast search" if request.search_mode == "vector" else "deep search"
             )
             analysis = f"Generated {len(fields)} form fields based on the provided description using {search_method}"
             if request.knowledge_base_id:
