@@ -393,6 +393,120 @@ def extract_text_from_file_unified(
         return f"Failed to extract text from {filename}: {str(e)}"
 
 
+async def extract_text_from_file_unified_async(
+    file_content: bytes, filename: str, pdf_parsing_mode: str = None, current_user=None
+) -> str:
+    """
+    ASYNC version of extract_text_from_file_unified.
+    Unified file text extraction function that handles multiple file types.
+    Use this when calling from async code (like FastAPI endpoints).
+
+    Args:
+        file_content: Raw bytes of the file
+        filename: Name of the file
+        pdf_parsing_mode: PDF parsing mode ('auto', 'enhanced', 'basic').
+                         Priority order:
+                         1. Explicit pdf_parsing_mode parameter
+                         2. User's preference (current_user.pdf_parsing_preference)
+                         3. Global setting (settings.PDF_PARSING_MODE)
+        current_user: Current user object (optional)
+
+    Returns:
+        Extracted text content as string
+    """
+    try:
+        # Determine file type from extension
+        file_ext = Path(filename).suffix.lower()
+
+        if file_ext == ".pdf":
+            # Handle PDF files with async extraction
+            from app.services.pdf_utils import extract_text_from_pdf_bytes_async
+            from app.core.config import settings
+
+            # Priority order for mode selection
+            if pdf_parsing_mode is not None:
+                # Explicit parameter takes highest priority
+                mode = pdf_parsing_mode
+                print(
+                    f"[DOCUMENT_UTILS] Using explicit pdf_parsing_mode parameter: {mode}"
+                )
+            elif current_user is not None:
+                # User preference takes second priority
+                mode = getattr(
+                    current_user, "pdf_parsing_preference", settings.PDF_PARSING_MODE
+                )
+                print(
+                    f"[DOCUMENT_UTILS] Using user {current_user.id} PDF parsing preference: {mode}"
+                )
+            else:
+                # Global setting is fallback
+                mode = settings.PDF_PARSING_MODE
+                print(f"[DOCUMENT_UTILS] Using global PDF_PARSING_MODE setting: {mode}")
+
+            return await extract_text_from_pdf_bytes_async(
+                file_content, filename, parsing_mode=mode
+            )
+
+        elif file_ext in [".docx", ".doc"]:
+            # Handle Word documents using our unified DOCX function
+            if file_ext == ".docx":
+                return extract_text_from_docx_bytes(file_content, filename)
+            else:
+                # For .doc files, fall back to textloader approach
+                with tempfile.NamedTemporaryFile(
+                    delete=False, suffix=file_ext
+                ) as temp_file:
+                    temp_file.write(file_content)
+                    temp_file_path = temp_file.name
+
+                try:
+                    loader = TextLoader(temp_file_path, encoding="utf-8")
+                    documents = loader.load()
+                    return "\n\n".join([doc.page_content for doc in documents])
+                except UnicodeDecodeError:
+                    try:
+                        loader = TextLoader(temp_file_path, encoding="latin-1")
+                        documents = loader.load()
+                        return "\n\n".join([doc.page_content for doc in documents])
+                    except Exception as e:
+                        return f"Failed to extract text from {filename}: {str(e)}"
+                finally:
+                    if os.path.exists(temp_file_path):
+                        os.unlink(temp_file_path)
+
+        elif file_ext in [".txt", ".md"]:
+            # Handle text files
+            try:
+                return file_content.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    return file_content.decode("latin-1")
+                except UnicodeDecodeError:
+                    return f"Unable to extract text from {filename} - encoding issue"
+
+        elif file_ext == ".csv":
+            # Handle CSV files
+            return extract_text_from_csv_bytes(file_content, filename)
+
+        elif file_ext in [".xlsx", ".xls"]:
+            # Handle Excel files
+            return extract_text_from_xlsx_bytes(file_content, filename)
+
+        else:
+            # Try to decode as text for unknown file types
+            try:
+                return file_content.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    return file_content.decode("latin-1")
+                except UnicodeDecodeError:
+                    return f"Unable to extract text from {filename} - unsupported file format"
+
+    except Exception as e:
+        print(f"Error extracting text from {filename}: {e}")
+        return f"Failed to extract text from {filename}: {str(e)}"
+
+
 async def extract_documents_from_file_unified(
     file_content: bytes, filename: str, pdf_parsing_mode: str = None, current_user=None
 ) -> List[Document]:

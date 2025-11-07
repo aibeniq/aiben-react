@@ -207,12 +207,12 @@ async def get_reportgenie_progress(
         raise HTTPException(status_code=404, detail="Task not found")
 
     # Debug logging to see what's actually being returned
-    # print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
-    # print(
-    #    f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
-    # )
-    # print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
-    # print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+    print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
+    print(
+        f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
+    )
+    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
 
     # Check each stage completion status
     stages = progress_data.get("stages", {})
@@ -744,7 +744,18 @@ async def generate_report(
                                     },
                                 )
 
-                                section_content = synthesized_answer
+                                # Replace insufficient context phrase with translated message
+                                if (
+                                    settings.LLM_INSUFFICIENT_INFO_PHRASE
+                                    in synthesized_answer
+                                ):
+                                    insufficient_context_message = translate_frontend(
+                                        "errors.insufficientContext",
+                                        language=user_language,
+                                    )
+                                    section_content = insufficient_context_message
+                                else:
+                                    section_content = synthesized_answer
 
                                 # Build citations from relevant chunks using provenance
                                 source_citations = []
@@ -2694,7 +2705,11 @@ async def optimize_outline(
 
                         # Synthesize the chunk analyses
                         if not chunk_analyses:
-                            generated_content = "No relevant information found in the knowledge base to answer this question."
+                            user_language = current_user.preferred_language or "en"
+                            insufficient_context_message = translate_frontend(
+                                "errors.insufficientContext", language=user_language
+                            )
+                            generated_content = insufficient_context_message
                         else:
                             chunk_analyses_text = "\n\n".join(chunk_analyses)
                             synthesized_answer = invoke_llm(
@@ -2707,11 +2722,19 @@ async def optimize_outline(
                                     "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
                                 },
                             )
-                            # Translate the synthesized answer if needed
-                            # generated_content = await translate_text_if_needed(
-                            #     synthesized_answer, session, current_user, llm
-                            # )
-                            generated_content = synthesized_answer
+
+                            # Replace insufficient context phrase with translated message
+                            if (
+                                settings.LLM_INSUFFICIENT_INFO_PHRASE
+                                in synthesized_answer
+                            ):
+                                user_language = current_user.preferred_language or "en"
+                                insufficient_context_message = translate_frontend(
+                                    "errors.insufficientContext", language=user_language
+                                )
+                                generated_content = insufficient_context_message
+                            else:
+                                generated_content = synthesized_answer
 
                         print(
                             f"Generated {len(generated_content)} characters for section using full text scan"

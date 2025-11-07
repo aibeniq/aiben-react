@@ -95,7 +95,8 @@
       "timeout": "Nag-timeout ang request. Subukang muli.",
       "largeFileTimeout": "Nag-timeout ang pagproseso ng malaking file. Subukang lumipat sa 'Full Text Scan' mode para sa mas mahusay na performance sa malalaking file.",
       "fileSize": "Masyadong malaki ang file. Pumili ng mas maliliit na file.",
-      "serverError": "May error sa server. Subukang muli mamaya."
+      "serverError": "May error sa server. Subukang muli mamaya.",
+      "insufficientContext": "Hindi nakita ang kaugnay na impormasyon. Mangyaring magtanong ng mas tiyak o mag-upload ng ibang dokumento."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Ang paglalarawan ay dapat na hindi bababa sa 10 character ang haba upang magbigay ng sapat na konteksto para sa mga mungkahi ng AI"
   },
   "common": {
+    "user": "User",
     "loading": "Naglo-load...",
     "noData": "Walang available na data",
     "success": "Tagumpay!",

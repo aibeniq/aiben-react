@@ -95,7 +95,8 @@
       "timeout": "Zahteva je potekla. Poskusite znova.",
       "largeFileTimeout": "Obdelava velikih datotek je potekla. Poskusite preklopiti v način 'Popolno skeniranje besedila' za boljšo učinkovitost z velikimi datotekami.",
       "fileSize": "Datoteka je prevelika. Izberite manjše datoteke.",
-      "serverError": "Prišlo je do napake strežnika. Poskusite znova pozneje."
+      "serverError": "Prišlo je do napake strežnika. Poskusite znova pozneje.",
+      "insufficientContext": "V bazi znanja ni bilo mogoče najti ustreznih informacij za odgovor na to vprašanje."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Opis mora biti dolg vsaj 10 znakov, da zagotovi dovolj konteksta za predloge AI"
   },
   "common": {
+    "user": "User",
     "loading": "Nalaganje...",
     "noData": "Ni razpoložljivih podatkov",
     "success": "Uspeh!",

@@ -95,7 +95,8 @@
       "timeout": "請求逾時。請重試。",
       "largeFileTimeout": "大型檔案處理逾時。嘗試切換到「全文掃描」模式以獲得更好的大型檔案效能。",
       "fileSize": "檔案過大。請選擇較小的檔案。",
-      "serverError": "發生伺服器錯誤。請稍後重試。"
+      "serverError": "發生伺服器錯誤。請稍後重試。",
+      "insufficientContext": "在知識庫中未找到回答此問題的相關資訊。"
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "描述必須至少 10 個字符長，以提供足夠的上下文給 AI 建議"
   },
   "common": {
+    "user": "User",
     "loading": "載入中...",
     "noData": "無可用資料",
     "success": "成功！",

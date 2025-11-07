@@ -95,7 +95,8 @@
       "timeout": "Begäran timade ut. Försök igen.",
       "largeFileTimeout": "Bearbetning av stora filer timade ut. Prova 'Fulltext-skanning'-läge för bättre prestanda med stora filer.",
       "fileSize": "Filen är för stor. Välj mindre filer.",
-      "serverError": "Ett serverfel inträffade. Försök igen senare."
+      "serverError": "Ett serverfel inträffade. Försök igen senare.",
+      "insufficientContext": "Ingen relevant information hittades i kunskapsbanken för att besvara denna fråga."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Beskrivningar måste vara minst 10 tecken långa för att ge tillräcklig kontext för AI-förslag"
   },
   "common": {
+    "user": "User",
     "loading": "Laddar...",
     "noData": "Ingen data tillgänglig",
     "success": "Lyckades!",

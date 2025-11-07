@@ -95,7 +95,8 @@
       "timeout": "Anmodning timeout. Prøv igen.",
       "largeFileTimeout": "Behandling af store filer timeout. Prøv 'Fuldtekst-scanning'-tilstand for bedre ydeevne med store filer.",
       "fileSize": "Filen er for stor. Vælg mindre filer.",
-      "serverError": "En serverfejl opstod. Prøv igen senere."
+      "serverError": "En serverfejl opstod. Prøv igen senere.",
+      "insufficientContext": "Ingen relevant information fundet i vidensbasen til at besvare dette spørgsmål."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Beskrivelser skal være mindst 10 tegn lange for at give tilstrækkelig kontekst for AI-forslag"
   },
   "common": {
+    "user": "User",
     "loading": "Indlæser...",
     "noData": "Ingen data tilgængelig",
     "success": "Succes!",

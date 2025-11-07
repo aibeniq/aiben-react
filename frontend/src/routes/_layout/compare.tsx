@@ -9,11 +9,15 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
 import { type TwinCheckTopicList, TwincheckService } from "@/client"
+import ProcessingSettingsPopup, {
+  type ProcessingSettings,
+} from "@/components/Common/ProcessingSettingsPopup"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
+import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 import { useTwincheckProgress } from "@/hooks/useTwincheckProgress"
@@ -23,6 +27,7 @@ import { copyToClipboard } from "@/utils/copyToClipboard"
 
 const TwinCheck = () => {
   const { t, i18n } = useTranslation()
+  const { user } = useAuth()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { registerOperation } = useOperationCancellation()
   const { compareResult, setCompareResult, compareInputs, setCompareInputs, clearCompareResult } =
@@ -49,6 +54,13 @@ const TwinCheck = () => {
   // Loading state
   const [loading, setLoading] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
+
+  // Processing settings state - initialized from user defaults
+  const [processingSettings, setProcessingSettings] = useState<ProcessingSettings>({
+    searchMode: (user?.default_processing_mode as "vector" | "full_scan") || "vector",
+    visionAnalysis: user?.vision_analysis_enabled || false,
+    pdfParsing: (user?.pdf_parsing_preference as "enhanced" | "basic") || "basic",
+  })
 
   // Progress tracking
   const [taskId, setTaskId] = useState<string | null>(null)
@@ -364,6 +376,9 @@ const TwinCheck = () => {
           task_id: newTaskId, // Pass task_id for progress tracking
           comparison_topics: data.comparison_topics,
           topic_list_name: data.topic_list_name,
+          search_mode: processingSettings.searchMode,
+          vision_analysis_enabled: processingSettings.visionAnalysis,
+          pdf_parsing_preference: processingSettings.pdfParsing,
         } as any, // Type assertion - SDK will be regenerated later
       })
 
@@ -466,7 +481,7 @@ const TwinCheck = () => {
           right="0"
           bottom="0"
           bg="blackAlpha.800"
-          zIndex="50"
+          zIndex="40"
           display="flex"
           flexDirection="column"
           alignItems="center"
@@ -567,6 +582,20 @@ const TwinCheck = () => {
             topics={topics}
           />
         </SelectionModal>
+
+        {/* Processing Settings - outside greyed-out area */}
+        <Box width="100%">
+          <HStack align="center" gap={2}>
+            <Text fontSize="sm" fontWeight="medium">
+              {t("processingSettings.title")}
+            </Text>
+            <ProcessingSettingsPopup
+              settings={processingSettings}
+              onSettingsChange={setProcessingSettings}
+              disabled={loading}
+            />
+          </HStack>
+        </Box>
 
         <VStack
           align="stretch"

@@ -95,7 +95,8 @@
       "timeout": "Permintaan tamat masa. Sila cuba lagi.",
       "largeFileTimeout": "Pemprosesan fail besar tamat masa. Cuba tukar ke mod 'Imbasan Teks Penuh' untuk prestasi yang lebih baik dengan fail besar.",
       "fileSize": "Fail terlalu besar. Sila pilih fail yang lebih kecil.",
-      "serverError": "Ralat pelayan berlaku. Sila cuba lagi kemudian."
+      "serverError": "Ralat pelayan berlaku. Sila cuba lagi kemudian.",
+      "insufficientContext": "Maklumat yang berkaitan tidak dijumpai. Sila ajukan soalan yang lebih spesifik atau muat naik dokumen lain."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Penerangan mestilah sekurang-kurangnya 10 aksara panjang untuk memberikan konteks yang cukup untuk cadangan AI"
   },
   "common": {
+    "user": "User",
     "loading": "Memuatkan...",
     "noData": "Tiada data tersedia",
     "success": "Berjaya!",

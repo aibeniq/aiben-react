@@ -278,25 +278,24 @@ const ChecklistModal = ({
         response = await apiResponse.json()
       } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
         // Use the SDK method with knowledge base reference
-        response = await VeradocService.generateQuestions({
-          requestBody: {
+        response = await VeradocService.generateQuestionsWithFiles({
+          formData: {
             description: checklistDescription.trim(),
             checklist_type: "general",
-            knowledge_base_id: referenceKnowledgeBase.id,
-            search_mode: processingSettings.searchMode,
+            files: [],
             vision_analysis_override: processingSettings.visionAnalysis,
             pdf_parsing_override: processingSettings.pdfParsing,
           },
         })
       } else {
         // Use the basic SDK method without references
-        response = await VeradocService.generateQuestions({
-          requestBody: {
+        response = await VeradocService.generateQuestionsWithFiles({
+          formData: {
             description: checklistDescription.trim(),
             checklist_type: "general",
-            search_mode: processingSettings.searchMode,
             vision_analysis_override: processingSettings.visionAnalysis,
             pdf_parsing_override: processingSettings.pdfParsing,
+            files: [],
           },
         })
       }

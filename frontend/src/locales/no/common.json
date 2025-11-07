@@ -95,7 +95,8 @@
       "timeout": "Forespørsel tidsavbrudd. Prøv igjen.",
       "largeFileTimeout": "Behandling av store filer tidsavbrudd. Prøv 'Fulltekst-skanning'-modus for bedre ytelse med store filer.",
       "fileSize": "Filen er for stor. Velg mindre filer.",
-      "serverError": "En serverfeil oppstod. Prøv igjen senere."
+      "serverError": "En serverfeil oppstod. Prøv igjen senere.",
+      "insufficientContext": "Ingen relevant informasjon funnet i kunnskapsbasen for å svare på dette spørsmålet."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Beskrivelser må være minst 10 tegn lange for å gi tilstrekkelig kontekst for AI-forslag"
   },
   "common": {
+    "user": "User",
     "loading": "Laster...",
     "noData": "Ingen data tilgjengelig",
     "success": "Suksess!",

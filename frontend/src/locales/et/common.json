@@ -95,7 +95,8 @@
       "timeout": "Taotlus aegus. Palun proovi uuesti.",
       "largeFileTimeout": "Suurte failide töötlemine aegus. Proovi lülituda 'Täisteksti skaneerimine' režiimi parema jõudluse saavutamiseks suurte failidega.",
       "fileSize": "Fail on liiga suur. Palun vali väiksemad failid.",
-      "serverError": "Tekkis serveri viga. Palun proovi hiljem uuesti."
+      "serverError": "Tekkis serveri viga. Palun proovi hiljem uuesti.",
+      "insufficientContext": "Teadmistebaasist ei leitud küsimusele vastamiseks asjakohast teavet."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Kirjeldused peavad olema vähemalt 10 tähemärki pikkad, et pakkuda AI soovitustele piisavat konteksti"
   },
   "common": {
+    "user": "User",
     "loading": "Laadimine...",
     "noData": "Andmed pole saadaval",
     "success": "Edukas!",

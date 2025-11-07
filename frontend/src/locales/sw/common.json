@@ -95,7 +95,8 @@
       "timeout": "Ombi limepitwa na wakati. Tafadhali jaribu tena.",
       "largeFileTimeout": "Usindikaji wa faili kubwa umepitwa na wakati. Jaribu kubadili kwenye hali ya 'Skansio ya Maandishi Kamili' kwa utendaji bora na faili kubwa.",
       "fileSize": "Faili ni kubwa sana. Tafadhali chagua faili ndogo.",
-      "serverError": "Hitilafu ya seva imetokea. Tafadhali jaribu tena baadaye."
+      "serverError": "Hitilafu ya seva imetokea. Tafadhali jaribu tena baadaye.",
+      "insufficientContext": "Habari zinazohusiana hazijapatikana. Tafadhali uliza swali mahususi zaidi au pakia hati nyingine."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Maelezo yanapaswa kuwa na angalau herufi 10 kwa urefu ili kutoa muktadha wa kutosha kwa mapendekezo ya AI"
   },
   "common": {
+    "user": "User",
     "loading": "Inapakia...",
     "noData": "Hakuna data inayopatikana",
     "success": "Mafanikio!",

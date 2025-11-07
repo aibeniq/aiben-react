@@ -95,7 +95,8 @@
       "timeout": "Permintaan waktu habis. Silakan coba lagi.",
       "largeFileTimeout": "Pemrosesan file besar waktu habis. Coba beralih ke mode 'Pemindaian Teks Lengkap' untuk performa yang lebih baik dengan file besar.",
       "fileSize": "File terlalu besar. Silakan pilih file yang lebih kecil.",
-      "serverError": "Terjadi kesalahan server. Silakan coba lagi nanti."
+      "serverError": "Terjadi kesalahan server. Silakan coba lagi nanti.",
+      "insufficientContext": "Informasi yang relevan tidak ditemukan. Silakan ajukan pertanyaan yang lebih spesifik atau unggah dokumen lain."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Deskripsi harus setidaknya 10 karakter panjangnya untuk memberikan konteks yang cukup untuk saran AI"
   },
   "common": {
+    "user": "User",
     "loading": "Memuat...",
     "noData": "Tidak ada data tersedia",
     "success": "Berhasil!",

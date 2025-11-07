@@ -95,7 +95,8 @@
       "timeout": "Tempo de requisição esgotado. Por favor, tente novamente.",
       "largeFileTimeout": "O processamento de arquivos grandes excedeu o tempo limite. Tente alternar para o modo 'Varredura de Texto Completo' para melhor desempenho com arquivos grandes.",
       "fileSize": "Arquivo muito grande. Escolha arquivos menores.",
-      "serverError": "Ocorreu um erro no servidor. Por favor, tente novamente mais tarde."
+      "serverError": "Ocorreu um erro no servidor. Por favor, tente novamente mais tarde.",
+      "insufficientContext": "Não foi encontrada informação relevante. Faça uma pergunta mais específica ou faça upload de outro documento."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "A descrição deve ter pelo menos 10 caracteres de comprimento para fornecer contexto suficiente para sugestões de IA"
   },
   "common": {
+    "user": "User",
     "loading": "Carregando...",
     "noData": "Nenhum dado disponível",
     "success": "Sucesso!",

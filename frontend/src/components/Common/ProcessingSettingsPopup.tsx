@@ -130,7 +130,11 @@ const ProcessingSettingsPopup = ({
             />
           )}
           <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && handleClose()} size="lg">
-            <DialogContent portalled={false} backdrop={false} style={{ zIndex: 2 }}>
+            <DialogContent
+              portalled={false}
+              backdrop={false}
+              style={{ zIndex: (backdropZIndex ?? 1) + 1 }}
+            >
               <DialogHeader>
                 <DialogTitle>{t("processingSettings.title")}</DialogTitle>
                 <DialogCloseTrigger />

@@ -99,14 +99,16 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
 
       // Store the cancelable promise
       ongoingRequestRef.current = VeradocService.optimizeChecklist({
-        knowledgeBaseId: selectedKnowledgeBase.id,
-        questions: checklist.questions || "",
-        customInstructions: customInstructions || undefined,
-        searchMode:
-          processingSettings.searchMode === "full_scan"
-            ? "full_text"
-            : processingSettings.searchMode,
         formData: {
+          knowledge_base_id: selectedKnowledgeBase.id,
+          questions: checklist.questions || "",
+          custom_instructions: customInstructions || undefined,
+          search_mode:
+            processingSettings.searchMode === "full_scan"
+              ? "full_text"
+              : processingSettings.searchMode,
+          vision_analysis_override: processingSettings.visionAnalysis,
+          pdf_parsing_override: processingSettings.pdfParsing,
           files: files,
         },
       })

@@ -90,7 +90,8 @@
       "timeout": "Cererea a expirat. Încercați din nou.",
       "largeFileTimeout": "Procesarea fișierului mare a expirat. Încercați să comutați la modul 'Scanare text complet' pentru performanță mai bună cu fișiere mari.",
       "fileSize": "Fișierul este prea mare. Vă rugăm să alegeți fișiere mai mici.",
-      "serverError": "A apărut o eroare de server. Încercați din nou mai târziu."
+      "serverError": "A apărut o eroare de server. Încercați din nou mai târziu.",
+      "insufficientContext": "Nu s-a găsit informație relevantă în baza de cunoștințe pentru a răspunde la această întrebare."
     }
   },
   "settings": {
@@ -202,6 +203,7 @@
     "minimumDescriptionLength": "Descrierea trebuie să aibă cel puțin 10 caractere lungime pentru a oferi context suficient pentru sugestiile AI"
   },
   "common": {
+    "user": "User",
     "loading": "Se încarcă...",
     "noData": "Nu sunt date disponibile",
     "success": "Succes!",

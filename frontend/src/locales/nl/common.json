@@ -92,7 +92,8 @@
       "timeout": "Aanvraag time-out. Probeer het opnieuw.",
       "largeFileTimeout": "Het verwerken van grote bestanden heeft te lang geduurd. Probeer over te schakelen naar 'Volledige documentscan' voor betere prestaties bij grote bestanden.",
       "fileSize": "Bestand is te groot. Kies kleinere bestanden.",
-      "serverError": "Er is een serverfout opgetreden. Probeer het later opnieuw."
+      "serverError": "Er is een serverfout opgetreden. Probeer het later opnieuw.",
+      "insufficientContext": "Geen relevante informatie gevonden in de kennisbank om deze vraag te beantwoorden."
     }
   },
   "settings": {
@@ -204,6 +205,7 @@
     "minimumDescriptionLength": "Beschrijving moet minimaal 10 tekens lang zijn om voldoende context te bieden voor AI-suggesties"
   },
   "common": {
+    "user": "User",
     "loading": "Laden...",
     "noData": "Geen gegevens beschikbaar",
     "success": "Succes!",

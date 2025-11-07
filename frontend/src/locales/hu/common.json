@@ -95,7 +95,8 @@
       "timeout": "A kérés időtúllépés miatt megszakadt. Kérjük, próbálkozzon újra.",
       "largeFileTimeout": "Nagy fájl feldolgozása időtúllépés miatt megszakadt. Nagy fájlok esetén váltson a „Teljes szöveg átvizsgálás” módra a jobb teljesítmény érdekében.",
       "fileSize": "A fájl túl nagy. Kérjük, válasszon kisebb fájlokat.",
-      "serverError": "Szerverhiba történt. Kérjük, próbálkozzon később újra."
+      "serverError": "Szerverhiba történt. Kérjük, próbálkozzon később újra.",
+      "insufficientContext": "Nem található releváns információ a tudásbázisban ennek a kérdésnek a megválaszolásához."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "A leírásoknak legalább 10 karakter hosszúnak kell lenniük, hogy elegendő kontextust biztosítsanak az AI javaslatokhoz"
   },
   "common": {
+    "user": "User",
     "loading": "Betöltés...",
     "noData": "Nincs elérhető adat",
     "success": "Sikeres!",

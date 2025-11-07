@@ -1,4 +1,4 @@
-import { Box, Container, Heading, Tabs, VStack } from "@chakra-ui/react"
+import { Box, Container, Heading, Skeleton, Tabs, VStack } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 
@@ -54,12 +54,25 @@ export const Route = createFileRoute("/_layout/settings")({
 })
 
 function UserSettings() {
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, isLoading } = useAuth()
   const { t } = useTranslation()
   const finalTabs = currentUser?.is_superuser ? tabsConfig.slice(0, 3) : tabsConfig
 
-  if (!currentUser) {
-    return null
+  // Show loading state instead of returning null to prevent blank screen
+  if (isLoading || !currentUser) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <VStack gap={6} align="stretch">
+          <Box>
+            <Skeleton height="40px" width="200px" />
+          </Box>
+          <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
+            <Skeleton height="50px" mb={4} />
+            <Skeleton height="400px" />
+          </Box>
+        </VStack>
+      </Container>
+    )
   }
 
   return (

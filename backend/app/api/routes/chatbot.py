@@ -61,6 +61,77 @@ from pathlib import Path
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
+# Cache for frontend translations
+_frontend_translations_cache = None
+
+
+def _load_frontend_translations():
+    """
+    Load frontend translations from common.json files.
+    """
+    global _frontend_translations_cache
+    if _frontend_translations_cache is not None:
+        return _frontend_translations_cache
+
+    translations = {}
+    # In Docker, frontend locales are copied to /app/frontend/src/locales
+    locales_dir = Path("/app/frontend/src/locales")
+
+    # Fallback for development (not in Docker)
+    if not locales_dir.exists():
+        # Get to project root: backend/app/api/routes -> backend/app/api -> backend/app -> backend -> project_root
+        locales_dir = (
+            Path(__file__).parent.parent.parent.parent.parent
+            / "frontend"
+            / "src"
+            / "locales"
+        )
+
+    if locales_dir.exists():
+        for lang_dir in locales_dir.iterdir():
+            if lang_dir.is_dir():
+                common_file = lang_dir / "common.json"
+                if common_file.exists():
+                    try:
+                        with open(common_file, "r", encoding="utf-8") as f:
+                            translations[lang_dir.name] = json.load(f)
+                    except Exception as e:
+                        print(f"Error loading translations for {lang_dir.name}: {e}")
+    else:
+        print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+
+    _frontend_translations_cache = translations
+    return translations
+
+
+def translate_frontend(key, language="en", **kwargs):
+    """
+    Translate a key using frontend translations with parameter substitution.
+    """
+    translations = _load_frontend_translations()
+
+    # Get translations for the requested language, fallback to English
+    lang_translations = translations.get(language, translations.get("en", {}))
+
+    # Navigate to the nested key
+    keys = key.split(".")
+    value = lang_translations
+    for k in keys:
+        if isinstance(value, dict) and k in value:
+            value = value[k]
+        else:
+            # Key not found, return the key itself
+            return key
+
+    if not isinstance(value, str):
+        return key
+
+    # Substitute parameters
+    try:
+        return value.format(**kwargs)
+    except (KeyError, ValueError):
+        return value
+
 
 # Request models for chat endpoints
 class ChatRequest(BaseModel):
@@ -524,9 +595,12 @@ async def _handle_full_text_kb_query(
         else:
             print("No images found in processed source files")
 
-        # Replace the internal insufficient info phrase with a user-friendly message
+        # Replace the internal insufficient info phrase with a user-friendly translated message
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer:
-            final_answer = "I'm sorry, but I couldn't find enough information in the knowledge base to answer your question. The knowledge base may not contain the specific details you're looking for, or the question might be about content not present in the stored documents."
+            user_language = current_user.preferred_language or "en"
+            final_answer = translate_frontend(
+                "errors.insufficientContext", language=user_language
+            )
 
         # Record the interaction
         record_llm_interaction(
@@ -905,9 +979,12 @@ async def _handle_full_text_document_query(
         #     final_answer, session, current_user, llm
         # )
 
-        # Replace the internal insufficient info phrase with a user-friendly message
+        # Replace the internal insufficient info phrase with a user-friendly translated message
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer:
-            final_answer = "I'm sorry, but I couldn't find enough information in the provided documents to answer your question. The documents may not contain the specific details you're looking for, or the question might be about content not present in the uploaded files."
+            user_language = current_user.preferred_language or "en"
+            final_answer = translate_frontend(
+                "errors.insufficientContext", language=user_language
+            )
 
         # Record the interaction
         record_llm_interaction(
@@ -1563,9 +1640,12 @@ async def query_knowledge_base(
             },
         )
 
-        # Replace the internal insufficient info phrase with a user-friendly message
+        # Replace the internal insufficient info phrase with a user-friendly translated message
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in answer_content:
-            answer_content = "I'm sorry, but I couldn't find enough information in the knowledge base to answer your question. The knowledge base may not contain the specific details you're looking for, or the question might be about content not present in the stored documents."
+            user_language = current_user.preferred_language or "en"
+            answer_content = translate_frontend(
+                "errors.insufficientContext", language=user_language
+            )
 
         return {
             "answer": answer_content,
@@ -2364,9 +2444,12 @@ async def query_document(
             },
         )
 
-        # Replace the internal insufficient info phrase with a user-friendly message
+        # Replace the internal insufficient info phrase with a user-friendly translated message
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in answer_content:
-            answer_content = "I'm sorry, but I couldn't find enough information in the provided documents to answer your question. The documents may not contain the specific details you're looking for, or the question might be about content not present in the uploaded files."
+            user_language = current_user.preferred_language or "en"
+            answer_content = translate_frontend(
+                "errors.insufficientContext", language=user_language
+            )
 
         return {
             "answer": answer_content,

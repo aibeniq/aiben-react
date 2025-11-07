@@ -95,7 +95,8 @@
       "timeout": "Pieprasījums beidzās ar noildzi. Lūdzu, mēģiniet vēlreiz.",
       "largeFileTimeout": "Liela faila apstrāde beidzās ar noildzi. Mēģiniet pārslēgties uz 'Pilna teksta skenēšana' režīmu labākai veiktspējai ar lieliem failiem.",
       "fileSize": "Fails ir pārāk liels. Lūdzu, izvēlieties mazākus failus.",
-      "serverError": "Radās servera kļūda. Lūdzu, mēģiniet vēlāk."
+      "serverError": "Radās servera kļūda. Lūdzu, mēģiniet vēlāk.",
+      "insufficientContext": "Zināšanu bāzē netika atrasta atbilstoša informācija, lai atbildētu uz šo jautājumu."
     }
   },
   "settings": {
@@ -207,6 +208,7 @@
     "minimumDescriptionLength": "Aprakstam jābūt vismaz 10 rakstzīmju garam, lai nodrošinātu pietiekamu kontekstu AI ieteikumiem"
   },
   "common": {
+    "user": "User",
     "loading": "Ielādē...",
     "noData": "Nav pieejamu datu",
     "success": "Panākumi!",

@@ -95,7 +95,8 @@
       "timeout": "A solicitação expirou. Tente novamente.",
       "largeFileTimeout": "O processamento de arquivo grande expirou. Tente alternar para o modo 'Varredura de Texto Completo' para melhor desempenho com arquivos grandes.",
       "fileSize": "O arquivo é muito grande. Escolha arquivos menores.",
-      "serverError": "Ocorreu um erro no servidor. Tente novamente mais tarde."
+      "serverError": "Ocorreu um erro no servidor. Tente novamente mais tarde.",
+      "insufficientContext": "Nenhuma informação relevante encontrada na base de conhecimento para responder a esta pergunta."
     }
   },
   "settings": {
@@ -491,6 +492,7 @@
     }
   },
   "common": {
+    "user": "User",
     "loading": "Carregando...",
     "noData": "Nenhum dado disponível",
     "success": "Sucesso!",
