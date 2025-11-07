@@ -238,7 +238,7 @@ const ChatbotMain = () => {
             {
               role: "assistant",
               content:
-                "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Document Scan' mode using the gear icon above.",
+                "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Deep Search' mode using the gear icon above.",
             },
           ])
         }

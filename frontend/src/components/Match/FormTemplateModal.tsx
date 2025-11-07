@@ -250,7 +250,7 @@ const FormTemplateModal = ({
         }
 
         const searchMethodText =
-          processingSettings.searchMode === "vector" ? "vector search" : "full document scan"
+          processingSettings.searchMode === "vector" ? "fast search" : "deep search"
         let referenceText = ""
 
         if (referenceMode === "files" && exampleFiles.length > 0) {

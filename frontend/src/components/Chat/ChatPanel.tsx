@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  HStack,
-  IconButton,
-  Input,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Button, HStack, IconButton, Input, VStack, useDisclosure } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import { FaBrain } from "react-icons/fa"
 import { FiFileText, FiPaperclip, FiSearch, FiSend, FiX } from "react-icons/fi"
@@ -61,11 +53,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
 
   return (
     <HStack spacing={4}>
-      <IconButton
-        icon={<FiPaperclip />}
-        aria-label="Attach file"
-        onClick={() => {}}
-      />
+      <IconButton icon={<FiPaperclip />} aria-label="Attach file" onClick={() => {}} />
       <Input
         placeholder="Type your message here..."
         value={input}
@@ -76,9 +64,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
         Send
       </Button>
       <RadioGroup
-        onValueChange={(details) =>
-          setSearchMode(details.value as "vector" | "full_text")
-        }
+        onValueChange={(details) => setSearchMode(details.value as "vector" | "full_text")}
         value={searchMode}
       >
         <HStack gap={4}>
@@ -104,11 +90,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>(
-    [],
+  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    propKnowledgeBase || null,
   )
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] =
-    useState<KnowledgeBasePublic | null>(propKnowledgeBase || null)
   const endOfMessagesRef = useRef<HTMLDivElement>(null)
 
   const handleSendMessage = async (input: string) => {
@@ -179,9 +164,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Type a message..."
                         onKeyDown={(e) =>
-                          e.key === "Enter" &&
-                          !isLoading &&
-                          handleSendMessage(input)
+                          e.key === "Enter" && !isLoading && handleSendMessage(input)
                         }
                         disabled={isLoading}
                       />
@@ -200,13 +183,13 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                       value={searchType}
                     >
                       <HStack gap={4}>
-                        <Radio value="vector">Vector Search</Radio>
+                        <Radio value="vector">Fast Search</Radio>
                         <Radio value="full_text">Full Text Scan</Radio>
                       </HStack>
                     </RadioGroup>
                     <Text fontSize="xs" color="gray.500" mt={1}>
-                      Vector search provides fast, targeted results. Full text
-                      scan reviews all content in the knowledge base.
+                      Fast search provides fast, targeted results. Full text scan reviews all
+                      content in the knowledge base.
                     </Text>
                   </VStack>
                 </Box>

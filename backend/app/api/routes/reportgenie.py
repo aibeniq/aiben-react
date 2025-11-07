@@ -773,7 +773,7 @@ async def generate_report(
                                             "content": display_content,
                                             "metadata": {
                                                 "source": prov.get(
-                                                    "source", "Full Document Scan"
+                                                    "source", "Deep Search"
                                                 ),
                                                 "source_data_id": prov.get(
                                                     "source_data_id", ""
@@ -827,7 +827,7 @@ async def generate_report(
                                         {
                                             "content": display_content,
                                             "metadata": {
-                                                "source": "Full Document Scan",
+                                                "source": "Deep Search",
                                                 "chunk_index": idx,
                                                 "scan_type": "full_text",
                                             },
@@ -1704,9 +1704,7 @@ async def generate_outline_json(
 
         if not analysis:
             search_method = (
-                "vector search"
-                if request.search_mode == "vector"
-                else "full document scan"
+                "fast search" if request.search_mode == "vector" else "deep search"
             )
             analysis = f"Generated {len(sections)} outline sections based on the provided description using {search_method}"
             if request.knowledge_base_id:
