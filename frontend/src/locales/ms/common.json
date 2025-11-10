@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Kata laluan tidak sepadan",
     "networkError": "Ralat rangkaian. Semak sambungan anda.",
     "unauthorized": "Anda tidak diberi kuasa untuk tindakan ini.",
-    "notFound": "Sumber yang diminta tidak dijumpai."
+    "notFound": "Sumber yang diminta tidak dijumpai.",
+    "insufficientContext": "Tiada maklumat relevan dijumpai dalam pangkalan pengetahuan untuk menjawab soalan ini."
+  },
+  "success": {
+    "questionsCopied": "Soalan disalin ke papan keratan",
+    "optimizedQuestionsApplied": "{{count}} soalan yang dioptimumkan digunakan"
   },
   "help": {
     "dashboard": "Halaman gambaran utama yang memaparkan statistik penggunaan dan aktiviti terkini",

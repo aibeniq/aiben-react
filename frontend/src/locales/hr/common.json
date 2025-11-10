@@ -167,7 +167,12 @@
     "passwordsDoNotMatch": "Lozinke se ne podudaraju",
     "networkError": "Mrežna greška. Provjerite vezu.",
     "unauthorized": "Nemate ovlasti za ovu radnju.",
-    "notFound": "Traženi resurs nije pronađen."
+    "notFound": "Traženi resurs nije pronađen.",
+    "insufficientContext": "Nisu pronađene relevantne informacije u bazi znanja za odgovor na ovo pitanje."
+  },
+  "success": {
+    "questionsCopied": "Pitanja kopirana u međuspremnik",
+    "optimizedQuestionsApplied": "{{count}} optimiziranih pitanja primijenjeno"
   },
   "help": {
     "dashboard": "Glavna stranica pregleda koja prikazuje statistiku korištenja i nedavnu aktivnost",

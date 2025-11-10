@@ -167,7 +167,12 @@
     "passwordsDoNotMatch": "Hasła nie pasują",
     "networkError": "Błąd sieci. Sprawdź połączenie.",
     "unauthorized": "Nie masz uprawnień do wykonania tej akcji.",
-    "notFound": "Żądany zasób nie został znaleziony."
+    "notFound": "Żądany zasób nie został znaleziony.",
+    "insufficientContext": "Nie znaleziono odpowiednich informacji w bazie wiedzy, aby odpowiedzieć na to pytanie."
+  },
+  "success": {
+    "questionsCopied": "Pytania skopiowane do schowka",
+    "optimizedQuestionsApplied": "Zastosowano {{count}} zoptymalizowanych pytań"
   },
   "help": {
     "dashboard": "Główny pulpit nawigacyjny wyświetlający statystyki użytkowania i najnowszą aktywność",

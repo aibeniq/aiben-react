@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "パスワードが一致しません",
     "networkError": "ネットワークエラー。接続を確認してください。",
     "unauthorized": "この操作を実行する権限がありません。",
-    "notFound": "要求されたリソースが見つかりません。"
+    "notFound": "要求されたリソースが見つかりません。",
+    "insufficientContext": "この質問に答えるための関連情報がナレッジベースで見つかりませんでした。"
+  },
+  "success": {
+    "questionsCopied": "質問がクリップボードにコピーされました",
+    "optimizedQuestionsApplied": "{{count}}個の最適化された質問が適用されました"
   },
   "help": {
     "dashboard": "使用統計と最近のアクティビティを表示するメインの概要ページ",

@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "הסיסמות לא תואמות",
     "networkError": "שגיאת רשת. בדוק את החיבור שלך.",
     "unauthorized": "אין לך הרשאה לבצע פעולה זו.",
-    "notFound": "המשאב המבוקש לא נמצא."
+    "notFound": "המשאב המבוקש לא נמצא.",
+    "insufficientContext": "לא נמצאה מידע רלוונטי בבסיס הידע כדי לענות על שאלה זו."
+  },
+  "success": {
+    "questionsCopied": "שאלות הועתקו ללוח",
+    "optimizedQuestionsApplied": "{{count}} שאלות מותאמות הוחלו"
   },
   "help": {
     "dashboard": "דף סקירה ראשי המציג סטטיסטיקות שימוש ופעילות אחרונה",

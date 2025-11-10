@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
     "networkError": "Erreur réseau. Vérifiez votre connexion.",
     "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
-    "notFound": "La ressource demandée n'a pas été trouvée."
+    "notFound": "La ressource demandée n'a pas été trouvée.",
+    "insufficientContext": "Aucune information pertinente trouvée dans la base de connaissances pour répondre à cette question."
+  },
+  "success": {
+    "questionsCopied": "Questions copiées dans le presse-papiers",
+    "optimizedQuestionsApplied": "{{count}} questions optimisées appliquées"
   },
   "help": {
     "dashboard": "Page d'aperçu principal affichant les statistiques d'utilisation et l'activité récente",

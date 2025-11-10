@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Senhas não coincidem",
     "networkError": "Erro de rede. Verifique sua conexão.",
     "unauthorized": "Você não está autorizado a realizar esta ação.",
-    "notFound": "O recurso solicitado não foi encontrado."
+    "notFound": "O recurso solicitado não foi encontrado.",
+    "insufficientContext": "Nenhuma informação relevante encontrada na base de conhecimento para responder a esta pergunta."
+  },
+  "success": {
+    "questionsCopied": "Perguntas copiadas para a área de transferência",
+    "optimizedQuestionsApplied": "{{count}} perguntas otimizadas aplicadas"
   },
   "help": {
     "dashboard": "Página principal de visão geral mostrando estatísticas de uso e atividade recente",

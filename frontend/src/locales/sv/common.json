@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Lösenorden stämmer inte överens",
     "networkError": "Nätverksfel. Kontrollera din anslutning.",
     "unauthorized": "Du har inte behörighet att utföra denna åtgärd.",
-    "notFound": "Den begärda resursen hittades inte."
+    "notFound": "Den begärda resursen hittades inte.",
+    "insufficientContext": "Ingen relevant information hittades i kunskapsbasen för att svara på denna fråga."
+  },
+  "success": {
+    "questionsCopied": "Frågor kopierade till urklipp",
+    "optimizedQuestionsApplied": "{{count}} optimerade frågor tillämpade"
   },
   "help": {
     "dashboard": "Huvudöversiktsida som visar användningsstatistik och senaste aktivitet",

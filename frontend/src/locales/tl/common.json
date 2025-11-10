@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Hindi nagtugma ang mga password",
     "networkError": "Error sa network. Suriin ang inyong koneksyon.",
     "unauthorized": "Walang pahintulot para sa aksyong ito.",
-    "notFound": "Hindi natagpuan ang hiniling na resource."
+    "notFound": "Hindi natagpuan ang hiniling na resource.",
+    "insufficientContext": "Walang relevant na impormasyon na natagpuan sa knowledge base upang sagutin ang tanong na ito."
+  },
+  "success": {
+    "questionsCopied": "Nakopya ang mga tanong sa clipboard",
+    "optimizedQuestionsApplied": "{{count}} na mga optimized na tanong ang inilapat"
   },
   "help": {
     "dashboard": "Pangunahing pahina ng dashboard na nagpapakita ng mga istatistika ng paggamit at kamakailang aktibidad",

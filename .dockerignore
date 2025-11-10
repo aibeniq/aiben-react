@@ -1,0 +1,46 @@
+# Python
+
+**pycache**
+_.pyc
+.mypy_cache
+.coverage
+htmlcov
+.venv
+_.egg-info
+
+# Node (but keep locales)
+
+node_modules
+frontend/dist
+frontend/build
+
+# Git
+
+.git
+.gitignore
+
+# IDE
+
+.vscode
+.idea
+\*.swp
+
+# Docs and tests
+
+_.md
+tests
+_.test.ts
+_.test.tsx
+_.spec.ts
+\*.spec.tsx
+
+# Other
+
+.DS_Store
+_.log
+.env.local
+.env._.local
+
+# Don't ignore frontend locales (needed by backend)
+
+!frontend/src/locales

@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Le password non corrispondono",
     "networkError": "Errore di rete. Controlla la tua connessione.",
     "unauthorized": "Non sei autorizzato a eseguire questa azione.",
-    "notFound": "La risorsa richiesta non è stata trovata."
+    "notFound": "La risorsa richiesta non è stata trovata.",
+    "insufficientContext": "Nessuna informazione rilevante trovata nella knowledge base per rispondere a questa domanda."
+  },
+  "success": {
+    "questionsCopied": "Domande copiate negli appunti",
+    "optimizedQuestionsApplied": "{{count}} domande ottimizzate applicate"
   },
   "help": {
     "dashboard": "Pagina panoramica principale che mostra statistiche di utilizzo e attività recente",

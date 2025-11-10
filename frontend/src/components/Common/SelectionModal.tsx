@@ -1,5 +1,6 @@
 import { CloseButton, Dialog, HStack, Heading, Portal, Switch, Text } from "@chakra-ui/react"
 import type React from "react"
+import { useTranslation } from "react-i18next"
 import { DialogBody, DialogFooter, DialogHeader } from "../ui/dialog"
 import ConfirmButton from "../ui/confirm-button"
 import HelpTooltip from "../ui/help-tooltip"
@@ -29,6 +30,8 @@ const SelectionModal = ({
   onToggleChange,
   toggleTooltipContent = "",
 }: SelectionModalProps) => {
+  const { t } = useTranslation()
+
   if (!isOpen) return null
 
   return (
@@ -72,7 +75,7 @@ const SelectionModal = ({
             <DialogBody>{children}</DialogBody>
             <DialogFooter justifyContent="flex-end">
               <ConfirmButton onClick={onClose} size="md">
-                Done
+                {t("buttons.done")}
               </ConfirmButton>
             </DialogFooter>
           </Dialog.Content>

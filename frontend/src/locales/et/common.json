@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Paroolid ei ühti",
     "networkError": "Võrgu viga. Kontrolli ühendust.",
     "unauthorized": "Sul pole selle toimingu sooritamiseks õigust.",
-    "notFound": "Taotletud ressurssi ei leitud."
+    "notFound": "Taotletud ressurssi ei leitud.",
+    "insufficientContext": "Teadmistebaasist ei leitud sellele küsimusele vastamiseks asjakohast teavet."
+  },
+  "success": {
+    "questionsCopied": "Küsimused kopeeritud lõikelauale",
+    "optimizedQuestionsApplied": "{{count}} optimeeritud küsimust rakendatud"
   },
   "help": {
     "dashboard": "Peamine ülevaate leht, mis näitab kasutusstatistikat ja hiljutist tegevust",

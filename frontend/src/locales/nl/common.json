@@ -167,7 +167,12 @@
     "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
     "networkError": "Netwerkfout. Controleer uw verbinding.",
     "unauthorized": "U bent niet geautoriseerd om deze actie uit te voeren.",
-    "notFound": "De gevraagde bron is niet gevonden."
+    "notFound": "De gevraagde bron is niet gevonden.",
+    "insufficientContext": "Geen relevante informatie gevonden in de kennisbank om deze vraag te beantwoorden."
+  },
+  "success": {
+    "questionsCopied": "Vragen gekopieerd naar klembord",
+    "optimizedQuestionsApplied": "{{count}} geoptimaliseerde vragen toegepast"
   },
   "help": {
     "dashboard": "Het hoofddashboard dat gebruiksstatistieken en recente activiteit toont",

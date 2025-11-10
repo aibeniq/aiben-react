@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Slaptažodžiai nesutampa",
     "networkError": "Tinklo klaida. Patikrinkite ryšį.",
     "unauthorized": "Neturite leidimo atlikti šį veiksmą.",
-    "notFound": "Prašomas išteklius nerastas."
+    "notFound": "Prašomas išteklius nerastas.",
+    "insufficientContext": "Žinių bazėje nerasta atitinkamos informacijos, kad būtų galima atsakyti į šį klausimą."
+  },
+  "success": {
+    "questionsCopied": "Klausimai nukopijuoti į iškarpinę",
+    "optimizedQuestionsApplied": "{{count}} optimizuotų klausimų pritaikyta"
   },
   "help": {
     "dashboard": "Pagrindinis apžvalgos puslapis, rodantis naudojimo statistiką ir naujausią veiklą",

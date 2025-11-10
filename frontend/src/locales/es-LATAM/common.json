@@ -218,7 +218,12 @@
     "passwordsDoNotMatch": "Las contraseñas no coinciden",
     "networkError": "Error de red. Verifica tu conexión.",
     "unauthorized": "No tienes autorización para esta acción.",
-    "notFound": "No se encontró el recurso solicitado."
+    "notFound": "No se encontró el recurso solicitado.",
+    "insufficientContext": "No se encontró información relevante en la base de conocimientos para responder esta pregunta."
+  },
+  "success": {
+    "questionsCopied": "Preguntas copiadas al portapapeles",
+    "optimizedQuestionsApplied": "{{count}} preguntas optimizadas aplicadas"
   },
   "common": {
     "user": "User",

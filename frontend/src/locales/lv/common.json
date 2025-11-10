@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Paroles nesakrīt",
     "networkError": "Tīkla kļūda. Pārbaudiet savienojumu.",
     "unauthorized": "Jums nav atļaujas veikt šo darbību.",
-    "notFound": "Pieprasītais resurss nav atrasts."
+    "notFound": "Pieprasītais resurss nav atrasts.",
+    "insufficientContext": "Zināšanu bāzē nav atrasta atbilstoša informācija, lai atbildētu uz šo jautājumu."
+  },
+  "success": {
+    "questionsCopied": "Jautājumi nokopēti starpliktuvē",
+    "optimizedQuestionsApplied": "{{count}} optimizēti jautājumi pielietoti"
   },
   "help": {
     "dashboard": "Galvenā pārskata lapa, kas parāda lietojuma statistiku un jaunāko aktivitāti",

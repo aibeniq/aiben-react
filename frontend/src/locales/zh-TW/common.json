@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "密碼不匹配",
     "networkError": "網路錯誤。請檢查您的連線。",
     "unauthorized": "您沒有執行此操作的權限。",
-    "notFound": "找不到請求的資源。"
+    "notFound": "找不到請求的資源。",
+    "insufficientContext": "在知識庫中未找到相關資訊來回答這個問題。"
+  },
+  "success": {
+    "questionsCopied": "問題已複製到剪貼簿",
+    "optimizedQuestionsApplied": "已應用{{count}}個優化問題"
   },
   "help": {
     "dashboard": "主要概覽頁面，顯示使用統計和最近活動",
