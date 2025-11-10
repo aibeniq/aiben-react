@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "A jelszavak nem egyeznek",
     "networkError": "Hálózati hiba. Ellenőrizze a kapcsolatot.",
     "unauthorized": "Nincs jogosultsága ehhez a művelethez.",
-    "notFound": "A kért erőforrás nem található."
+    "notFound": "A kért erőforrás nem található.",
+    "insufficientContext": "Nem található releváns információ a tudásbázisban ennek a kérdésnek a megválaszolásához."
+  },
+  "success": {
+    "questionsCopied": "Kérdések másolva a vágólapra",
+    "optimizedQuestionsApplied": "{{count}} optimalizált kérdés alkalmazva"
   },
   "help": {
     "dashboard": "Fő áttekintő oldal, amely megjeleníti a használati statisztikákat és a legutóbbi tevékenységet",

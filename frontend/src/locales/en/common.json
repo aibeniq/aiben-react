@@ -96,7 +96,17 @@
       "timeout": "Request timed out. Please try again.",
       "largeFileTimeout": "Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
       "fileSize": "File is too large. Please choose smaller files.",
-      "serverError": "Server error occurred. Please try again later."
+      "serverError": "Server error occurred. Please try again later.",
+      "noQuestionsToCopy": "No questions to copy",
+      "failedToCopyQuestions": "Failed to copy questions to clipboard",
+      "selectKnowledgeBaseFirst": "Please select a knowledge base first to optimize the checklist.",
+      "addQuestionsBeforeOptimizing": "Please add some questions to the checklist before optimizing.",
+      "enterDescription": "Please enter a description",
+      "descriptionTooShort": "Description must be at least 10 characters",
+      "noQuestionsSuggested": "No questions were suggested. Please try a different description.",
+      "failedToSuggestQuestions": "Failed to suggest questions: {{error}}",
+      "unknownError": "Unknown error",
+      "noKnowledgeBasesAvailable": "No Knowledge Bases available. Create one first to use this feature."
     }
   },
   "settings": {
@@ -698,6 +708,10 @@
       "formatting": "Comparing and formatting results...",
       "matching": "Matching fields..."
     }
+  },
+  "success": {
+    "questionsCopied": "Questions copied to clipboard",
+    "optimizedQuestionsApplied": "Applied {{count}} optimized questions"
   },
   "editFormTemplateModal": {
     "title": "Edit Form Template",

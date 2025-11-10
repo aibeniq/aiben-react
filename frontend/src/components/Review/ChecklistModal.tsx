@@ -187,27 +187,27 @@ const ChecklistModal = ({
     const questionsText = nonEmptyQuestions.join("\n")
 
     if (nonEmptyQuestions.length === 0) {
-      showErrorToast("No questions to copy")
+      showErrorToast(t("errors.noQuestionsToCopy"))
       return
     }
 
     try {
       await copyToClipboard(questionsText)
-      showSuccessToast("Questions copied to clipboard")
+      showSuccessToast(t("success.questionsCopied"))
     } catch (error) {
       console.error("Error copying questions:", error)
-      showErrorToast("Failed to copy questions to clipboard")
+      showErrorToast(t("errors.failedToCopyQuestions"))
     }
   }
 
   const handleOptimizeClick = () => {
     if (!selectedKnowledgeBase) {
-      showErrorToast("Please select a knowledge base first to optimize the checklist.")
+      showErrorToast(t("errors.selectKnowledgeBaseFirst"))
       return
     }
 
     if (questionsList.length === 0 || questionsList.every((q) => !q.trim())) {
-      showErrorToast("Please add some questions to the checklist before optimizing.")
+      showErrorToast(t("errors.addQuestionsBeforeOptimizing"))
       return
     }
 
@@ -222,17 +222,17 @@ const ChecklistModal = ({
       setValidationErrors((prev) => ({ ...prev, questions: "" }))
     }
 
-    showSuccessToast(`Applied ${optimizedQuestions.length} optimized questions`)
+    showSuccessToast(t("success.optimizedQuestionsApplied", { count: optimizedQuestions.length }))
   }
 
   const handleSuggestQuestions = async () => {
     if (!checklistDescription.trim()) {
-      showErrorToast("Please enter a description")
+      showErrorToast(t("errors.enterDescription"))
       return
     }
 
     if (checklistDescription.trim().length < 10) {
-      showErrorToast("Description must be at least 10 characters")
+      showErrorToast(t("errors.descriptionTooShort"))
       return
     }
 
@@ -326,11 +326,13 @@ const ChecklistModal = ({
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast("No questions were suggested. Please try a different description.")
+        showErrorToast(t("errors.noQuestionsSuggested"))
       }
     } catch (error: any) {
       console.error("Error suggesting questions:", error)
-      showErrorToast(`Failed to suggest questions: ${error.message || "Unknown error"}`)
+      showErrorToast(
+        t("errors.failedToSuggestQuestions", { error: error.message || t("errors.unknownError") }),
+      )
     } finally {
       setSuggesting(false)
     }
@@ -501,8 +503,7 @@ const ChecklistModal = ({
                               </Button>
                               {!knowledgeBases || knowledgeBases.length === 0 ? (
                                 <Text fontSize="sm" color="orange.600">
-                                  No Knowledge Bases available. Create one first to use this
-                                  feature.
+                                  {t("errors.noKnowledgeBasesAvailable")}
                                 </Text>
                               ) : null}
                             </Box>

@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Kata sandi tidak cocok",
     "networkError": "Kesalahan jaringan. Periksa koneksi Anda.",
     "unauthorized": "Anda tidak berwenang untuk melakukan tindakan ini.",
-    "notFound": "Sumber daya yang diminta tidak ditemukan."
+    "notFound": "Sumber daya yang diminta tidak ditemukan.",
+    "insufficientContext": "Tidak ada informasi relevan yang ditemukan di basis pengetahuan untuk menjawab pertanyaan ini."
+  },
+  "success": {
+    "questionsCopied": "Pertanyaan disalin ke clipboard",
+    "optimizedQuestionsApplied": "{{count}} pertanyaan yang dioptimalkan diterapkan"
   },
   "help": {
     "dashboard": "Halaman ikhtisar utama yang menampilkan statistik penggunaan dan aktivitas terbaru",

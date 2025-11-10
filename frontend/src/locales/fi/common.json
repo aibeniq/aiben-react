@@ -97,7 +97,17 @@
       "largeFileTimeout": "Suurten tiedostojen käsittely aikakatkaistiin. Kokeile 'Koko tekstin skannaus' -tilaa parempaa suorituskykyä varten suurille tiedostoille.",
       "fileSize": "Tiedosto on liian suuri. Valitse pienempiä tiedostoja.",
       "serverError": "Palvelinvirhe tapahtui. Yritä myöhemmin uudelleen.",
-      "insufficientContext": "Tietokannasta ei löytynyt asiaankuuluvaa tietoa tämän kysymyksen vastaamiseen."
+      "insufficientContext": "Tietokannasta ei löytynyt asiaankuuluvaa tietoa tämän kysymyksen vastaamiseen.",
+      "noQuestionsToCopy": "Ei kysymyksiä kopioitavaksi",
+      "failedToCopyQuestions": "Kysymysten kopiointi leikepöydälle epäonnistui",
+      "selectKnowledgeBaseFirst": "Valitse ensin tietokanta tarkistuslistan optimointia varten.",
+      "addQuestionsBeforeOptimizing": "Lisää kysymyksiä tarkistuslistaan ennen optimointia.",
+      "enterDescription": "Syötä kuvaus",
+      "descriptionTooShort": "Kuvauksen on oltava vähintään 10 merkkiä pitkä",
+      "noQuestionsSuggested": "Kysymyksiä ei ehdotettu. Kokeile eri kuvausta.",
+      "failedToSuggestQuestions": "Kysymysten ehdottaminen epäonnistui: {{error}}",
+      "unknownError": "Tuntematon virhe",
+      "noKnowledgeBasesAvailable": "Tietokantoja ei ole saatavilla. Luo ensin yksi käyttääksesi tätä ominaisuutta."
     }
   },
   "settings": {
@@ -905,6 +915,10 @@
     "referenceNumber": "Viite {{number}}",
     "processedInChunks": "Käsitelty {{count}} osassa",
     "synthesisError": "Virhe aiheen analyysin synteesissä"
+  },
+  "success": {
+    "questionsCopied": "Kysymykset kopioitu leikepöydälle",
+    "optimizedQuestionsApplied": "Käytetty {{count}} optimoitua kysymystä"
   },
   "toast": {
     "passwordUpdated": "Salasana päivitetty onnistuneesti.",

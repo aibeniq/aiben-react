@@ -96,7 +96,17 @@
       "largeFileTimeout": "Se agotó el tiempo de procesamiento de archivos grandes. Prueba cambiar al modo 'Escaneo de Texto Completo' para mejor rendimiento con archivos grandes.",
       "fileSize": "El archivo es demasiado grande. Elige archivos más pequeños.",
       "serverError": "Ocurrió un error del servidor. Inténtalo de nuevo más tarde.",
-      "insufficientContext": "No se encontró información relevante en la base de conocimientos para responder a esta pregunta."
+      "insufficientContext": "No se encontró información relevante en la base de conocimientos para responder a esta pregunta.",
+      "noQuestionsToCopy": "No hay preguntas para copiar",
+      "failedToCopyQuestions": "Error al copiar preguntas al portapapeles",
+      "selectKnowledgeBaseFirst": "Por favor selecciona una base de conocimientos primero para optimizar la lista de verificación.",
+      "addQuestionsBeforeOptimizing": "Por favor agrega preguntas a la lista de verificación antes de optimizar.",
+      "enterDescription": "Por favor ingresa una descripción",
+      "descriptionTooShort": "La descripción debe tener al menos 10 caracteres",
+      "noQuestionsSuggested": "No se sugirieron preguntas. Por favor intenta con una descripción diferente.",
+      "failedToSuggestQuestions": "Error al sugerir preguntas: {{error}}",
+      "unknownError": "Error desconocido",
+      "noKnowledgeBasesAvailable": "No hay bases de conocimientos disponibles. Crea una primero para usar esta función."
     }
   },
   "settings": {
@@ -727,6 +737,10 @@
     "cancel": "Cancelar",
     "updateFormTemplate": "Actualizar Plantilla de Formulario",
     "pleaseWait": "Por favor espere mientras revisamos sus documentos"
+  },
+  "success": {
+    "questionsCopied": "Preguntas copiadas al portapapeles",
+    "optimizedQuestionsApplied": "Aplicadas {{count}} preguntas optimizadas"
   },
   "editOutlineModal": {
     "title": "Editar Esquema",

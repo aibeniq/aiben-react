@@ -167,7 +167,12 @@
     "passwordsDoNotMatch": "Hesla se neshodují",
     "networkError": "Chyba sítě. Zkontrolujte připojení.",
     "unauthorized": "Nemáte oprávnění k provedení této akce.",
-    "notFound": "Požadovaný zdroj nebyl nalezen."
+    "notFound": "Požadovaný zdroj nebyl nalezen.",
+    "insufficientContext": "V znalostní bázi nebyla nalezena žádná relevantní informace pro odpověď na tuto otázku."
+  },
+  "success": {
+    "questionsCopied": "Otázky zkopírovány do schránky",
+    "optimizedQuestionsApplied": "Aplikováno {{count}} optimalizovaných otázek"
   },
   "help": {
     "dashboard": "Hlavní stránka přehledu zobrazující statistiky používání a nedávnou aktivitu",

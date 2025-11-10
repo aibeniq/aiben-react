@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Mật khẩu không khớp",
     "networkError": "Lỗi mạng. Vui lòng kiểm tra kết nối.",
     "unauthorized": "Bạn không có quyền thực hiện hành động này.",
-    "notFound": "Không tìm thấy tài nguyên được yêu cầu."
+    "notFound": "Không tìm thấy tài nguyên được yêu cầu.",
+    "insufficientContext": "Không tìm thấy thông tin liên quan trong cơ sở kiến thức để trả lời câu hỏi này."
+  },
+  "success": {
+    "questionsCopied": "Câu hỏi đã được sao chép vào clipboard",
+    "optimizedQuestionsApplied": "{{count}} câu hỏi được tối ưu hóa đã được áp dụng"
   },
   "help": {
     "dashboard": "Trang tổng quan chính hiển thị thống kê sử dụng và hoạt động gần đây",

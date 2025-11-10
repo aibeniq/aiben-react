@@ -96,7 +96,17 @@
       "largeFileTimeout": "Zeitüberschreitung bei der Verarbeitung großer Dateien. Versuchen Sie den 'Volltextsuche'-Modus für bessere Leistung mit großen Dateien.",
       "fileSize": "Datei ist zu groß. Bitte wählen Sie kleinere Dateien.",
       "serverError": "Server-Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
-      "insufficientContext": "Keine relevanten Informationen in der Wissensdatenbank gefunden, um diese Frage zu beantworten."
+      "insufficientContext": "Keine relevanten Informationen in der Wissensdatenbank gefunden, um diese Frage zu beantworten.",
+      "noQuestionsToCopy": "Keine Fragen zum Kopieren",
+      "failedToCopyQuestions": "Fehler beim Kopieren der Fragen in die Zwischenablage",
+      "selectKnowledgeBaseFirst": "Bitte wählen Sie zuerst eine Wissensdatenbank aus, um die Checkliste zu optimieren.",
+      "addQuestionsBeforeOptimizing": "Bitte fügen Sie Fragen zur Checkliste hinzu, bevor Sie optimieren.",
+      "enterDescription": "Bitte geben Sie eine Beschreibung ein",
+      "descriptionTooShort": "Beschreibung muss mindestens 10 Zeichen lang sein",
+      "noQuestionsSuggested": "Keine Fragen vorgeschlagen. Bitte versuchen Sie eine andere Beschreibung.",
+      "failedToSuggestQuestions": "Fehler beim Vorschlagen von Fragen: {{error}}",
+      "unknownError": "Unbekannter Fehler",
+      "noKnowledgeBasesAvailable": "Keine Wissensdatenbanken verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu verwenden."
     }
   },
   "settings": {
@@ -171,6 +181,10 @@
     "networkError": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
     "unauthorized": "Sie sind nicht berechtigt, diese Aktion durchzuführen.",
     "notFound": "Die angeforderte Ressource wurde nicht gefunden."
+  },
+  "success": {
+    "questionsCopied": "Fragen in die Zwischenablage kopiert",
+    "optimizedQuestionsApplied": "{{count}} optimierte Fragen angewendet"
   },
   "help": {
     "dashboard": "Hauptübersichtsseite mit Nutzungsstatistiken und aktueller Aktivität",

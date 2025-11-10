@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Passordene samsvarer ikke",
     "networkError": "Nettverksfeil. Sjekk tilkoblingen din.",
     "unauthorized": "Du har ikke tillatelse til å utføre denne handlingen.",
-    "notFound": "Den forespurte ressursen ble ikke funnet."
+    "notFound": "Den forespurte ressursen ble ikke funnet.",
+    "insufficientContext": "Ingen relevant informasjon funnet i kunnskapsbasen for å svare på dette spørsmålet."
+  },
+  "success": {
+    "questionsCopied": "Spørsmål kopiert til utklippstavlen",
+    "optimizedQuestionsApplied": "{{count}} optimaliserte spørsmål brukt"
   },
   "help": {
     "dashboard": "Hovedoversiktsside som viser bruksstatistikk og nylig aktivitet",

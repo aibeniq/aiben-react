@@ -167,7 +167,12 @@
     "passwordsDoNotMatch": "비밀번호가 일치하지 않습니다",
     "networkError": "네트워크 오류입니다. 연결을 확인해 주세요.",
     "unauthorized": "이 작업을 수행할 권한이 없습니다.",
-    "notFound": "요청한 리소스를 찾을 수 없습니다."
+    "notFound": "요청한 리소스를 찾을 수 없습니다.",
+    "insufficientContext": "이 질문에 답할 수 있는 관련 정보가 지식 베이스에서 발견되지 않았습니다."
+  },
+  "success": {
+    "questionsCopied": "질문이 클립보드에 복사되었습니다",
+    "optimizedQuestionsApplied": "{{count}}개의 최적화된 질문이 적용되었습니다"
   },
   "help": {
     "dashboard": "사용량 통계와 최근 활동을 보여주는 주요 개요 페이지",

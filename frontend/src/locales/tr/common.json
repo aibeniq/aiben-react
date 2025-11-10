@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Şifreler eşleşmiyor",
     "networkError": "Ağ hatası. Bağlantınızı kontrol edin.",
     "unauthorized": "Bu eylemi gerçekleştirme yetkiniz yok.",
-    "notFound": "İstenen kaynak bulunamadı."
+    "notFound": "İstenen kaynak bulunamadı.",
+    "insufficientContext": "Bu soruyu yanıtlamak için bilgi tabanında ilgili bilgi bulunamadı."
+  },
+  "success": {
+    "questionsCopied": "Sorular panoya kopyalandı",
+    "optimizedQuestionsApplied": "{{count}} optimize soru uygulandı"
   },
   "help": {
     "dashboard": "Kullanım istatistiklerini ve son aktiviteleri gösteren ana genel bakış sayfası",

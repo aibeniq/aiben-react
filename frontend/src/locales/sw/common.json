@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Nenosiri hazilingani",
     "networkError": "Hitilafu ya mtandao. Angalia muunganisho wako.",
     "unauthorized": "Huna ruhusa ya kufanya kitendo hiki.",
-    "notFound": "Rasilimali uliyoomba haikupatikana."
+    "notFound": "Rasilimali uliyoomba haikupatikana.",
+    "insufficientContext": "Hakuna maelezo yanayofaa yaliyopatikana katika hazina ya maarifa kujibu swali hili."
+  },
+  "success": {
+    "questionsCopied": "Maswali yamenakiliwa kwenye clipboard",
+    "optimizedQuestionsApplied": "{{count}} maswali yaliyoboreshwa yametumika"
   },
   "help": {
     "dashboard": "Ukurasa kuu wa muhtasari unaoonyesha takwimu za matumizi na shughuli ya hivi karibuni",

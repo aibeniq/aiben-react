@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "密码不匹配",
     "networkError": "网络错误。请检查您的连接。",
     "unauthorized": "您无权执行此操作。",
-    "notFound": "未找到请求的资源。"
+    "notFound": "未找到请求的资源。",
+    "insufficientContext": "在知识库中未找到相关信息来回答这个问题。"
+  },
+  "success": {
+    "questionsCopied": "问题已复制到剪贴板",
+    "optimizedQuestionsApplied": "已应用{{count}}个优化问题"
   },
   "help": {
     "dashboard": "显示使用统计和最近活动的主要概览页面",

@@ -165,7 +165,12 @@
     "passwordsDoNotMatch": "Parolele nu se potrivesc",
     "networkError": "Eroare de rețea. Verificați conexiunea.",
     "unauthorized": "Nu aveți autorizarea pentru această acțiune.",
-    "notFound": "Resursa solicitată nu a fost găsită."
+    "notFound": "Resursa solicitată nu a fost găsită.",
+    "insufficientContext": "Nu s-a găsit informație relevantă în baza de cunoștințe pentru a răspunde la această întrebare."
+  },
+  "success": {
+    "questionsCopied": "Întrebări copiate în clipboard",
+    "optimizedQuestionsApplied": "{{count}} întrebări optimizate aplicate"
   },
   "help": {
     "dashboard": "Pagina principală de prezentare generală care afișează statisticile de utilizare și activitatea recentă",

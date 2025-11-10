@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Gesli se ne ujemata",
     "networkError": "Omrežna napaka. Preverite povezavo.",
     "unauthorized": "Nimate dovoljenja za to dejanje.",
-    "notFound": "Zahtevani vir ni bil najden."
+    "notFound": "Zahtevani vir ni bil najden.",
+    "insufficientContext": "V bazi znanja ni bilo mogoče najti ustreznih informacij za odgovor na to vprašanje."
+  },
+  "success": {
+    "questionsCopied": "Vprašanja kopirana v odložišče",
+    "optimizedQuestionsApplied": "{{count}} optimiziranih vprašanj uporabljenih"
   },
   "help": {
     "dashboard": "Glavna pregledna stran, ki prikazuje statistiko uporabe in nedavno aktivnost",

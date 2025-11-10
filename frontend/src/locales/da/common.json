@@ -170,7 +170,12 @@
     "passwordsDoNotMatch": "Adgangskoderne matcher ikke",
     "networkError": "Netværksfejl. Tjek din forbindelse.",
     "unauthorized": "Du har ikke tilladelse til at udføre denne handling.",
-    "notFound": "Den anmodede ressource blev ikke fundet."
+    "notFound": "Den anmodede ressource blev ikke fundet.",
+    "insufficientContext": "Ingen relevant information fundet i vidensbasen til at besvare dette spørgsmål."
+  },
+  "success": {
+    "questionsCopied": "Spørgsmål kopieret til udklipsholder",
+    "optimizedQuestionsApplied": "{{count}} optimerede spørgsmål anvendt"
   },
   "help": {
     "dashboard": "Hovedoversigtsside, der viser brugsstatistikker og seneste aktivitet",
