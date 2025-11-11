@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pydantic import BaseModel
 import tempfile
 import os
@@ -199,6 +199,123 @@ class TextQueryResponse(BaseModel):
 # Session manager is imported from services
 
 
+def create_large_batches(chunks_with_metadata: List[Dict], max_batch_tokens: int) -> List[List[Dict]]:
+    """
+    Create batches of chunks that fit within max token limit.
+    Also enforces a hard limit on chunks per batch to prevent timeouts.
+    
+    Args:
+        chunks_with_metadata: List of chunk dictionaries with 'content' and metadata
+        max_batch_tokens: Maximum tokens allowed per batch
+        
+    Returns:
+        List of batches, where each batch is a list of chunk dictionaries
+    """
+    batches = []
+    current_batch = []
+    current_batch_tokens = 0
+    
+    # Hard limit: max 100 chunks per batch to prevent timeouts
+    MAX_CHUNKS_PER_BATCH = 100
+    
+    for chunk_data in chunks_with_metadata:
+        # Estimate tokens (rough: 1 token ≈ 4 chars)
+        chunk_tokens = len(chunk_data["content"]) // 4
+        
+        # Start new batch if:
+        # 1. Would exceed token limit, OR
+        # 2. Would exceed chunk count limit
+        should_start_new_batch = (
+            (current_batch and current_batch_tokens + chunk_tokens > max_batch_tokens) or
+            (len(current_batch) >= MAX_CHUNKS_PER_BATCH)
+        )
+        
+        if should_start_new_batch:
+            batches.append(current_batch)
+            current_batch = []
+            current_batch_tokens = 0
+        
+        current_batch.append(chunk_data)
+        current_batch_tokens += chunk_tokens
+    
+    # Add final batch
+    if current_batch:
+        batches.append(current_batch)
+    
+    return batches
+
+
+def parse_combined_batch_response(batch_response: str) -> tuple:
+    """
+    Parse LLM response to extract:
+    1. Which chunks are relevant
+    2. The answer extracted from each relevant chunk
+    
+    Args:
+        batch_response: LLM response with chunk analyses
+        
+    Returns:
+        Tuple of (relevant_chunk_numbers, chunk_answers)
+        - relevant_chunk_numbers: List[int] - chunk numbers (1-based) that are relevant
+        - chunk_answers: Dict[int, str] - mapping of chunk number to extracted answer
+    """
+    relevant_chunks = []
+    chunk_answers = {}
+    
+    lines = batch_response.split('\n')
+    current_chunk_num = None
+    current_answer_lines = []
+    
+    # Debug: Print first 500 chars of response
+    print(f"🔍 DEBUG: Parsing batch response (first 500 chars): {batch_response[:500]}")
+    
+    for line in lines:
+        line = line.strip()
+        
+        # Check for chunk header
+        if line.startswith('CHUNK '):
+            # Save previous chunk answer if exists
+            if current_chunk_num and current_answer_lines:
+                chunk_answers[current_chunk_num] = '\n'.join(current_answer_lines).strip()
+                current_answer_lines = []
+            
+            # Parse new chunk
+            try:
+                parts = line.split(':')
+                chunk_num_str = parts[0].replace('CHUNK', '').strip()
+                current_chunk_num = int(chunk_num_str)
+                
+                # Check if relevant - be very careful with the logic
+                status = parts[1].strip() if len(parts) > 1 else ""
+                if 'RELEVANT' in status and 'NOT RELEVANT' not in status:
+                    relevant_chunks.append(current_chunk_num)
+                    print(f"✅ DEBUG: Chunk {current_chunk_num} marked as RELEVANT")
+                else:
+                    current_chunk_num = None  # Reset if not relevant
+                    print(f"❌ DEBUG: Chunk {chunk_num_str} marked as NOT RELEVANT")
+            except (ValueError, IndexError) as e:
+                print(f"⚠️ DEBUG: Failed to parse chunk header: {line} - Error: {e}")
+                current_chunk_num = None
+                continue
+        
+        # Collect answer lines for current relevant chunk
+        elif current_chunk_num and line.startswith('Answer:'):
+            answer_text = line.replace('Answer:', '').strip()
+            if answer_text:
+                current_answer_lines.append(answer_text)
+        elif current_chunk_num and line and not line.startswith('CHUNK '):
+            current_answer_lines.append(line)
+    
+    # Save final chunk answer
+    if current_chunk_num and current_answer_lines:
+        chunk_answers[current_chunk_num] = '\n'.join(current_answer_lines).strip()
+    
+    print(f"📊 DEBUG: Found {len(relevant_chunks)} relevant chunks: {relevant_chunks[:10]}")  # Show first 10
+    print(f"📝 DEBUG: Collected {len(chunk_answers)} chunk answers")
+    
+    return relevant_chunks, chunk_answers
+
+
 async def _handle_full_text_kb_query(
     session: SessionDep,
     current_user: CurrentUser,
@@ -213,6 +330,9 @@ async def _handle_full_text_kb_query(
 ):
     """Handle full text scan for knowledge base query."""
     from app.services.text_processing import chunk_text
+
+    # Ensure error_key is always defined to avoid UnboundLocalError in later return/recording paths
+    error_key = None
 
     # Get the knowledge base
     kb = session.get(KnowledgeBase, kb_id)
@@ -275,124 +395,155 @@ async def _handle_full_text_kb_query(
             data_header = source_data.data[:20] if source_data.data else b""
             print(f"Data header for {source.name}: {data_header}")
 
+            # Use unified document extraction to preserve page metadata
+            from app.services.document_utils import extract_documents_from_file_unified
+            
+            # Extract file content from ZIP if needed
+            raw_file_content = source_data.data
+            
             # Check if this is actually a ZIP file
-            if not source_data.data.startswith(b"PK"):
-                print(
-                    f"WARNING: {source.name} does not appear to be a ZIP file, trying direct extraction"
-                )
-                file_content = await extract_text_from_file_async(
-                    source_data.data, source.name, current_user=current_user
-                )
-            else:
-                # Extract the file content from the ZIP
-                zip_data = BytesIO(source_data.data)
-                with zipfile.ZipFile(zip_data, "r") as zip_file:
-                    # Get the first file in the archive (there should only be one)
-                    file_info = zip_file.infolist()[0]
-                    print(f"Extracting file: {file_info.filename} from ZIP")
-                    raw_file_content = zip_file.read(file_info.filename)
-                    print(f"Extracted {len(raw_file_content)} bytes from ZIP")
-
-                    # Check the header of the extracted content
-                    extracted_header = (
-                        raw_file_content[:20] if raw_file_content else b""
-                    )
-                    print(f"Extracted file header: {extracted_header}")
-
-                    # Now extract text from the raw file content
-                    file_content = await extract_text_from_file_async(
-                        raw_file_content, source.name, current_user=current_user
-                    )
-
-        except zipfile.BadZipFile as e:
-            print(f"Error extracting ZIP file for source {source.name}: {e}")
-            print(
-                f"Data starts with: {source_data.data[:50] if source_data.data else 'No data'}"
-            )
-            # Try direct extraction as fallback
-            try:
-                print(f"Attempting direct text extraction for {source.name}")
-                file_content = await extract_text_from_file_async(
-                    source_data.data, source.name, current_user=current_user
-                )
-            except Exception as fallback_e:
-                print(
-                    f"Fallback extraction also failed for {source.name}: {fallback_e}"
-                )
-                file_content = f"Failed to extract from {source.name}: ZIP error: {str(e)}, Direct error: {str(fallback_e)}"
-        except Exception as e:
-            print(f"Error extracting text from source {source.name}: {e}")
-            file_content = f"Failed to extract text from {source.name}: {str(e)}"
-
-        if (
-            file_content.strip()
-            and not file_content.startswith("Failed to extract")
-            and not file_content.startswith("Unable to extract")
-        ):
-            print(
-                f"Successfully extracted {len(file_content)} characters from {source.name}"
-            )
-            # Track this source as successfully processed
-            processed_sources.append(source)
-            # Chunk the text
-            chunks = chunk_text(
-                file_content, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
-            )
-            print(f"Created {len(chunks)} chunks from {source.name}")
-
-            # Analyze each chunk
-            for i, chunk in enumerate(chunks):
+            if source_data.data.startswith(b"PK"):
                 try:
-                    print(f"Analyzing chunk {i+1}/{len(chunks)} from {source.name}")
-                    # Add delay between chunks to prevent rate limit exhaustion
-                    if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
-                        await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-
-                    # Get user language and create language instruction (use preferred_language)
-                    user_language = (
-                        getattr(current_user, "preferred_language", None) or "en"
+                    # Extract the file content from the ZIP
+                    zip_data = BytesIO(source_data.data)
+                    with zipfile.ZipFile(zip_data, "r") as zip_file:
+                        # Get the first file in the archive (there should only be one)
+                        file_info = zip_file.infolist()[0]
+                        print(f"Extracting file: {file_info.filename} from ZIP")
+                        raw_file_content = zip_file.read(file_info.filename)
+                        print(f"Extracted {len(raw_file_content)} bytes from ZIP")
+                except zipfile.BadZipFile as e:
+                    print(f"Error extracting ZIP file for source {source.name}: {e}")
+                    # Continue with raw data
+            else:
+                print(f"File {source.name} is not in ZIP format, using raw data")
+            
+            # Extract documents with page metadata using unified function
+            try:
+                documents = await extract_documents_from_file_unified(
+                    raw_file_content, source.name, current_user=current_user
+                )
+                
+                if documents and len(documents) > 0:
+                    total_chars = sum(len(doc.page_content) for doc in documents)
+                    print(f"Successfully extracted {total_chars} characters from {len(documents)} pages in {source.name}")
+                    
+                    # Track this source as successfully processed
+                    processed_sources.append(source)
+                    
+                    # Chunk with larger size for better context while preserving page metadata
+                    from app.services.text_processing import chunk_documents_with_metadata
+                    
+                    chunks_with_metadata = chunk_documents_with_metadata(
+                        documents, max_tokens=settings.FULL_SCAN_CHUNK_SIZE
                     )
-                    language_name = settings.SUPPORTED_LANGUAGES.get(
-                        user_language, "English"
-                    )
-                    language_instruction = f"Respond in this language: {language_name}."
-                    print(f"DEBUG: language_instruction = {language_instruction}")
+                    print(f"Created {len(chunks_with_metadata)} chunks from {source.name}")
+                    
+                    # Debug: Check page metadata
+                    if chunks_with_metadata:
+                        sample_pages = [chunk.get("pages", [1])[0] for chunk in chunks_with_metadata[:5]]
+                        print(f"🔍 DEBUG: First 5 chunk pages from {source.name}: {sample_pages}")
+                else:
+                    print(f"Could not extract documents from source {source.name}: No documents returned")
+                    continue
+                    
+            except Exception as e:
+                print(f"Error extracting documents from source {source.name}: {e}")
+                continue
 
-                    chunk_analysis = invoke_llm(
+            # Get user language for all batch processing
+            user_language = getattr(current_user, "preferred_language", None) or "en"
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
+
+            # Create large batches (~80-90 chunks per batch)
+            batches = create_large_batches(
+                chunks_with_metadata, 
+                max_batch_tokens=settings.FULL_SCAN_MAX_BATCH_TOKENS
+            )
+            print(f"Created {len(batches)} batches for processing ({len(chunks_with_metadata)} total chunks)")
+
+            # Process each batch with combined analysis + filtering
+            all_chunk_answers = {}
+            chunk_number_offset = 0
+            
+            for batch_idx, batch_chunks in enumerate(batches):
+                # Format chunks with global numbering
+                batch_text = "\n\n".join([
+                    f"CHUNK {chunk_number_offset + i + 1}:\n{chunk_data['content']}"
+                    for i, chunk_data in enumerate(batch_chunks)
+                ])
+                
+                # Add delay between batches
+                if batch_idx > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
+                    await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                
+                try:
+                    print(f"Processing batch {batch_idx + 1}/{len(batches)} ({len(batch_chunks)} chunks) from {source.name}")
+                    
+                    # Single LLM call: analyze AND filter
+                    batch_response = invoke_llm(
                         llm,
-                        settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                        settings.CHATBOT_COMBINED_BATCH_ANALYSIS_PROMPT_TEMPLATE,
                         {
-                            "chunk": chunk,
+                            "chunks": batch_text,
                             "question": rephrased_question,
                             "language_instruction": language_instruction,
                         },
                     )
-
-                    if "No relevant information found" not in chunk_analysis:
-                        print(
-                            f"Found relevant information in chunk {i+1} from {source.name}"
-                        )
-                        all_chunk_analyses.append(chunk_analysis)
-                        source_citations.append(
-                            {
-                                "content": chunk,  # Remove 300 character truncation
+                    
+                    # Parse response to get relevant chunks and their answers
+                    relevant_chunk_numbers, chunk_answers = parse_combined_batch_response(batch_response)
+                    
+                    print(f"✅ Found {len(relevant_chunk_numbers)} relevant chunks in batch {batch_idx + 1}")
+                    
+                    # Store answers from this batch
+                    all_chunk_answers.update(chunk_answers)
+                    
+                    # Add relevant chunks as citations
+                    for chunk_num in relevant_chunk_numbers:
+                        chunk_idx = chunk_num - 1  # Convert to 0-based index
+                        if 0 <= chunk_idx < len(chunks_with_metadata):
+                            chunk_data = chunks_with_metadata[chunk_idx]
+                            pages = chunk_data.get("pages", [1])
+                            page_range = (
+                                f"Page {pages[0]}"
+                                if len(pages) == 1
+                                else f"Pages {pages[0]}-{pages[-1]}"
+                            )
+                            
+                            source_citations.append({
+                                "content": chunk_data["content"],
                                 "metadata": {
                                     "source": source.name,
                                     "source_data_id": str(source.source_data_id),
-                                },
-                            }
-                        )
-                    else:
-                        print(
-                            f"No relevant information found in chunk {i+1} from {source.name}"
-                        )
+                                    "page": pages[0],  # First page for sorting/display
+                                    "pages": pages,  # All pages in this chunk
+                                        "page_range": page_range,
+                                        "chunk_number": chunk_num,
+                                    },
+                                })
+                    
                 except Exception as e:
-                    print(f"Error analyzing chunk {i+1} from {source.name}: {e}")
+                    print(f"Error processing batch {batch_idx + 1}: {e}")
                     continue
-        else:
-            print(
-                f"Could not extract text from source {source.name}: {file_content[:100] if file_content else 'No content'}"
-            )
+                
+                # Update offset for next batch
+                chunk_number_offset += len(batch_chunks)
+            
+            # Collect all chunk answers for synthesis
+            if all_chunk_answers:
+                combined_analysis = "\n\n".join([
+                    f"From chunk {num}:\n{answer}"
+                    for num, answer in sorted(all_chunk_answers.items())
+                ])
+                all_chunk_analyses.append(combined_analysis)
+        
+        except Exception as e:
+            print(f"Error processing source {source.name}: {e}")
+            import traceback
+            traceback.print_exc()
+            continue
 
     print(
         f"Full text scan complete. Found {len(all_chunk_analyses)} relevant chunk analyses."
@@ -421,13 +572,6 @@ async def _handle_full_text_kb_query(
         sources = []
     else:
         # Synthesize all chunk analyses
-        chunk_analyses_text = "\n\n".join(
-            [
-                f"Analysis {i+1}: {analysis}"
-                for i, analysis in enumerate(all_chunk_analyses)
-            ]
-        )
-
         # Get user language and create language instruction (use preferred_language)
         user_language = getattr(current_user, "preferred_language", None) or "en"
         language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
@@ -435,16 +579,51 @@ async def _handle_full_text_kb_query(
 
         print(f"DEBUG: language_instruction = {language_instruction}")
 
-        final_answer = invoke_llm(
-            llm,
-            settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-            {
-                "question": rephrased_question,
-                "chunk_analyses": chunk_analyses_text,
-                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
-                "language_instruction": language_instruction,
-            },
+        # Check if synthesis prompt would exceed token limits
+        from app.services.synthesis import check_synthesis_token_limit, hierarchical_synthesis
+        from app.services.text_processing import estimate_tokens
+        
+        # Format analyses for token estimation
+        formatted_analyses = [
+            f"Analysis {i+1}: {analysis}"
+            for i, analysis in enumerate(all_chunk_analyses)
+        ]
+        
+        estimated_tokens, exceeds_limit = check_synthesis_token_limit(
+            chunk_analyses=formatted_analyses,
+            question=rephrased_question,
+            language_instruction=language_instruction,
+            llm=llm,
         )
+        
+        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+        print(f"📊 Chatbot KB Full Scan synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
+        
+        if exceeds_limit:
+            # Use hierarchical synthesis for large documents
+            print(f"⚠️ Synthesis prompt too large ({estimated_tokens:,} tokens) - using hierarchical synthesis")
+            final_answer = hierarchical_synthesis(
+                chunk_analyses=formatted_analyses,
+                question=rephrased_question,
+                llm=llm,
+                session=session,
+                user_id=current_user.id,
+                max_tokens_per_group=max_allowed,
+                language_instruction=language_instruction,
+            )
+        else:
+            # Original single-step synthesis
+            chunk_analyses_text = "\n\n".join(formatted_analyses)
+            final_answer = invoke_llm(
+                llm,
+                settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                {
+                    "question": rephrased_question,
+                    "chunk_analyses": chunk_analyses_text,
+                    "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                    "language_instruction": language_instruction,
+                },
+            )
 
     # Check if the synthesized answer indicates information wasn't found (always check after synthesis)
     text_analysis_insufficient = settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer
@@ -700,8 +879,9 @@ async def _handle_full_text_document_query(
 
             # Chunk documents while preserving page metadata
             chunks_with_metadata = chunk_documents_with_metadata(
-                documents, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
+                documents, max_tokens=settings.FULL_SCAN_CHUNK_SIZE
             )
+            print(f"Created {len(chunks_with_metadata)} chunks from {file.filename} for batch processing")
 
             # Extract images if vision is enabled
             file_images = []
@@ -715,65 +895,98 @@ async def _handle_full_text_document_query(
                 )
                 print(f"Extracted {len(file_images)} images from {file.filename}")
 
-            # Analyze each chunk for this file
+            # Analyze chunks in batches for this file
             file_chunk_analyses = []
             file_source_citations = []
 
-            for i, chunk_data in enumerate(chunks_with_metadata):
-                # Add delay between chunks to prevent rate limit exhaustion
-                if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
-                    import asyncio
+            # Get user language for all batch processing
+            user_language = getattr(current_user, "preferred_language", None) or "en"
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
 
+            # Create large batches (~80-90 chunks per batch)
+            batches = create_large_batches(
+                chunks_with_metadata,
+                max_batch_tokens=settings.FULL_SCAN_MAX_BATCH_TOKENS
+            )
+            print(f"Created {len(batches)} batches for processing ({len(chunks_with_metadata)} total chunks)")
+
+            # Process each batch with combined analysis + filtering
+            all_chunk_answers = {}
+            chunk_number_offset = 0
+            
+            for batch_idx, batch_chunks in enumerate(batches):
+                # Format chunks with global numbering
+                batch_text = "\n\n".join([
+                    f"CHUNK {chunk_number_offset + i + 1}:\n{chunk_data['content']}"
+                    for i, chunk_data in enumerate(batch_chunks)
+                ])
+                
+                # Add delay between batches
+                if batch_idx > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
+                    import asyncio
                     await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
 
                 try:
-                    # Get user language and create language instruction (use preferred_language)
-                    user_language = (
-                        getattr(current_user, "preferred_language", None) or "en"
-                    )
-                    language_name = settings.SUPPORTED_LANGUAGES.get(
-                        user_language, "English"
-                    )
-                    language_instruction = f"Respond in this language: {language_name}."
-                    print(f"DEBUG: language_instruction = {language_instruction}")
+                    print(f"Processing batch {batch_idx + 1}/{len(batches)} ({len(batch_chunks)} chunks) from {file.filename}")
 
-                    chunk_analysis = invoke_llm(
+                    # Single LLM call: analyze AND filter
+                    batch_response = invoke_llm(
                         llm,
-                        settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                        settings.CHATBOT_COMBINED_BATCH_ANALYSIS_PROMPT_TEMPLATE,
                         {
-                            "chunk": chunk_data["content"],
+                            "chunks": batch_text,
                             "question": rephrased_question,
                             "language_instruction": language_instruction,
                         },
                     )
+                    
+                    # Parse response to get relevant chunks and their answers
+                    relevant_chunk_numbers, chunk_answers = parse_combined_batch_response(batch_response)
+                    
+                    print(f"✅ Found {len(relevant_chunk_numbers)} relevant chunks in batch {batch_idx + 1}")
+                    
+                    # Store answers from this batch
+                    all_chunk_answers.update(chunk_answers)
+                    
+                    # Add relevant chunks as citations
+                    for chunk_num in relevant_chunk_numbers:
+                        chunk_idx = chunk_num - 1  # Convert to 0-based index
+                        if 0 <= chunk_idx < len(chunks_with_metadata):
+                            chunk_data = chunks_with_metadata[chunk_idx]
+                            pages = chunk_data.get("pages", [1])
+                            page_range = (
+                                f"Page {pages[0]}"
+                                if len(pages) == 1
+                                else f"Pages {pages[0]}-{pages[-1]}"
+                            )
 
-                    if "No relevant information found" not in chunk_analysis:
-                        file_chunk_analyses.append(chunk_analysis)
-
-                        # Build citation with page information
-                        pages = chunk_data.get("pages", [1])
-                        page_range = (
-                            f"Page {pages[0]}"
-                            if len(pages) == 1
-                            else f"Pages {pages[0]}-{pages[-1]}"
-                        )
-
-                        file_source_citations.append(
-                            {
+                            file_source_citations.append({
                                 "content": chunk_data["content"],
                                 "metadata": {
                                     "source": file.filename,
-                                    "chunk": i + 1,
+                                    "chunk": chunk_num,
                                     "file_index": file_idx + 1,
                                     "page": pages[0],  # First page for sorting/display
                                     "pages": pages,  # All pages in this chunk
                                     "page_range": page_range,
+                                    "chunk_number": chunk_num,
                                 },
-                            }
-                        )
+                            })
+                            print(f"✅ Chunk {chunk_num} from {file.filename} is relevant")
+                    
                 except Exception as e:
-                    print(f"Error analyzing chunk {i} in file {file.filename}: {e}")
+                    print(f"Error analyzing batch {batch_idx + 1} in file {file.filename}: {e}")
                     continue
+                
+                # Update offset for next batch
+                chunk_number_offset += len(batch_chunks)
+            
+            # Collect chunk answers for this file's synthesis
+            if all_chunk_answers:
+                # Format answers as analyses for synthesis
+                for chunk_num in sorted(all_chunk_answers.keys()):
+                    file_chunk_analyses.append(all_chunk_answers[chunk_num])
 
             # Process analysis for this file (whether chunks were found or not)
             vision_analysis_performed = False
@@ -781,25 +994,51 @@ async def _handle_full_text_document_query(
             document_analysis = ""
 
             if file_chunk_analyses:
-                # Synthesize chunks for this specific document
-                file_chunk_analyses_text = "\n\n".join(
-                    [
-                        f"Chunk {i+1}: {analysis}"
-                        for i, analysis in enumerate(file_chunk_analyses)
-                    ]
+                # Check if synthesis prompt would exceed token limits
+                from app.services.synthesis import check_synthesis_token_limit, hierarchical_synthesis
+                from app.services.text_processing import estimate_tokens
+                
+                # Format analyses for token estimation
+                formatted_analyses = [
+                    f"Chunk {i+1}: {analysis}"
+                    for i, analysis in enumerate(file_chunk_analyses)
+                ]
+                
+                estimated_tokens, exceeds_limit = check_synthesis_token_limit(
+                    chunk_analyses=formatted_analyses,
+                    question=rephrased_question,
+                    language_instruction=language_instruction,
+                    llm=llm,
                 )
-
-                # Create a document-level analysis
-                document_analysis = invoke_llm(
-                    llm,
-                    settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-                    {
-                        "question": rephrased_question,
-                        "chunk_analyses": file_chunk_analyses_text,
-                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
-                        "language_instruction": language_instruction,
-                    },
-                )
+                
+                max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                print(f"📊 Chatbot Document Full Scan synthesis ({file.filename}): {estimated_tokens:,} tokens (limit: {max_allowed:,})")
+                
+                if exceeds_limit:
+                    # Use hierarchical synthesis for large documents
+                    print(f"⚠️ Synthesis prompt too large ({estimated_tokens:,} tokens) - using hierarchical synthesis")
+                    document_analysis = hierarchical_synthesis(
+                        chunk_analyses=formatted_analyses,
+                        question=rephrased_question,
+                        llm=llm,
+                        session=session,
+                        user_id=current_user.id,
+                        max_tokens_per_group=max_allowed,
+                        language_instruction=language_instruction,
+                    )
+                else:
+                    # Original single-step synthesis
+                    file_chunk_analyses_text = "\n\n".join(formatted_analyses)
+                    document_analysis = invoke_llm(
+                        llm,
+                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                        {
+                            "question": rephrased_question,
+                            "chunk_analyses": file_chunk_analyses_text,
+                            "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                            "language_instruction": language_instruction,
+                        },
+                    )
 
                 # Check if the text analysis indicates information wasn't found
                 text_analysis_insufficient = (

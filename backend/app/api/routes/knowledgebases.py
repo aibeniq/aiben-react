@@ -2378,11 +2378,50 @@ def delete_knowledge_base(
     if not current_user.is_superuser and (knowledge_base.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
 
+    # Get all source_data_ids from this KB's sources BEFORE deletion
+    source_data_ids_to_check = session.exec(
+        select(Source.source_data_id).where(Source.knowledge_base_id == id)
+    ).all()
+
+    # For each source_data_id, check if OTHER knowledge bases are using it
+    # We need to check BEFORE deleting this KB
+    source_data_to_delete = []
+    for source_data_id in source_data_ids_to_check:
+        # Count references from OTHER knowledge bases (excluding this one)
+        other_kb_references = session.exec(
+            select(func.count())
+            .select_from(Source)
+            .where(
+                Source.source_data_id == source_data_id,
+                Source.knowledge_base_id != id  # Exclude current KB
+            )
+        ).one()
+        
+        if other_kb_references == 0:
+            # No other KBs use this source_data - safe to delete
+            source_data_to_delete.append(source_data_id)
+            print(f"🧹 Marking SourceData {source_data_id} for cleanup (no other KB references)")
+
     # Clean up file-based storage if it exists
     if knowledge_base.storage_type == "file" and knowledge_base.file_path:
         print(f"Cleaning up file-based storage: {knowledge_base.file_path}")
         MemoryManager.cleanup_stored_file(knowledge_base.file_path)
 
+    # Delete the knowledge base (cascades to Source entries)
     session.delete(knowledge_base)
+    session.flush()  # Ensure cascade deletion completes
+
+    # Now delete the SourceData entries that are no longer needed
+    orphaned_count = 0
+    for source_data_id in source_data_to_delete:
+        source_data = session.get(SourceData, source_data_id)
+        if source_data:
+            print(f"🧹 Deleting orphaned SourceData: {source_data_id}")
+            session.delete(source_data)
+            orphaned_count += 1
+
+    if orphaned_count > 0:
+        print(f"🧹 Cleaned up {orphaned_count} orphaned SourceData entries")
+
     session.commit()
     return Message(message="Knowledge base deleted successfully")
