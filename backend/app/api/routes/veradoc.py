@@ -81,6 +81,17 @@ def _load_frontend_translations():
                     translations[lang_code] = json.load(f)
     else:
         print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+    # Ensure a fallback for the 'errors.insufficientContext' key exists in English.
+    default_insufficient = (
+        "No relevant information found in the knowledge base to answer this question."
+    )
+    if "en" not in translations:
+        translations["en"] = {}
+    en_trans = translations["en"]
+    if not isinstance(en_trans.get("errors"), dict):
+        en_trans["errors"] = en_trans.get("errors", {})
+    if "insufficientContext" not in en_trans["errors"]:
+        en_trans["errors"]["insufficientContext"] = default_insufficient
 
     _frontend_translations_cache = translations
     return translations
@@ -581,9 +592,40 @@ async def prefetch_knowledge_base_context(
                             )
 
                     # Combine chunk contexts
-                    question_context = "\n\n".join(
+                    combined_contexts = "\n\n".join(
                         [ctx for ctx in chunk_contexts if ctx]
                     )
+                    
+                    # Check if combined contexts are too large and need hierarchical synthesis
+                    from app.services.text_processing import estimate_tokens
+                    combined_tokens = estimate_tokens(combined_contexts, model=getattr(llm, "model_name", "gpt-4o"))
+                    max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                    
+                    print(f"📊 VeraDoc context combination: {combined_tokens:,} tokens (limit: {max_allowed:,})")
+                    
+                    if combined_tokens > max_allowed:
+                        # Use hierarchical synthesis to combine chunk contexts
+                        print(f"⚠️ Combined context too large ({combined_tokens:,} tokens) - using hierarchical synthesis")
+                        from app.services.synthesis import hierarchical_synthesis
+                        
+                        user_language = getattr(current_user, "preferred_language", None) or "en"
+                        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+                        language_instruction = f"Respond in this language: {language_name}."
+                        
+                        question_context = hierarchical_synthesis(
+                            chunk_analyses=chunk_contexts,
+                            question=question_text,
+                            llm=llm,
+                            session=session,
+                            user_id=current_user.id,
+                            max_tokens_per_group=max_allowed,
+                            language_instruction=language_instruction,
+                            synthesis_template=context_prompt_template,
+                            template_params={"context": "{chunk_analyses}"},
+                        )
+                    else:
+                        # Simple concatenation is fine
+                        question_context = combined_contexts
 
                 else:
                     # Context is small enough, process normally
@@ -3513,6 +3555,10 @@ async def generate_questions_with_files(
 
                     # If we have too many questions, synthesize and prioritize
                     if len(unique_questions) > (num_questions or 50):
+                        # Check if the synthesis prompt would exceed token limits
+                        from app.services.text_processing import estimate_tokens
+                        
+                        questions_list_text = chr(10).join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)])
                         synthesis_prompt_variables = {
                             "description": description,
                             "checklist_type": checklist_type,
@@ -3525,7 +3571,7 @@ async def generate_questions_with_files(
                         synthesis_prompt = f"""From the following list of checklist questions, select and refine the {num_questions or 20} most important and relevant questions for {checklist_type} verification based on: {description}
 
 Questions to review:
-{chr(10).join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)])}
+{questions_list_text}
 
 Requirements:
 1. Select the most critical and actionable questions
@@ -3535,23 +3581,34 @@ Requirements:
 
 Return only the final selected questions, one per line, numbered."""
 
-                        try:
-                            refined_response = invoke_llm(llm, synthesis_prompt, {})
-                            questions = []
-                            for line in refined_response.strip().split("\n"):
-                                line = line.strip()
-                                if line and (
-                                    line[0].isdigit()
-                                    or line.startswith("-")
-                                    or line.startswith("*")
-                                ):
-                                    question = re.sub(r"^\d+\.\s+", "", line)
-                                    question = re.sub(r"^[-*]\s+", "", question)
-                                    if question.strip():
-                                        questions.append(question.strip())
-                        except Exception as e:
-                            print(f"Error in question synthesis: {e}")
+                        estimated_tokens = estimate_tokens(synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o"))
+                        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                        
+                        print(f"📊 VeraDoc question synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
+                        
+                        if estimated_tokens > max_allowed:
+                            # Too many questions - just truncate to requested number instead of synthesis
+                            print(f"⚠️ Question synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation")
                             questions = unique_questions[: num_questions or 20]
+                        else:
+                            # Synthesis is safe
+                            try:
+                                refined_response = invoke_llm(llm, synthesis_prompt, {})
+                                questions = []
+                                for line in refined_response.strip().split("\n"):
+                                    line = line.strip()
+                                    if line and (
+                                        line[0].isdigit()
+                                        or line.startswith("-")
+                                        or line.startswith("*")
+                                    ):
+                                        question = re.sub(r"^\d+\.\s+", "", line)
+                                        question = re.sub(r"^[-*]\s+", "", question)
+                                        if question.strip():
+                                            questions.append(question.strip())
+                            except Exception as e:
+                                print(f"Error in question synthesis: {e}")
+                                questions = unique_questions[: num_questions or 20]
                     else:
                         questions = unique_questions[: num_questions or 20]
 
