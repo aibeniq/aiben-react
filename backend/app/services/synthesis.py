@@ -68,7 +68,7 @@ def hierarchical_synthesis(
     print(f"🔄 Starting hierarchical synthesis for {len(chunk_analyses)} chunk analyses")
     
     # Calculate how many analyses can fit in one synthesis call
-    template_overhead = 2000  # Reserve for template text
+    template_overhead = 50000  # Reserve for template text, system prompts, and formatting overhead
     available_tokens = max_tokens_per_group - template_overhead
     
     # Group analyses into batches that fit within token limit
