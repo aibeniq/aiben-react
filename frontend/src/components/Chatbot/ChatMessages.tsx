@@ -47,8 +47,16 @@ function getDisplayFileName(source: string): string {
   return source
 }
 
-function formatSourceWithPage(source: string, page?: number | string): string {
+function formatSourceWithPage(
+  source: string,
+  page?: number | string,
+  pageRange?: string,
+): string {
   const fileName = getDisplayFileName(source)
+  // Prefer page_range if available, otherwise use page
+  if (pageRange) {
+    return `${fileName} (${pageRange})`
+  }
   if (page && page !== "" && page !== 0) {
     return `${fileName} (Page ${page})`
   }
@@ -166,6 +174,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                     fileName={formatSourceWithPage(
                                       source.metadata.source,
                                       source.metadata.page,
+                                      source.metadata.page_range,
                                     )}
                                     ml={1}
                                     fontWeight="normal"
@@ -185,6 +194,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                         fileName={formatSourceWithPage(
                                           source.metadata.source,
                                           source.metadata.page,
+                                          source.metadata.page_range,
                                         )}
                                         file={matchingFile}
                                         ml={1}
@@ -204,6 +214,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                         {formatSourceWithPage(
                                           source.metadata.source,
                                           source.metadata.page,
+                                          source.metadata.page_range,
                                         )}
                                       </Text>
                                     )

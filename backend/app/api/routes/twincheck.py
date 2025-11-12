@@ -579,17 +579,36 @@ async def compare_documents(
                             }
                         )
 
-                # Synthesize the chunk results for this topic
+                # Check if synthesis is actually needed based on token count
+                # Format chunk results for token estimation
+                formatted_chunks = "\n\n".join(
+                    [f"CHUNK {r['chunk_index']} ANALYSIS:\n{r['analysis']}" 
+                     for r in chunk_results]
+                )
+                
+                estimated_tokens = estimate_tokens(
+                    formatted_chunks, 
+                    model=getattr(llm, "model_name", "gpt-4")
+                )
+                max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                
+                print(f"📊 Topic '{topic}': {len(chunk_results)} chunks = {estimated_tokens:,} tokens (limit: {max_allowed:,})")
+                
+                # Only synthesize if chunks are large OR there are many chunks
+                # Otherwise just concatenate them - they fit in context anyway
+                needs_synthesis = estimated_tokens > (max_allowed * 0.6) or len(chunk_results) > 5
+                
                 try:
-                    synthesis_prompt = create_synthesis_prompt(
-                        chunk_results, document1.filename, document2.filename, topic
-                    )
-
-                    print(
-                        f"  Synthesizing {len(chunk_results)} chunk results for topic: {topic}"
-                    )
-
-                    synthesized_result = invoke_llm(llm, synthesis_prompt, {})
+                    if needs_synthesis:
+                        print(f"⚠️ Using LLM synthesis for {len(chunk_results)} chunks ({estimated_tokens:,} tokens)")
+                        synthesis_prompt = create_synthesis_prompt(
+                            chunk_results, document1.filename, document2.filename, topic
+                        )
+                        synthesized_result = invoke_llm(llm, synthesis_prompt, {})
+                    else:
+                        print(f"✅ Skipping synthesis - chunks fit in context ({estimated_tokens:,} tokens, {len(chunk_results)} chunks)")
+                        # Just concatenate the chunk analyses - no LLM call needed
+                        synthesized_result = formatted_chunks
 
                     # Translate the synthesized result if needed
                     # synthesized_result = await translate_text_if_needed(
@@ -849,39 +868,59 @@ async def compare_documents(
                 [f"Topic: {ta['topic']}\n{ta['analysis']}" for ta in topic_analysis]
             )
 
-            summary_prompt = f"""
-            You are creating a comprehensive summary of a document comparison that was processed in chunks due to size.
+            # Check if the topic summaries are small enough to use directly
+            # or if we need LLM synthesis
+            summaries_tokens = estimate_tokens(
+                topic_summaries,
+                model=getattr(llm, "model_name", "gpt-4")
+            )
+            max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
             
-            Documents compared:
-            - Document 1: {document1.filename}
-            - Document 2: {document2.filename}
+            print(f"📊 Summary generation: {summaries_tokens:,} tokens in topic analyses (limit: {max_allowed:,})")
             
-            The comparison was processed in {len(diff_chunks)} chunks and analyzed across the following topics:
-            {request.comparison_topics}
+            # Only synthesize if topic summaries are large enough to benefit from it
+            # For small summaries, just use the topic analyses directly
+            needs_summary_synthesis = summaries_tokens > (max_allowed * 0.4) or len(topic_analysis) > 8
             
-            Below are the detailed topic analyses:
-            
-            {topic_summaries}
-            
-            Please provide a comprehensive executive summary that:
-            1. Highlights the most significant overall differences between the documents
-            2. Synthesizes patterns across all topic analyses
-            3. Provides clear, actionable insights about the document comparison
-            4. Is well-structured and avoids repetition
-            
-            Focus on the big picture and most important differences.
-            """
+            if needs_summary_synthesis:
+                print(f"⚠️ Using LLM synthesis for summary ({summaries_tokens:,} tokens, {len(topic_analysis)} topics)")
+                summary_prompt = f"""
+                You are creating a comprehensive summary of a document comparison that was processed in chunks due to size.
+                
+                Documents compared:
+                - Document 1: {document1.filename}
+                - Document 2: {document2.filename}
+                
+                The comparison was processed in {len(diff_chunks)} chunks and analyzed across the following topics:
+                {comparison_topics}
+                
+                Below are the detailed topic analyses:
+                
+                {topic_summaries}
+                
+                Please provide a comprehensive executive summary that:
+                1. Highlights the most significant overall differences between the documents
+                2. Synthesizes patterns across all topic analyses
+                3. Provides clear, actionable insights about the document comparison
+                4. Is well-structured and avoids repetition
+                
+                Focus on the big picture and most important differences.
+                """
 
-            try:
-                summary = invoke_llm(llm, summary_prompt, {})
+                try:
+                    summary = invoke_llm(llm, summary_prompt, {})
 
-                # Translate the summary if needed
-                # summary = await translate_text_if_needed(
-                #     summary, session, current_user, llm
-                # )
+                    # Translate the summary if needed
+                    # summary = await translate_text_if_needed(
+                    #     summary, session, current_user, llm
+                    # )
 
-            except Exception as e:
-                summary = f"Summary generation error: {str(e)}\n\nPlease refer to the individual topic analyses below for detailed insights."
+                except Exception as e:
+                    summary = f"Summary generation error: {str(e)}\n\nPlease refer to the individual topic analyses below for detailed insights."
+            else:
+                print(f"✅ Skipping summary synthesis - topic analyses are concise ({summaries_tokens:,} tokens, {len(topic_analysis)} topics)")
+                # Just use the topic summaries directly - they're already comprehensive
+                summary = f"Comparison of {document1.filename} and {document2.filename}:\n\n{topic_summaries}"
         else:
             # Single chunk processing (original behavior)
             print("Creating summary from diff text (single chunk mode)")
@@ -1840,10 +1879,14 @@ async def generate_topics(
 
                     # If we have too many topics, synthesize and prioritize
                     if len(unique_topics) > (num_topics or 20):
+                        # Check if the synthesis prompt would exceed token limits
+                        from app.services.text_processing import estimate_tokens
+                        
+                        topics_list_text = chr(10).join([f"{i+1}. {t}" for i, t in enumerate(unique_topics)])
                         synthesis_prompt = f"""From the following list of comparison topics, select and refine the {num_topics or 10} most important and relevant topics for {comparison_type} comparison based on: {description}
 
 Topics to review:
-{chr(10).join([f"{i+1}. {t}" for i, t in enumerate(unique_topics)])}
+{topics_list_text}
 
 Requirements:
 1. Select the most critical and comprehensive topics
@@ -1853,23 +1896,34 @@ Requirements:
 
 Return only the final selected topics, one per line, numbered."""
 
-                        try:
-                            refined_response = invoke_llm(llm, synthesis_prompt, {})
-                            topics = []
-                            for line in refined_response.strip().split("\n"):
-                                line = line.strip()
-                                if line and (
-                                    line[0].isdigit()
-                                    or line.startswith("-")
-                                    or line.startswith("*")
-                                ):
-                                    topic = re.sub(r"^\d+\.\s+", "", line)
-                                    topic = re.sub(r"^[-*]\s+", "", topic)
-                                    if topic.strip():
-                                        topics.append(topic.strip())
-                        except Exception as e:
-                            print(f"Error in topic synthesis: {e}")
+                        estimated_tokens = estimate_tokens(synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o"))
+                        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                        
+                        print(f"📊 TwinCheck topic synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
+                        
+                        if estimated_tokens > max_allowed:
+                            # Too many topics - just truncate to requested number instead of synthesis
+                            print(f"⚠️ Topic synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation")
                             topics = unique_topics[: num_topics or 10]
+                        else:
+                            # Synthesis is safe
+                            try:
+                                refined_response = invoke_llm(llm, synthesis_prompt, {})
+                                topics = []
+                                for line in refined_response.strip().split("\n"):
+                                    line = line.strip()
+                                    if line and (
+                                        line[0].isdigit()
+                                        or line.startswith("-")
+                                        or line.startswith("*")
+                                    ):
+                                        topic = re.sub(r"^\d+\.\s+", "", line)
+                                        topic = re.sub(r"^[-*]\s+", "", topic)
+                                        if topic.strip():
+                                            topics.append(topic.strip())
+                            except Exception as e:
+                                print(f"Error in topic synthesis: {e}")
+                                topics = unique_topics[: num_topics or 10]
                     else:
                         topics = unique_topics[: num_topics or 20]
 

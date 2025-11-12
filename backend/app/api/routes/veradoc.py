@@ -81,6 +81,17 @@ def _load_frontend_translations():
                     translations[lang_code] = json.load(f)
     else:
         print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+    # Ensure a fallback for the 'errors.insufficientContext' key exists in English.
+    default_insufficient = (
+        "No relevant information found in the knowledge base to answer this question."
+    )
+    if "en" not in translations:
+        translations["en"] = {}
+    en_trans = translations["en"]
+    if not isinstance(en_trans.get("errors"), dict):
+        en_trans["errors"] = en_trans.get("errors", {})
+    if "insufficientContext" not in en_trans["errors"]:
+        en_trans["errors"]["insufficientContext"] = default_insufficient
 
     _frontend_translations_cache = translations
     return translations
@@ -581,9 +592,40 @@ async def prefetch_knowledge_base_context(
                             )
 
                     # Combine chunk contexts
-                    question_context = "\n\n".join(
+                    combined_contexts = "\n\n".join(
                         [ctx for ctx in chunk_contexts if ctx]
                     )
+                    
+                    # Check if combined contexts are too large and need hierarchical synthesis
+                    from app.services.text_processing import estimate_tokens
+                    combined_tokens = estimate_tokens(combined_contexts, model=getattr(llm, "model_name", "gpt-4o"))
+                    max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                    
+                    print(f"📊 VeraDoc context combination: {combined_tokens:,} tokens (limit: {max_allowed:,})")
+                    
+                    if combined_tokens > max_allowed:
+                        # Use hierarchical synthesis to combine chunk contexts
+                        print(f"⚠️ Combined context too large ({combined_tokens:,} tokens) - using hierarchical synthesis")
+                        from app.services.synthesis import hierarchical_synthesis
+                        
+                        user_language = getattr(current_user, "preferred_language", None) or "en"
+                        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+                        language_instruction = f"Respond in this language: {language_name}."
+                        
+                        question_context = hierarchical_synthesis(
+                            chunk_analyses=chunk_contexts,
+                            question=question_text,
+                            llm=llm,
+                            session=session,
+                            user_id=current_user.id,
+                            max_tokens_per_group=max_allowed,
+                            language_instruction=language_instruction,
+                            synthesis_template=context_prompt_template,
+                            template_params={"context": "{chunk_analyses}"},
+                        )
+                    else:
+                        # Simple concatenation is fine
+                        question_context = combined_contexts
 
                 else:
                     # Context is small enough, process normally
@@ -1783,61 +1825,153 @@ async def process_rag_checklist(
                                 f"Respond in this language: {language_name}."
                             )
 
-                        # DEBUG: Print the full prompt sent to the LLM
-                        try:
-                            rendered_prompt = qa_prompt_template.format(
-                                document_text=document_text,
-                                question=question_text,
-                                question_context=question_context,
-                                custom_instructions_section=custom_instructions_section,
-                                language_instruction=language_instruction,
-                            )
-                        except Exception as e:
-                            rendered_prompt = f"[ERROR rendering prompt: {e}]"
-                        # Clean surrogates from rendered_prompt before printing to avoid UnicodeEncodeError
-                        clean_prompt = re.sub(r"[\ud800-\udfff]", "", rendered_prompt)
-                        # print(
-                        #    "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
-                        # )
-                        # print(clean_prompt)
-                        # print(
-                        #    "\n========================================================\n"
-                        # )
+                        # Check if document + prompt would exceed token limits
+                        from app.services.text_processing import estimate_tokens, chunk_text
+                        
+                        # Estimate total tokens for the prompt
+                        test_prompt = qa_prompt_template.format(
+                            document_text=document_text[:1000],  # Small sample for template estimation
+                            question=question_text,
+                            question_context=question_context,
+                            custom_instructions_section=custom_instructions_section,
+                            language_instruction=language_instruction,
+                        )
+                        template_overhead = estimate_tokens(test_prompt, model=getattr(llm, "model_name", "gpt-4o")) - 250  # Subtract sample text tokens
+                        document_tokens = estimate_tokens(document_text, model=getattr(llm, "model_name", "gpt-4o"))
+                        total_estimated_tokens = template_overhead + document_tokens
+                        
+                        # Get the per-request limit
+                        max_per_request = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 60000)
+                        
+                        print(f"📊 Document tokens: {document_tokens:,}, Template overhead: {template_overhead:,}, Total: {total_estimated_tokens:,}, Limit: {max_per_request:,}")
+                        
+                        # If document is too large, use chunking + synthesis approach
+                        if total_estimated_tokens > max_per_request:
+                            print(f"⚠️ Document too large ({total_estimated_tokens:,} tokens), using chunking + synthesis approach")
+                            
+                            # Chunk the document
+                            chunk_size = max_per_request - template_overhead - 5000  # Reserve for safety
+                            chunks = chunk_text(document_text, max_tokens=chunk_size)
+                            print(f"📄 Split document into {len(chunks)} chunks for processing")
+                            
+                            # Process each chunk
+                            chunk_answers = []
+                            for chunk_idx, chunk in enumerate(chunks):
+                                print(f"Processing chunk {chunk_idx + 1}/{len(chunks)}")
+                                
+                                try:
+                                    chunk_answer = await invoke_llm_async(
+                                        llm,
+                                        qa_prompt_template,
+                                        {
+                                            "document_text": chunk,
+                                            "question": question_text,
+                                            "question_context": question_context,
+                                            "custom_instructions_section": custom_instructions_section,
+                                            "language_instruction": language_instruction,
+                                        },
+                                    )
+                                    chunk_answers.append(f"[Chunk {chunk_idx + 1}]: {chunk_answer}")
+                                    
+                                    # Check for cancellation
+                                    if request and await request.is_disconnected():
+                                        print(f"❌ CLIENT DISCONNECTED - Stopping chunk processing")
+                                        raise HTTPException(status_code=408, detail="Request cancelled")
+                                    
+                                    await asyncio.sleep(0.05)
+                                    
+                                except Exception as chunk_error:
+                                    print(f"Error processing chunk {chunk_idx + 1}: {chunk_error}")
+                                    chunk_answers.append(f"[Chunk {chunk_idx + 1}]: Error - {str(chunk_error)}")
+                            
+                            # Synthesize chunk answers
+                            print(f"🔄 Synthesizing {len(chunk_answers)} chunk answers")
+                            synthesis_prompt = f"""Based on the following analysis of different sections of a document, provide a comprehensive answer to the question.
 
-                        try:
-                            # Generate text-based answer
-                            print(
-                                f"DEBUG: language_instruction = '{language_instruction}'"
-                            )
+Question: {question_text}
+
+Policy Context: {question_context}
+
+Section Analyses:
+{chr(10).join(chunk_answers)}
+
+Provide a unified, coherent answer that synthesizes the information from all sections. If different sections provide contradictory information, note this. If no section contains relevant information, clearly state that.
+
+{language_instruction}
+
+Unified Answer:"""
+                            
                             answer = await invoke_llm_async(
                                 llm,
-                                qa_prompt_template,
-                                {
-                                    "document_text": document_text,
-                                    "question": question_text,
-                                    "question_context": question_context,
-                                    "custom_instructions_section": custom_instructions_section,
-                                    "language_instruction": language_instruction,
-                                },
+                                synthesis_prompt,
+                                {},
                             )
+                        else:
+                            # Document is small enough, process normally
+                            print(f"✅ Document size OK ({total_estimated_tokens:,} tokens), processing normally")
 
-                            # Check for cancellation after LLM call
-                            if request and await request.is_disconnected():
+                        # DEBUG: Print the full prompt sent to the LLM (only for non-chunked case)
+                            try:
+                                rendered_prompt = qa_prompt_template.format(
+                                    document_text=document_text,
+                                    question=question_text,
+                                    question_context=question_context,
+                                    custom_instructions_section=custom_instructions_section,
+                                    language_instruction=language_instruction,
+                                )
+                            except Exception as e:
+                                rendered_prompt = f"[ERROR rendering prompt: {e}]"
+                            # Clean surrogates from rendered_prompt before printing to avoid UnicodeEncodeError
+                            clean_prompt = re.sub(r"[\ud800-\udfff]", "", rendered_prompt)
+                            # print(
+                            #    "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
+                            # )
+                            # print(clean_prompt)
+                            # print(
+                            #    "\n========================================================\n"
+                            # )
+
+                            try:
+                                # Generate text-based answer
                                 print(
-                                    f"❌ CLIENT DISCONNECTED - Stopping after question answering"
+                                    f"DEBUG: language_instruction = '{language_instruction}'"
                                 )
-                                raise HTTPException(
-                                    status_code=408,
-                                    detail="Request cancelled during question answering",
+                                answer = await invoke_llm_async(
+                                    llm,
+                                    qa_prompt_template,
+                                    {
+                                        "document_text": document_text,
+                                        "question": question_text,
+                                        "question_context": question_context,
+                                        "custom_instructions_section": custom_instructions_section,
+                                        "language_instruction": language_instruction,
+                                    },
                                 )
 
-                            # Yield after LLM call to prevent connection timeout
-                            await asyncio.sleep(0.05)
+                                # Check for cancellation after LLM call
+                                if request and await request.is_disconnected():
+                                    print(
+                                        f"❌ CLIENT DISCONNECTED - Stopping after question answering"
+                                    )
+                                    raise HTTPException(
+                                        status_code=408,
+                                        detail="Request cancelled during question answering",
+                                    )
 
-                            print(f"Got text answer: {answer[:100]}...")
+                                # Yield after LLM call to prevent connection timeout
+                                await asyncio.sleep(0.05)
 
-                            # Add vision analysis if images exist and LLM supports it
-                            if vision_enabled and document_images:
+                                print(f"Got text answer: {answer[:100]}...")
+
+                            except Exception as answer_error:
+                                print(
+                                    f"Error generating answer for question: {answer_error}"
+                                )
+                                answer = f"Error generating answer: {str(answer_error)}"
+
+                        # Add vision analysis if images exist and LLM supports it (for both chunked and non-chunked)
+                        if vision_enabled and document_images:
+                            try:
                                 print(
                                     f"Adding vision analysis for question: {question_text[:50]}..."
                                 )
@@ -1856,66 +1990,59 @@ async def process_rag_checklist(
                                         }
                                     )
 
-                                try:
-                                    vision_variables = {
-                                        "question": question_text,
-                                        "filename": file.filename,
-                                        "custom_instructions": (
-                                            request_data.custom_instructions
-                                            if hasattr(
-                                                request_data, "custom_instructions"
-                                            )
-                                            else ""
-                                        ),
-                                        "language_instruction": language_instruction,
-                                    }
+                                vision_variables = {
+                                    "question": question_text,
+                                    "filename": file.filename,
+                                    "custom_instructions": (
+                                        request_data.custom_instructions
+                                        if hasattr(
+                                            request_data, "custom_instructions"
+                                        )
+                                        else ""
+                                    ),
+                                    "language_instruction": language_instruction,
+                                }
 
-                                    print(
-                                        f"DEBUG: vision language_instruction = '{vision_variables.get('language_instruction', '')}'"
-                                    )
-                                    vision_analysis = await VisionService.process_images_with_prompt(
-                                        llm=llm,
-                                        images=image_data_list,
-                                        prompt_template=settings.VERADOC_VISION_PROMPT_TEMPLATE,
-                                        variables=vision_variables,
-                                    )
+                                print(
+                                    f"DEBUG: vision language_instruction = '{vision_variables.get('language_instruction', '')}'"
+                                )
+                                vision_analysis = await VisionService.process_images_with_prompt(
+                                    llm=llm,
+                                    images=image_data_list,
+                                    prompt_template=settings.VERADOC_VISION_PROMPT_TEMPLATE,
+                                    variables=vision_variables,
+                                )
 
-                                    # Combine text and vision analysis seamlessly (photogenic integration)
-                                    if (
-                                        "contains images but no extractable text"
-                                        in document_text
-                                        and len(document_text) < 200
-                                    ):
-                                        # For image-only documents, use vision-primary combination
-                                        combined_answer = f"Based on visual analysis of the document: {vision_analysis}. This assessment relies on image content, as the document contains minimal extractable text."
-                                    else:
-                                        # Normal text + vision combination: Integrate narratively without markers
-                                        # Clean the vision_analysis to remove any residual markers (if present)
-                                        vision_analysis_clean = re.sub(
-                                            r"## .*? ##|---.*?---", "", vision_analysis
-                                        ).strip()
-                                        # Combine into a flowing response
-                                        combined_answer = f"Text Analysis: {answer} Visual Analysis: {vision_analysis_clean}"
+                                # Combine text and vision analysis seamlessly (photogenic integration)
+                                if (
+                                    "contains images but no extractable text"
+                                    in document_text
+                                    and len(document_text) < 200
+                                ):
+                                    # For image-only documents, use vision-primary combination
+                                    combined_answer = f"Based on visual analysis of the document: {vision_analysis}. This assessment relies on image content, as the document contains minimal extractable text."
+                                else:
+                                    # Normal text + vision combination: Integrate narratively without markers
+                                    # Clean the vision_analysis to remove any residual markers (if present)
+                                    vision_analysis_clean = re.sub(
+                                        r"## .*? ##|---.*?---", "", vision_analysis
+                                    ).strip()
+                                    # Combine into a flowing response
+                                    combined_answer = f"Text Analysis: {answer} Visual Analysis: {vision_analysis_clean}"
 
-                                    answer = combined_answer
-                                    print(
-                                        f"Combined answer with vision analysis: {answer[:100]}..."
-                                    )
+                                answer = combined_answer
+                                print(
+                                    f"Combined answer with vision analysis: {answer[:100]}..."
+                                )
 
-                                except Exception as vision_error:
-                                    print(
-                                        f"Vision analysis error for question '{question_text[:50]}...': {vision_error}"
-                                    )
-                                    # Continue with text-only answer
+                            except Exception as vision_error:
+                                print(
+                                    f"Vision analysis error for question '{question_text[:50]}...': {vision_error}"
+                                )
+                                # Continue with text-only answer
 
-                            # Clean surrogates from answer
-                            answer = re.sub(r"[\ud800-\udfff]", "", answer)
-
-                        except Exception as answer_error:
-                            print(
-                                f"Error generating answer for question: {answer_error}"
-                            )
-                            answer = f"Error generating answer: {str(answer_error)}"
+                        # Clean surrogates from answer
+                        answer = re.sub(r"[\ud800-\udfff]", "", answer)
 
                         print(
                             "Source citations for question:", question_text
@@ -3444,6 +3571,11 @@ async def generate_questions_with_files(
                     reference_document_content, max_tokens=max_chunk_size
                 )
 
+                # Get user language and create language instruction
+                user_language = getattr(current_user, "preferred_language", None) or "en"
+                language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+                language_instruction = f"Respond in this language: {language_name}."
+
                 # Process each chunk to generate questions
                 all_chunk_questions = []
 
@@ -3457,6 +3589,7 @@ async def generate_questions_with_files(
                         "reference_documents_instruction": "You can find additional requirements in the reference documents provided below.",
                         "reference_documents_content": chunk,
                         "additional_instructions": "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions",
+                        "language_instruction": language_instruction,
                     }
 
                     try:
@@ -3513,6 +3646,10 @@ async def generate_questions_with_files(
 
                     # If we have too many questions, synthesize and prioritize
                     if len(unique_questions) > (num_questions or 50):
+                        # Check if the synthesis prompt would exceed token limits
+                        from app.services.text_processing import estimate_tokens
+                        
+                        questions_list_text = chr(10).join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)])
                         synthesis_prompt_variables = {
                             "description": description,
                             "checklist_type": checklist_type,
@@ -3525,7 +3662,7 @@ async def generate_questions_with_files(
                         synthesis_prompt = f"""From the following list of checklist questions, select and refine the {num_questions or 20} most important and relevant questions for {checklist_type} verification based on: {description}
 
 Questions to review:
-{chr(10).join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)])}
+{questions_list_text}
 
 Requirements:
 1. Select the most critical and actionable questions
@@ -3535,23 +3672,34 @@ Requirements:
 
 Return only the final selected questions, one per line, numbered."""
 
-                        try:
-                            refined_response = invoke_llm(llm, synthesis_prompt, {})
-                            questions = []
-                            for line in refined_response.strip().split("\n"):
-                                line = line.strip()
-                                if line and (
-                                    line[0].isdigit()
-                                    or line.startswith("-")
-                                    or line.startswith("*")
-                                ):
-                                    question = re.sub(r"^\d+\.\s+", "", line)
-                                    question = re.sub(r"^[-*]\s+", "", question)
-                                    if question.strip():
-                                        questions.append(question.strip())
-                        except Exception as e:
-                            print(f"Error in question synthesis: {e}")
+                        estimated_tokens = estimate_tokens(synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o"))
+                        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                        
+                        print(f"📊 VeraDoc question synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
+                        
+                        if estimated_tokens > max_allowed:
+                            # Too many questions - just truncate to requested number instead of synthesis
+                            print(f"⚠️ Question synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation")
                             questions = unique_questions[: num_questions or 20]
+                        else:
+                            # Synthesis is safe
+                            try:
+                                refined_response = invoke_llm(llm, synthesis_prompt, {})
+                                questions = []
+                                for line in refined_response.strip().split("\n"):
+                                    line = line.strip()
+                                    if line and (
+                                        line[0].isdigit()
+                                        or line.startswith("-")
+                                        or line.startswith("*")
+                                    ):
+                                        question = re.sub(r"^\d+\.\s+", "", line)
+                                        question = re.sub(r"^[-*]\s+", "", question)
+                                        if question.strip():
+                                            questions.append(question.strip())
+                            except Exception as e:
+                                print(f"Error in question synthesis: {e}")
+                                questions = unique_questions[: num_questions or 20]
                     else:
                         questions = unique_questions[: num_questions or 20]
 

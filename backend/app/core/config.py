@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     FULL_SCAN_DOCUMENT_CHUNK_SIZE: int = 30000
     FULL_SCAN_DOCUMENT_CHUNK_OVERLAP: int = 200
     FULL_SCAN_PROMPT_RESERVE_TOKENS: int = 5000  # Reserve for chatbot full scan prompts
+    
+    # Batch processing settings for Full Document Scan - Optimized for speed
+    FULL_SCAN_CHUNK_SIZE: int = 6000  # Larger chunks for better context (increased from 2000)
+    FULL_SCAN_MAX_BATCH_TOKENS: int = 220000  # Max tokens per batch (increased from 180000)
+    FULL_SCAN_BATCH_OVERLAP: int = 100  # Small overlap between chunks for context (reduced from 200)
+    
     RAG_DOCUMENT_CHUNK_SIZE: int = 1000
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_NUM_CHUNKS: int = 20  # Number of chunks to retrieve for RAG search
@@ -282,8 +288,11 @@ class Settings(BaseSettings):
     OPENAI_TOKENS_PER_MINUTE: int = 180000  # Token limit (90% of typical 200k limit)
     OPENAI_REQUESTS_PER_MINUTE: int = 500  # Request limit (conservative but practical)
     OPENAI_RATE_LIMIT_MAX_WAIT: int = (
-        30000  # Max wait time for rate limiting (500 minutes)
+        300  # Max wait time for rate limiting (5 minutes - prevents hanging on stuck requests)
     )
+    
+    # Per-request token limits to prevent impossible waits
+    OPENAI_MAX_TOKENS_PER_REQUEST: int = 60000  # Maximum tokens for any single LLM call (reduced to leave room for template overhead ~50k, preventing requests from exceeding model limits)
 
     # Processing Delays (to prevent cascading rate limit failures)
     PROCESSING_DELAY_BETWEEN_CHUNKS: float = 0.5  # Delay between processing chunks
@@ -769,6 +778,39 @@ Based on the provided regulations/guideline citations, the following should be k
 
     ANALYSIS:
     """
+
+    # Combined batch analysis template - analyzes AND filters in single call
+    CHATBOT_COMBINED_BATCH_ANALYSIS_PROMPT_TEMPLATE: str = """You are analyzing a document to answer a question. Below are numbered chunks from the document.
+
+For EACH chunk, you must:
+1. Determine if it contains information relevant to answering the question
+2. If relevant, extract the specific information that helps answer the question
+3. If not relevant, simply mark it as "NOT RELEVANT"
+
+Question: {question}
+
+Document Chunks:
+{chunks}
+
+INSTRUCTIONS:
+- For each chunk, respond in this EXACT format:
+  
+  CHUNK [number]: RELEVANT
+  Answer: [Extract the specific information from this chunk that answers the question]
+  
+  OR
+  
+  CHUNK [number]: NOT RELEVANT
+
+- Be GENEROUS in marking chunks as relevant - if a chunk has ANY information that could help answer the question, mark it as RELEVANT
+- If a chunk discusses the same topic or domain as the question (even tangentially), mark it RELEVANT
+- Only mark as NOT RELEVANT if the chunk is completely unrelated to the question topic
+- Extract key information concisely
+- Maintain the chunk number exactly as shown
+
+{language_instruction}
+
+Begin your analysis:"""
 
     CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE: str = """
     You are an AI assistant synthesizing analysis from multiple text chunks to answer a question.
