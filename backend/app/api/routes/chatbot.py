@@ -202,7 +202,7 @@ class TextQueryResponse(BaseModel):
 def create_large_batches(chunks_with_metadata: List[Dict], max_batch_tokens: int) -> List[List[Dict]]:
     """
     Create batches of chunks that fit within max token limit.
-    Also enforces a hard limit on chunks per batch to prevent timeouts.
+    Also enforces a hard limit on chunks per batch to prevent timeouts and token limit violations.
     
     Args:
         chunks_with_metadata: List of chunk dictionaries with 'content' and metadata
@@ -211,22 +211,32 @@ def create_large_batches(chunks_with_metadata: List[Dict], max_batch_tokens: int
     Returns:
         List of batches, where each batch is a list of chunk dictionaries
     """
+    from app.core.config import settings
+    
     batches = []
     current_batch = []
     current_batch_tokens = 0
     
-    # Hard limit: max 100 chunks per batch to prevent timeouts
-    MAX_CHUNKS_PER_BATCH = 100
+    # Get the per-request limit from settings to ensure we never exceed it
+    per_request_limit = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 60000)
+    
+    # Use the smaller of max_batch_tokens and per_request_limit, with some safety margin
+    # Reserve ~10k tokens for prompt template overhead
+    effective_limit = min(max_batch_tokens, per_request_limit - 10000)
+    
+    # Reduce hard limit: max 50 chunks per batch to prevent token limit violations
+    # (100 chunks was causing 103k token requests which exceeded the 60k limit)
+    MAX_CHUNKS_PER_BATCH = 50
     
     for chunk_data in chunks_with_metadata:
         # Estimate tokens (rough: 1 token ≈ 4 chars)
         chunk_tokens = len(chunk_data["content"]) // 4
         
         # Start new batch if:
-        # 1. Would exceed token limit, OR
+        # 1. Would exceed effective token limit, OR
         # 2. Would exceed chunk count limit
         should_start_new_batch = (
-            (current_batch and current_batch_tokens + chunk_tokens > max_batch_tokens) or
+            (current_batch and current_batch_tokens + chunk_tokens > effective_limit) or
             (len(current_batch) >= MAX_CHUNKS_PER_BATCH)
         )
         
@@ -351,7 +361,7 @@ async def _handle_full_text_kb_query(
 
     # Rephrase the question using chat history if available
     if chat_history:
-        rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+        rephrased_question = rephrase_question_with_context(llm, chat_history, question, current_user)
     else:
         rephrased_question = question
 
@@ -843,7 +853,7 @@ async def _handle_full_text_document_query(
 
     # Rephrase the question using chat history if available
     if chat_history:
-        rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+        rephrased_question = rephrase_question_with_context(llm, chat_history, question, current_user)
     else:
         rephrased_question = question
 
@@ -1266,7 +1276,7 @@ async def _handle_full_text_document_query(
                 print(f"Error removing temporary file {temp_path}: {e}")
 
 
-def rephrase_question_with_context(llm, chat_history, current_question):
+def rephrase_question_with_context(llm, chat_history, current_question, current_user=None):
     """Rephrase the user's latest question considering previous chat context"""
 
     # Skip rephrasing if this is the first question
@@ -1276,12 +1286,24 @@ def rephrase_question_with_context(llm, chat_history, current_question):
 
     print("Now rephrasing question with context")
 
+    # Get user language and create language instruction
+    if current_user:
+        user_language = getattr(current_user, "preferred_language", None) or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+    else:
+        language_instruction = "Respond in this language: English."
+
     # Use the unified invoke_llm function
     try:
         rephrased_question = invoke_llm(
             llm,
             settings.CHATBOT_REPHRASING_PROMPT_TEMPLATE,
-            {"chat_history": chat_history, "question": current_question},
+            {
+                "chat_history": chat_history,
+                "question": current_question,
+                "language_instruction": language_instruction,
+            },
         )
 
         rephrased_question = rephrased_question.strip()
@@ -1573,7 +1595,7 @@ async def query_knowledge_base(
         if chat_history:
             print("Rephrasing question with context")
             rephrased_question = rephrase_question_with_context(
-                llm, chat_history, question
+                llm, chat_history, question, current_user
             )
         else:
             rephrased_question = question
@@ -2334,7 +2356,7 @@ async def query_document(
         if chat_history:
             print("Rephrasing question with context")
             rephrased_question = rephrase_question_with_context(
-                llm, chat_history, question
+                llm, chat_history, question, current_user
             )
         else:
             rephrased_question = question
@@ -2769,7 +2791,7 @@ async def query_text(
         if chat_history:
             print("Rephrasing question with context")
             rephrased_question = rephrase_question_with_context(
-                llm, chat_history, question
+                llm, chat_history, question, current_user
             )
             print("Rephrased question:", rephrased_question)
         else:

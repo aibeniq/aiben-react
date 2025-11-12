@@ -50,9 +50,9 @@ class Settings(BaseSettings):
     FULL_SCAN_PROMPT_RESERVE_TOKENS: int = 5000  # Reserve for chatbot full scan prompts
     
     # Batch processing settings for Full Document Scan - Optimized for speed
-    FULL_SCAN_CHUNK_SIZE: int = 2000  # Larger chunks for better context
-    FULL_SCAN_MAX_BATCH_TOKENS: int = 180000  # Max tokens per batch (~80-90 chunks)
-    FULL_SCAN_BATCH_OVERLAP: int = 200  # Small overlap between chunks for context
+    FULL_SCAN_CHUNK_SIZE: int = 6000  # Larger chunks for better context (increased from 2000)
+    FULL_SCAN_MAX_BATCH_TOKENS: int = 220000  # Max tokens per batch (increased from 180000)
+    FULL_SCAN_BATCH_OVERLAP: int = 100  # Small overlap between chunks for context (reduced from 200)
     
     RAG_DOCUMENT_CHUNK_SIZE: int = 1000
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
@@ -288,11 +288,11 @@ class Settings(BaseSettings):
     OPENAI_TOKENS_PER_MINUTE: int = 180000  # Token limit (90% of typical 200k limit)
     OPENAI_REQUESTS_PER_MINUTE: int = 500  # Request limit (conservative but practical)
     OPENAI_RATE_LIMIT_MAX_WAIT: int = (
-        30000  # Max wait time for rate limiting (500 minutes)
+        300  # Max wait time for rate limiting (5 minutes - prevents hanging on stuck requests)
     )
     
     # Per-request token limits to prevent impossible waits
-    OPENAI_MAX_TOKENS_PER_REQUEST: int = 80000  # Maximum tokens for any single LLM call (well below per-minute budget to allow concurrent requests)
+    OPENAI_MAX_TOKENS_PER_REQUEST: int = 60000  # Maximum tokens for any single LLM call (reduced to leave room for template overhead ~50k, preventing requests from exceeding model limits)
 
     # Processing Delays (to prevent cascading rate limit failures)
     PROCESSING_DELAY_BETWEEN_CHUNKS: float = 0.5  # Delay between processing chunks
