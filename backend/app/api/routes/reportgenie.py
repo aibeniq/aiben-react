@@ -96,6 +96,21 @@ def _load_frontend_translations():
                     translations[lang_code] = json.load(f)
     else:
         print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+    # Ensure a fallback for the 'errors.insufficientContext' key exists in English.
+    # Some deployments may not include frontend locale files at the expected path
+    # (or the container may not have them mounted). Make sure we at least have
+    # a sensible English fallback so `translate_frontend` doesn't return the raw
+    # key string in generated reports.
+    default_insufficient = (
+        "No relevant information found in the knowledge base to answer this question."
+    )
+    if "en" not in translations:
+        translations["en"] = {}
+    en_trans = translations["en"]
+    if not isinstance(en_trans.get("errors"), dict):
+        en_trans["errors"] = en_trans.get("errors", {})
+    if "insufficientContext" not in en_trans["errors"]:
+        en_trans["errors"]["insufficientContext"] = default_insufficient
 
     _frontend_translations_cache = translations
     return translations
@@ -207,12 +222,12 @@ async def get_reportgenie_progress(
         raise HTTPException(status_code=404, detail="Task not found")
 
     # Debug logging to see what's actually being returned
-    print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
-    print(
-        f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
-    )
-    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
-    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+    #print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
+    #print(
+    #    f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
+    #)
+    #print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    #print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
 
     # Check each stage completion status
     stages = progress_data.get("stages", {})
@@ -357,6 +372,9 @@ async def extract_text_from_file_async(file_content: bytes, filename: str) -> st
         raise HTTPException(
             status_code=400, detail=f"Error extracting text from {filename}: {str(e)}"
         )
+
+# Import hierarchical synthesis from shared utilities
+from app.services.synthesis import hierarchical_synthesis
 
 
 @router.post("/generate", response_model=ReportGenieResponse)
@@ -678,7 +696,13 @@ async def generate_report(
                                     )
 
                         else:
-                            # No filtering - include all chunks
+                            # No filtering - include all chunks directly as analyses to avoid
+                            # per-chunk relevance sentinel responses like
+                            # "No relevant information found in this chunk." which can
+                            # cause the synthesizer to conclude there is insufficient
+                            # context. Appending raw chunk content ensures the
+                            # synthesizer always has context to work with when the
+                            # LLM-based relevance filter is disabled.
                             for i, chunk in enumerate(text_chunks):
                                 if not chunk or not chunk.strip():
                                     continue
@@ -689,30 +713,22 @@ async def generate_report(
                                     await asyncio.sleep(
                                         settings.PROCESSING_DELAY_BETWEEN_CHUNKS
                                     )
+
                                 try:
-                                    analysis = invoke_llm(
-                                        llm,
-                                        settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                                        {
-                                            "chunk": chunk,
-                                            "question": section_description,
-                                            "language_instruction": f"Respond in this language: {settings.SUPPORTED_LANGUAGES.get(current_user.preferred_language or 'en', 'English')}",
-                                            "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
-                                        },
-                                    )
+                                    # Use the chunk content directly. If chunks are
+                                    # extremely large, the synthesizer will still be
+                                    # responsible for handling or truncating as needed.
+                                    display_chunk = chunk
+                                    chunk_analyses.append(display_chunk)
+                                    relevant_chunk_indices.append(i)
                                 except Exception as e:
-                                    print(f"❌ Error analyzing chunk {i + 1}: {e}")
+                                    print(f"❌ Error processing chunk {i + 1}: {e}")
                                     traceback.print_exc()
                                     chunk_analyses.append(
-                                        f"Analysis failed for chunk {i + 1}, including content anyway."
+                                        f"Chunk {i + 1} content included due to processing error."
                                     )
                                     relevant_chunk_indices.append(i)
                                     continue
-
-                                chunk_analyses.append(
-                                    analysis if analysis is not None else chunk
-                                )
-                                relevant_chunk_indices.append(i)
 
                         # Synthesize the chunk analyses
                         print(
@@ -724,6 +740,10 @@ async def generate_report(
                             section_content = "No relevant information found in the knowledge base to answer this question."
                             source_citations = []
                         else:
+                            # Initialize variables before try block to avoid UnboundLocalError
+                            synthesized_answer = None
+                            source_citations = []
+                            
                             try:
                                 user_language = current_user.preferred_language or "en"
                                 language_name = settings.SUPPORTED_LANGUAGES.get(
@@ -733,16 +753,54 @@ async def generate_report(
                                     f"Respond in this language: {language_name}."
                                 )
 
-                                synthesized_answer = invoke_llm(
-                                    llm,
-                                    settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-                                    {
-                                        "chunk_analyses": "\n\n".join(chunk_analyses),
-                                        "question": section_description,
-                                        "language_instruction": language_instruction,
-                                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
-                                    },
+                                # Check if synthesis prompt would exceed token limits
+                                chunk_analyses_text = "\n\n".join(chunk_analyses)
+                                
+                                # Build the synthesis prompt to estimate its size
+                                test_synthesis_prompt = settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE.format(
+                                    chunk_analyses=chunk_analyses_text,
+                                    question=section_description,
+                                    language_instruction=language_instruction,
+                                    insufficient_info_phrase=settings.LLM_INSUFFICIENT_INFO_PHRASE,
                                 )
+                                
+                                estimated_synthesis_tokens = estimate_tokens(
+                                    test_synthesis_prompt,
+                                    model=getattr(llm, "model_name", "gpt-4o")
+                                )
+                                
+                                max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                                # Add safety margin (15%) to account for actual token usage vs estimation
+                                # The actual request includes system messages, completion allocation, etc.
+                                safety_margin = 0.85
+                                effective_limit = int(max_allowed * safety_margin)
+                                
+                                print(f"📊 Synthesis prompt: {estimated_synthesis_tokens:,} tokens (limit: {max_allowed:,}, effective: {effective_limit:,})")
+                                
+                                if estimated_synthesis_tokens > effective_limit:
+                                    # Use hierarchical synthesis for very large documents
+                                    print(f"⚠️ Synthesis prompt too large ({estimated_synthesis_tokens:,} tokens) - using hierarchical synthesis")
+                                    synthesized_answer = hierarchical_synthesis(
+                                        chunk_analyses=chunk_analyses,
+                                        question=section_description,
+                                        llm=llm,
+                                        session=session,
+                                        user_id=current_user.id,
+                                        max_tokens_per_group=max_allowed,
+                                        language_instruction=language_instruction,
+                                    )
+                                else:
+                                    # Original single-step synthesis
+                                    synthesized_answer = invoke_llm(
+                                        llm,
+                                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                                        {
+                                            "chunk_analyses": chunk_analyses_text,
+                                            "question": section_description,
+                                            "language_instruction": language_instruction,
+                                            "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                                        },
+                                    )
 
                                 # Replace insufficient context phrase with translated message
                                 if (
@@ -810,14 +868,19 @@ async def generate_report(
                                         f"Warning: Could not check disconnect status: {e}"
                                     )
 
-                                # Translate the synthesized answer if needed
-                                # section_content = await translate_text_if_needed(
-                                #     synthesized_answer, session, current_user, llm
-                                # )
-                                section_content = synthesized_answer
+                                # Handle failed synthesis - provide error message
+                                if synthesized_answer is None:
+                                    # LLM call failed, provide appropriate error message
+                                    user_language = current_user.preferred_language or "en"
+                                    error_message = translate_frontend(
+                                        "errors.processingError",
+                                        language=user_language,
+                                    )
+                                    section_content = error_message or "An error occurred during content generation. Please try again."
+                                else:
+                                    section_content = synthesized_answer
 
                                 # Create source citations from relevant chunks only
-                                source_citations = []
                                 for idx in relevant_chunk_indices:
                                     chunk_content = text_chunks[idx]
                                     # Send full chunk content for citations (no backend truncation)
@@ -1028,8 +1091,8 @@ async def generate_report(
             print(
                 f"🔍 Section {i+1}: '{section.get('title', 'No title')}' has {citations_count} citations"
             )
-            if citations_count > 0:
-                print(f"🔍 Sample citation: {section['source_citations'][0]}")
+            #if citations_count > 0:
+            #    print(f"🔍 Sample citation: {section['source_citations'][0]}")
 
         # Get outline name if outline_id is provided
         outline_name = None
@@ -1947,10 +2010,14 @@ async def generate_outline(
 
                     # If we have too many sections, synthesize and prioritize
                     if len(unique_sections) > (num_sections or 15):
+                        # Check if the synthesis prompt would exceed token limits
+                        from app.services.text_processing import estimate_tokens
+                        
+                        sections_list_text = chr(10).join([f"{i+1}. {s}" for i, s in enumerate(unique_sections)])
                         synthesis_prompt = f"""From the following list of outline sections, select and refine the {num_sections or 8} most important and relevant sections for a {report_type} report based on: {description}
 
 Sections to review:
-{chr(10).join([f"{i+1}. {s}" for i, s in enumerate(unique_sections)])}
+{sections_list_text}
 
 Requirements:
 1. Select the most critical and comprehensive sections
@@ -1960,23 +2027,34 @@ Requirements:
 
 Return only the final selected sections, one per line, numbered."""
 
-                        try:
-                            refined_response = invoke_llm(llm, synthesis_prompt, {})
-                            sections = []
-                            for line in refined_response.strip().split("\n"):
-                                line = line.strip()
-                                if line and (
-                                    line[0].isdigit()
-                                    or line.startswith("-")
-                                    or line.startswith("*")
-                                ):
-                                    section = re.sub(r"^\d+\.\s+", "", line)
-                                    section = re.sub(r"^[-*]\s+", "", section)
-                                    if section.strip():
-                                        sections.append(section.strip())
-                        except Exception as e:
-                            print(f"Error in section synthesis: {e}")
+                        estimated_tokens = estimate_tokens(synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o"))
+                        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                        
+                        print(f"📊 ReportGenie outline synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
+                        
+                        if estimated_tokens > max_allowed:
+                            # Too many sections - just truncate to requested number instead of synthesis
+                            print(f"⚠️ Outline synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation")
                             sections = unique_sections[: num_sections or 8]
+                        else:
+                            # Synthesis is safe
+                            try:
+                                refined_response = invoke_llm(llm, synthesis_prompt, {})
+                                sections = []
+                                for line in refined_response.strip().split("\n"):
+                                    line = line.strip()
+                                    if line and (
+                                        line[0].isdigit()
+                                        or line.startswith("-")
+                                        or line.startswith("*")
+                                    ):
+                                        section = re.sub(r"^\d+\.\s+", "", line)
+                                        section = re.sub(r"^[-*]\s+", "", section)
+                                        if section.strip():
+                                            sections.append(section.strip())
+                            except Exception as e:
+                                print(f"Error in section synthesis: {e}")
+                                sections = unique_sections[: num_sections or 8]
                     else:
                         sections = unique_sections[: num_sections or 15]
 
@@ -2515,9 +2593,9 @@ async def optimize_outline(
                                 if len(text_chunks[0]) > 200
                                 else text_chunks[0]
                             )
-                            print(
-                                f"🔍 First chunk preview ({len(text_chunks[0])} chars): {first_chunk_preview}..."
-                            )
+                            #print(
+                            #    f"🔍 First chunk preview ({len(text_chunks[0])} chars): {first_chunk_preview}..."
+                            #)
 
                         # LLM-based relevance filtering for ReportGenie full text scan
                         # Filter chunks before analysis to avoid processing irrelevant content
@@ -2709,17 +2787,50 @@ async def optimize_outline(
                             )
                             generated_content = insufficient_context_message
                         else:
+                            # Check if synthesis prompt would exceed token limits
                             chunk_analyses_text = "\n\n".join(chunk_analyses)
-                            synthesized_answer = invoke_llm(
-                                llm,
-                                settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-                                {
-                                    "chunk_analyses": chunk_analyses_text,
-                                    "question": section_description,
-                                    "language_instruction": language_instruction,
-                                    "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
-                                },
+                            
+                            # Build the synthesis prompt to estimate its size
+                            test_synthesis_prompt = settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE.format(
+                                chunk_analyses=chunk_analyses_text,
+                                question=section_description,
+                                language_instruction=language_instruction,
+                                insufficient_info_phrase=settings.LLM_INSUFFICIENT_INFO_PHRASE,
                             )
+                            
+                            estimated_synthesis_tokens = estimate_tokens(
+                                test_synthesis_prompt,
+                                model=getattr(llm, "model_name", "gpt-4o")
+                            )
+                            
+                            max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+                            
+                            print(f"📊 Synthesis prompt: {estimated_synthesis_tokens:,} tokens (limit: {max_allowed:,})")
+                            
+                            if estimated_synthesis_tokens > max_allowed:
+                                # Use hierarchical synthesis for very large documents
+                                print(f"⚠️ Synthesis prompt too large ({estimated_synthesis_tokens:,} tokens) - using hierarchical synthesis")
+                                synthesized_answer = hierarchical_synthesis(
+                                    chunk_analyses=chunk_analyses,
+                                    question=section_description,
+                                    llm=llm,
+                                    session=session,
+                                    user_id=current_user.id,
+                                    max_tokens_per_group=max_allowed,
+                                    language_instruction=language_instruction,
+                                )
+                            else:
+                                # Original single-step synthesis
+                                synthesized_answer = invoke_llm(
+                                    llm,
+                                    settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                                    {
+                                        "chunk_analyses": chunk_analyses_text,
+                                        "question": section_description,
+                                        "language_instruction": language_instruction,
+                                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                                    },
+                                )
 
                             # Replace insufficient context phrase with translated message
                             if (

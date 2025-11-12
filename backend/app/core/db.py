@@ -4,7 +4,15 @@ from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate, UserStatus
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+# Increased pool size to handle concurrent Full Document Scan operations
+# which can hold connections for extended periods
+engine = create_engine(
+    str(settings.SQLALCHEMY_DATABASE_URI),
+    pool_size=20,  # Increased from default 5
+    max_overflow=40,  # Increased from default 10
+    pool_timeout=60,  # Increased from default 30
+    pool_pre_ping=True,  # Verify connections before use
+)
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB

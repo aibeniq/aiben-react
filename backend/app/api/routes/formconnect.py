@@ -159,11 +159,15 @@ async def extract_fields_from_digitized_document(
     Extract fields from a document using the LLM.
     Supports both full text processing and vector search modes.
     """
+    # Log the search mode being used
+    print(f"🔍 FormConnect Match: search_mode='{search_mode}' for file '{file.filename}'")
+
     # Read the file content
     content = await file.read()
 
     if search_mode == "vector":
         # TRUE VECTOR SEARCH IMPLEMENTATION
+        print(f"📊 Using VECTOR SEARCH mode for field extraction")
         return await extract_fields_using_vector_search(
             file,
             content,
@@ -175,6 +179,7 @@ async def extract_fields_from_digitized_document(
         )
     else:
         # FULL TEXT MODE (existing implementation)
+        print(f"📄 Using FULL DOCUMENT SCAN mode for field extraction")
         return await extract_fields_using_full_text(
             content,
             file.filename,
@@ -1354,7 +1359,7 @@ async def process_form(
         pdf_parsing_override: "enhanced" or "basic" - PDF parsing mode (overrides user default)
     """
     print("process_form function invoked!")
-    print(f"Received search_mode: {search_mode}")
+    print(f"🔍 Received search_mode: '{search_mode}'")
     print(f"Received task_id: {task_id}")
     print(f"Received vision_analysis_override: {vision_analysis_override}")
     print(f"Received pdf_parsing_override: {pdf_parsing_override}")
@@ -2670,6 +2675,17 @@ def _load_frontend_translations():
         print(f"[_load_frontend_translations] Loaded {len(translations)} languages")
     else:
         print(f"WARNING: Frontend locales directory not found at {locales_dir}")
+    # Ensure a fallback for the 'errors.insufficientContext' key exists in English.
+    default_insufficient = (
+        "No relevant information found in the knowledge base to answer this question."
+    )
+    if "en" not in translations:
+        translations["en"] = {}
+    en_trans = translations["en"]
+    if not isinstance(en_trans.get("errors"), dict):
+        en_trans["errors"] = en_trans.get("errors", {})
+    if "insufficientContext" not in en_trans["errors"]:
+        en_trans["errors"]["insufficientContext"] = default_insufficient
 
     _frontend_translations_cache = translations
     return translations

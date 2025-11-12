@@ -159,11 +159,32 @@ class GlobalOpenAIRateLimiter:
             max_wait_time: Maximum time to wait in seconds (uses config default if None)
             
         Returns:
-            True if capacity is available, False if max wait time exceeded
+            True if capacity is available, False if max wait time exceeded or request impossible
         """
         if max_wait_time is None:
             from app.core.config import settings
             max_wait_time = settings.OPENAI_RATE_LIMIT_MAX_WAIT
+        
+        # NEW: Immediate rejection for requests larger than per-minute budget
+        if estimated_tokens > self.tokens_per_minute:
+            logger.error(
+                f"❌ REJECTED: Request requires {estimated_tokens:,} tokens, "
+                f"exceeds per-minute budget of {self.tokens_per_minute:,} tokens. "
+                f"This request is IMPOSSIBLE to fulfill - must split into smaller chunks."
+            )
+            return False
+        
+        # NEW: Immediate rejection for requests larger than safe per-request limit
+        from app.core.config import settings
+        max_per_request = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+        if estimated_tokens > max_per_request:
+            logger.error(
+                f"❌ REJECTED: Request requires {estimated_tokens:,} tokens, "
+                f"exceeds per-request limit of {max_per_request:,} tokens. "
+                f"Must split into smaller chunks."
+            )
+            return False
+        
         start_time = time.time()
         
         while time.time() - start_time < max_wait_time:
