@@ -106,7 +106,10 @@
       "noQuestionsSuggested": "No se sugirieron preguntas. Por favor intenta con una descripción diferente.",
       "failedToSuggestQuestions": "Error al sugerir preguntas: {{error}}",
       "unknownError": "Error desconocido",
-      "noKnowledgeBasesAvailable": "No hay bases de conocimientos disponibles. Crea una primero para usar esta función."
+      "noKnowledgeBasesAvailable": "No hay bases de conocimientos disponibles. Crea una primero para usar esta función.",
+      "checklistNameRequired": "El nombre de la lista de verificación es obligatorio",
+      "checklistNameTooShort": "El nombre de la lista de verificación debe tener al menos 3 caracteres",
+      "atLeastOneQuestionRequired": "Se requiere al menos una pregunta"
     }
   },
   "settings": {
@@ -736,7 +739,10 @@
     "fieldPlaceholder": "Agregue un nombre de campo (ej., Nombre, Dirección, NSS) o sugiera desde la descripción",
     "cancel": "Cancelar",
     "updateFormTemplate": "Actualizar Plantilla de Formulario",
-    "pleaseWait": "Por favor espere mientras revisamos sus documentos"
+    "pleaseWait": "Por favor espere mientras revisamos sus documentos",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "success": {
     "questionsCopied": "Preguntas copiadas al portapapeles",
@@ -759,7 +765,21 @@
     "addSectionPlaceholder": "Agregar sección",
     "cancel": "Cancelar",
     "createOutline": "Crear Esquema",
-    "updateOutline": "Actualizar Esquema"
+    "updateOutline": "Actualizar Esquema",
+    "descriptionTooShort": "La descripción debe tener al menos 10 caracteres para sugerir secciones",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "El nombre del esquema es obligatorio",
+    "nameTooShort": "El nombre del esquema debe tener al menos 3 caracteres",
+    "atLeastOneSectionRequired": "Se requiere al menos una sección",
+    "enterDescription": "Por favor ingrese primero una descripción del esquema",
+    "noSectionsSuggested": "No se sugirieron secciones. Por favor intente con una descripción más detallada.",
+    "invalidRequest": "Solicitud inválida. Por favor verifique que su descripción cumpla con los requisitos.",
+    "loginRequired": "Debe estar conectado para sugerir secciones.",
+    "serverError": "Error del servidor. Por favor inténtelo de nuevo más tarde o contacte al soporte.",
+    "failedToSuggest": "Error al sugerir secciones: {{error}}",
+    "noSectionsToCopy": "No hay secciones para copiar",
+    "copyFailed": "Error al copiar las secciones al portapapeles"
   },
   "editChecklistModal": {
     "title": "Editar Lista de Verificación",
@@ -778,7 +798,8 @@
     "copyAllQuestions": "Copiar todas las preguntas como texto",
     "cancel": "Cancelar",
     "createChecklist": "Crear Lista de Verificación",
-    "updateChecklist": "Actualizar Lista de Verificación"
+    "updateChecklist": "Actualizar Lista de Verificación",
+    "questionsSuggested": "Sugeridas {{count}} preguntas desde la descripción{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Editar Lista de Temas",
@@ -787,6 +808,8 @@
     "topicListNamePlaceholder": "Ingrese el nombre de la lista de temas",
     "description": "Descripción de la Lista de Temas",
     "descriptionPlaceholder": "Ingrese la descripción de la lista de temas para sugerir temas automáticamente (mínimo 10 caracteres)...",
+    "descriptionNeedsMoreCharacters": "La descripción necesita al menos {{count}} caracteres más para sugerir temas",
+    "descriptionTooShort": "La descripción debe tener al menos 10 caracteres para sugerir temas",
     "referenceDocuments": "Documentos de Referencia (Opcional)",
     "uploadFiles": "Subir Archivos",
     "knowledgeBase": "Base de Conocimiento",
@@ -800,13 +823,24 @@
     "copyAllTopics": "Copiar todos los temas como texto",
     "cancel": "Cancelar",
     "createTopicList": "Crear Lista de Temas",
-    "updateTopicList": "Actualizar Lista de Temas"
-  },
-  "editCustom": {
-    "title": "Editar Instrucciones Personalizadas",
-    "currentInstructions": "Instrucciones Actuales:",
-    "save": "Guardar",
-    "cancel": "Cancelar"
+    "updateTopicList": "Actualizar Lista de Temas",
+    "topicsSuggested": "Sugeridos {{count}} temas desde la descripción{{referenceText}}",
+    "topicsCopied": "¡Temas copiados al portapapeles!",
+    "referenceExampleFiles": " y {{count}} archivo(s) de ejemplo",
+    "referenceKnowledgeBase": " usando la base de conocimientos \"{{title}}\" ({{searchMode}})"
+  ,
+    "nameRequired": "El nombre de la lista de temas es obligatorio",
+    "nameTooShort": "El nombre de la lista de temas debe tener al menos 3 caracteres",
+    "atLeastOneTopicRequired": "Se requiere al menos un tema",
+    "enterDescription": "Por favor ingrese primero una descripción de la lista de temas",
+    "noTopicsSuggested": "No se sugirieron temas. Por favor intente con una descripción más detallada.",
+    "invalidRequest": "Solicitud inválida. Por favor verifique que su descripción cumpla con los requisitos.",
+    "loginRequired": "Debe estar conectado para sugerir temas.",
+    "featureUnavailable": "La función de sugerir temas no está disponible. Por favor contacte al soporte.",
+    "serverError": "Error del servidor. Por favor inténtelo de nuevo más tarde o contacte al soporte.",
+    "failedToSuggest": "Error al sugerir temas: {{error}}",
+    "noTopicsToCopy": "No hay temas para copiar",
+    "copyFailed": "Error al copiar los temas al portapapeles"
   },
   "optimizeChecklistModal": {
     "title": "Optimizar Lista de Verificación",

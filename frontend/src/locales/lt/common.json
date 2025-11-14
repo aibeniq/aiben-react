@@ -96,7 +96,10 @@
       "largeFileTimeout": "Didelio failo apdorojimas baigėsi laiku. Bandykite perjungti į 'Viso teksto nuskaitymo' režimą geresniam našumui su dideliais failais.",
       "fileSize": "Failas per didelis. Prašome pasirinkti mažesnius failus.",
       "serverError": "Įvyko serverio klaida. Bandykite dar kartą vėliau.",
-      "insufficientContext": "Žinių bazėje nerasta atitinkamos informacijos šiam klausimui atsakyti."
+      "insufficientContext": "Žinių bazėje nerasta atitinkamos informacijos šiam klausimui atsakyti.",
+      "checklistNameRequired": "Kontrolinio sąrašo pavadinimas yra privalomas",
+      "checklistNameTooShort": "Kontrolinio sąrašo pavadinimas turi būti bent 3 simbolių",
+      "atLeastOneQuestionRequired": "Reikalingas bent vienas klausimas"
     }
   },
   "settings": {
@@ -461,7 +464,10 @@
     "suggest": "Pasiūlyti",
     "fieldPlaceholder": "Pridėti lauko pavadinimą...",
     "cancel": "Atšaukti",
-    "updateFormTemplate": "Atnaujinti formos šabloną"
+    "updateFormTemplate": "Atnaujinti formos šabloną",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Kontūro redagavimas",
@@ -480,7 +486,10 @@
     "addSectionPlaceholder": "Pridėti skyrių",
     "cancel": "Atšaukti",
     "createOutline": "Sukurti kontūrą",
-    "updateOutline": "Atnaujinti kontūrą"
+    "updateOutline": "Atnaujinti kontūrą",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Kontrolinio sąrašo redagavimas",
@@ -499,7 +508,8 @@
     "copyAllQuestions": "Kopijuoti visus klausimus kaip tekstą",
     "cancel": "Atšaukti",
     "createChecklist": "Sukurti kontrolinį sąrašą",
-    "updateChecklist": "Atnaujinti kontrolinį sąrašą"
+    "updateChecklist": "Atnaujinti kontrolinį sąrašą",
+    "questionsSuggested": "Pasiūlyta {{count}} klausimų iš aprašymo{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Temų sąrašo redagavimas",
@@ -521,7 +531,11 @@
     "copyAllTopics": "Kopijuoti visas temas kaip tekstą",
     "cancel": "Atšaukti",
     "createTopicList": "Sukurti temų sąrašą",
-    "updateTopicList": "Atnaujinti temų sąrašą"
+    "updateTopicList": "Atnaujinti temų sąrašą",
+    "descriptionNeedsMoreCharacters": "Aprašymui reikia bent {{count}} simbolių daugiau, kad pasiūlyti temas",
+    "descriptionTooShort": "Aprašymas turi būti bent 10 simbolių, kad pasiūlyti temas",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
   },
   "knowledgeBases": {
     "title": "Žinių bazių valdymas",

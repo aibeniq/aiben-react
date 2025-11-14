@@ -60,9 +60,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       setUploadedFiles(files)
       // Clear knowledge base selection when files are uploaded
       setSelectedKbId(null)
-      showSuccessToast(
-        `${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`,
-      )
+      showSuccessToast(`${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`)
     }
   }
 
@@ -73,6 +71,15 @@ const InputArea: React.FC<InputAreaProps> = ({
       fileInputRef.current.click()
     } else {
       console.log("File input ref is null")
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      if (!isSendDisabled && !isLoading) {
+        onSendClick()
+      }
     }
   }
 
@@ -97,6 +104,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       <Textarea
         value={value}
         onChange={onChange}
+        onKeyDown={handleKeyDown}
         placeholder={displayPlaceholder}
         resize="vertical"
         minHeight="40px"

@@ -78,15 +78,15 @@ const TopicListModal = ({
     const errors: { [key: string]: string } = {}
 
     if (!topicListName.trim()) {
-      errors.name = "Topic list name is required"
+      errors.name = t("editTopicListModal.nameRequired")
     } else if (topicListName.trim().length < 3) {
-      errors.name = "Topic list name must be at least 3 characters long"
+      errors.name = t("editTopicListModal.nameTooShort")
     }
 
     // Description is optional - no validation required
 
     if (topicsList.length === 0 || topicsList.every((topic) => !topic.trim())) {
-      errors.topics = "At least one topic is required"
+      errors.topics = t("editTopicListModal.atLeastOneTopicRequired")
     }
 
     setValidationErrors(errors)
@@ -156,13 +156,13 @@ const TopicListModal = ({
 
   const handleSuggestTopics = async () => {
     if (!topicListDescription.trim()) {
-      showErrorToast("Please enter a topic list description first")
+      showErrorToast(t("editTopicListModal.enterDescription"))
       return
     }
 
     // Validate minimum length requirement
     if (topicListDescription.trim().length < 10) {
-      showErrorToast("Please enter a more detailed description (at least 10 characters)")
+      showErrorToast(t("editTopicListModal.descriptionTooShort"))
       return
     }
 
@@ -223,17 +223,27 @@ const TopicListModal = ({
           setValidationErrors((prev) => ({ ...prev, topics: "" }))
         }
 
-        let successMessage = `Suggested ${suggestedTopics.length} topics from description`
+        let referenceText = ""
         if (exampleFiles.length > 0) {
-          successMessage += ` and ${exampleFiles.length} example file(s)`
+          // Use translated fragment for example files
+          referenceText += t("editTopicListModal.referenceExampleFiles", {
+            count: exampleFiles.length,
+          })
         }
         if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
-          successMessage += ` using knowledge base "${referenceKnowledgeBase.title}" (${searchMode} search)`
+          // Map internal searchMode to a human-friendly translated label
+          const searchModeLabel = searchMode === "vector" ? t("vectorSearch") : t("fullScanTitle")
+          referenceText += t("editTopicListModal.referenceKnowledgeBase", {
+            title: referenceKnowledgeBase.title,
+            searchMode: searchModeLabel,
+          })
         }
 
-        showSuccessToast(successMessage)
+        showSuccessToast(
+          t("editTopicListModal.topicsSuggested", { count: suggestedTopics.length, referenceText }),
+        )
       } else {
-        showErrorToast("No topics were suggested. Please try with a more detailed description.")
+        showErrorToast(t("editTopicListModal.noTopicsSuggested"))
       }
     } catch (error: any) {
       console.error("Error suggesting topics:", error)
@@ -248,17 +258,17 @@ const TopicListModal = ({
 
       // Handle specific error types
       if (error.status === 422) {
-        showErrorToast(
-          "Invalid request. Please check that your description meets the requirements.",
-        )
+        showErrorToast(t("editTopicListModal.invalidRequest"))
       } else if (error.status === 401) {
-        showErrorToast("You need to be logged in to suggest topics.")
+        showErrorToast(t("editTopicListModal.loginRequired"))
       } else if (error.status === 404) {
-        showErrorToast("Suggest topics feature is not available. Please contact support.")
+        showErrorToast(t("editTopicListModal.featureUnavailable"))
       } else if (error.status === 500) {
-        showErrorToast("Server error. Please try again later or contact support.")
+        showErrorToast(t("editTopicListModal.serverError"))
       } else {
-        showErrorToast(`Failed to suggest topics: ${error.message || "Unknown error"}`)
+        showErrorToast(
+          t("editTopicListModal.failedToSuggest", { error: error.message || "Unknown error" }),
+        )
       }
     } finally {
       setSuggesting(false)
@@ -289,16 +299,16 @@ const TopicListModal = ({
     const nonEmptyTopics = topicsList.filter((topic) => topic.trim() !== "")
 
     if (nonEmptyTopics.length === 0) {
-      showErrorToast("No topics to copy")
+      showErrorToast(t("editTopicListModal.noTopicsToCopy"))
       return
     }
 
     try {
       await copyToClipboard(nonEmptyTopics.join("\n"))
-      showSuccessToast("Topics copied to clipboard!")
+      showSuccessToast(t("editTopicListModal.topicsCopied"))
     } catch (error) {
       console.error("Error copying topics:", error)
-      showErrorToast("Failed to copy topics to clipboard")
+      showErrorToast(t("editTopicListModal.copyFailed"))
     }
   }
 
@@ -357,8 +367,9 @@ const TopicListModal = ({
                       {topicListDescription.trim().length > 0 &&
                         topicListDescription.trim().length < 10 && (
                           <Text fontSize="xs" color="orange.600">
-                            Description needs at least {10 - topicListDescription.trim().length}{" "}
-                            more characters to suggest topics
+                            {t("editTopicListModal.descriptionNeedsMoreCharacters", {
+                              count: 10 - topicListDescription.trim().length,
+                            })}
                           </Text>
                         )}
                     </Field>
@@ -453,7 +464,7 @@ const TopicListModal = ({
                         {topicListDescription.trim().length < 10 &&
                           topicListDescription.trim().length > 0 && (
                             <Text fontSize="sm" color="gray.500">
-                              Description must be at least 10 characters to suggest topics
+                              {t("editTopicListModal.descriptionTooShort")}
                             </Text>
                           )}
                       </VStack>
@@ -478,7 +489,7 @@ const TopicListModal = ({
                             colorPalette="green"
                             title={
                               topicListDescription.trim().length < 10
-                                ? "Description must be at least 10 characters to suggest topics"
+                                ? t("editTopicListModal.descriptionTooShort")
                                 : "Suggest topics based on the description"
                             }
                           >

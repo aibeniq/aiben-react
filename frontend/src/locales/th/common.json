@@ -96,7 +96,10 @@
       "largeFileTimeout": "การประมวลผลไฟล์ขนาดใหญ่หมดเวลา ลองเปลี่ยนเป็นโหมด 'สแกนข้อความทั้งหมด' เพื่อประสิทธิภาพที่ดีขึ้นกับไฟล์ขนาดใหญ่",
       "fileSize": "ไฟล์มีขนาดใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดเล็กลง",
       "serverError": "เกิดข้อผิดพลาดของเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้งในภายหลัง",
-      "insufficientContext": "ไม่พบข้อมูลที่เกี่ยวข้อง กรุณาถามคำถามที่เฉพาะเจาะจงมากขึ้นหรืออัปโหลดเอกสารอื่น"
+      "insufficientContext": "ไม่พบข้อมูลที่เกี่ยวข้อง กรุณาถามคำถามที่เฉพาะเจาะจงมากขึ้นหรืออัปโหลดเอกสารอื่น",
+      "checklistNameRequired": "ต้องระบุชื่อรายการตรวจสอบ",
+      "checklistNameTooShort": "ชื่อรายการตรวจสอบต้องมีอย่างน้อย 3 ตัวอักษร",
+      "atLeastOneQuestionRequired": "ต้องมีคำถามอย่างน้อยหนึ่งข้อ"
     }
   },
   "settings": {
@@ -464,7 +467,10 @@
     "addSectionPlaceholder": "เพิ่มส่วน",
     "cancel": "ยกเลิก",
     "createOutline": "สร้างโครงร่าง",
-    "updateOutline": "อัปเดตโครงร่าง"
+    "updateOutline": "อัปเดตโครงร่าง",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "แก้ไขรายการตรวจสอบ",
@@ -483,7 +489,8 @@
     "copyAllQuestions": "คัดลอกคำถามทั้งหมดเป็นข้อความ",
     "cancel": "ยกเลิก",
     "createChecklist": "สร้างรายการตรวจสอบ",
-    "updateChecklist": "อัปเดตรายการตรวจสอบ"
+    "updateChecklist": "อัปเดตรายการตรวจสอบ",
+    "questionsSuggested": "แนะนำ {{count}} คำถามจากคำอธิบาย{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "แก้ไขรายการหัวข้อ",
@@ -505,7 +512,13 @@
     "copyAllTopics": "คัดลอกหัวข้อทั้งหมดเป็นข้อความ",
     "cancel": "ยกเลิก",
     "createTopicList": "สร้างรายการหัวข้อ",
-    "updateTopicList": "อัปเดตรายการหัวข้อ"
+    "updateTopicList": "อัปเดตรายการหัวข้อ",
+    "descriptionNeedsMoreCharacters": "คำอธิบายต้องมีอักขระอย่างน้อย {{count}} ตัวเพิ่มเติมเพื่อแนะนำหัวข้อ",
+    "descriptionTooShort": "คำอธิบายต้องมีอักขระอย่างน้อย 10 ตัวเพื่อแนะนำหัวข้อ",
+  "topicsSuggested": "แนะนำ {{count}} หัวข้อจากคำอธิบาย{{referenceText}}",
+  "topicsCopied": "คัดลอกหัวข้อไปยังคลิปบอร์ดแล้ว!",
+  "referenceExampleFiles": " และไฟล์ตัวอย่าง {{count}} ไฟล์",
+  "referenceKnowledgeBase": " โดยใช้ฐานความรู้ \"{{title}}\" ({{searchMode}})"
   },
   "knowledgeBases": {
     "title": "การจัดการฐานความรู้",
@@ -960,6 +973,9 @@
     "suggest": "แนะนำ",
     "fieldPlaceholder": "เพิ่มชื่อฟิลด์...",
     "cancel": "ยกเลิก",
-    "updateFormTemplate": "อัปเดตเทมเพลตฟอร์ม"
+    "updateFormTemplate": "อัปเดตเทมเพลตฟอร์ม",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   }
 }

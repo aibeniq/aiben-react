@@ -141,7 +141,7 @@ const FormTemplateModal = ({
 
     // Validate minimum length requirement
     if (formDescription.trim().length < 10) {
-      showErrorToast("Please enter a more detailed description (at least 10 characters)")
+      showErrorToast(t("editFormTemplateModal.descriptionTooShort"))
       return
     }
 
@@ -260,7 +260,10 @@ const FormTemplateModal = ({
         }
 
         showSuccessToast(
-          `Suggested ${suggestedFields.length} form fields from description${referenceText}`,
+          t("editFormTemplateModal.fieldsSuggested", {
+            count: suggestedFields.length,
+            referenceText,
+          }),
         )
       } else {
         showErrorToast("No fields were suggested. Please try with a more detailed description.")
@@ -319,7 +322,7 @@ const FormTemplateModal = ({
 
     try {
       await copyToClipboard(fieldLines.join("\n"))
-      showSuccessToast("Fields copied to clipboard!")
+      showSuccessToast(t("editFormTemplateModal.fieldsCopied"))
     } catch (error) {
       console.error("Error copying fields:", error)
       showErrorToast("Failed to copy fields to clipboard")
@@ -464,7 +467,7 @@ const FormTemplateModal = ({
                         {formDescription.trim().length < 10 &&
                           formDescription.trim().length > 0 && (
                             <Text fontSize="sm" color="gray.500">
-                              Description must be at least 10 characters to suggest fields
+                              {t("editFormTemplateModal.descriptionTooShort")}
                             </Text>
                           )}
                       </VStack>
@@ -489,7 +492,7 @@ const FormTemplateModal = ({
                             colorPalette="green"
                             title={
                               formDescription.trim().length < 10
-                                ? "Description must be at least 10 characters to suggest fields"
+                                ? t("editFormTemplateModal.descriptionTooShort")
                                 : referenceMode === "files" && exampleFiles.length > 0
                                   ? `Suggest fields based on description and ${exampleFiles.length} uploaded file(s)`
                                   : referenceMode === "knowledge-base" && referenceKnowledgeBase

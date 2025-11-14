@@ -96,7 +96,10 @@
       "largeFileTimeout": "大型檔案處理逾時。嘗試切換到「全文掃描」模式以獲得更好的大型檔案效能。",
       "fileSize": "檔案過大。請選擇較小的檔案。",
       "serverError": "發生伺服器錯誤。請稍後重試。",
-      "insufficientContext": "在知識庫中未找到回答此問題的相關資訊。"
+      "insufficientContext": "在知識庫中未找到回答此問題的相關資訊。",
+      "checklistNameRequired": "檢查清單名稱為必填",
+      "checklistNameTooShort": "檢查清單名稱至少需要3個字符",
+      "atLeastOneQuestionRequired": "至少需要一個問題"
     }
   },
   "settings": {
@@ -464,7 +467,10 @@
     "addSectionPlaceholder": "新增部分",
     "cancel": "取消",
     "createOutline": "創建大綱",
-    "updateOutline": "更新大綱"
+    "updateOutline": "更新大綱",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "編輯檢查清單",
@@ -483,7 +489,8 @@
     "copyAllQuestions": "將所有問題複製為文字",
     "cancel": "取消",
     "createChecklist": "創建檢查清單",
-    "updateChecklist": "更新檢查清單"
+    "updateChecklist": "更新檢查清單",
+    "questionsSuggested": "從描述中建議了 {{count}} 個問題{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "編輯主題清單",
@@ -492,6 +499,8 @@
     "topicListNamePlaceholder": "輸入主題清單名稱",
     "description": "主題清單描述",
     "descriptionPlaceholder": "輸入主題清單描述以自動建議主題（至少 10 個字符）...",
+    "descriptionNeedsMoreCharacters": "描述需要至少 {{count}} 個字符才能建議主題",
+    "descriptionTooShort": "描述必須至少 10 個字符長，以提供足夠的上下文給 AI 建議",
     "referenceDocuments": "參考文檔（可選）",
     "uploadFiles": "上傳檔案",
     "knowledgeBase": "知識庫",
@@ -505,7 +514,11 @@
     "copyAllTopics": "將所有主題複製為文字",
     "cancel": "取消",
     "createTopicList": "創建主題清單",
-    "updateTopicList": "更新主題清單"
+    "updateTopicList": "更新主題清單",
+  "topicsSuggested": "已根據描述建議 {{count}} 個主題{{referenceText}}",
+  "topicsCopied": "主題已複製到剪貼簿！",
+  "referenceExampleFiles": " 並 {{count}} 個示例檔案",
+  "referenceKnowledgeBase": " 使用知識庫 \"{{title}}\"（{{searchMode}}）"
   },
   "knowledgeBases": {
     "title": "知識庫管理",
@@ -960,6 +973,9 @@
     "suggest": "建議",
     "fieldPlaceholder": "新增欄位名稱...",
     "cancel": "取消",
-    "updateFormTemplate": "更新表單範本"
+    "updateFormTemplate": "更新表單範本",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   }
 }

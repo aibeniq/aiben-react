@@ -96,7 +96,10 @@
       "largeFileTimeout": "Nag-timeout ang pagproseso ng malaking file. Subukang lumipat sa 'Full Text Scan' mode para sa mas mahusay na performance sa malalaking file.",
       "fileSize": "Masyadong malaki ang file. Pumili ng mas maliliit na file.",
       "serverError": "May error sa server. Subukang muli mamaya.",
-      "insufficientContext": "Hindi nakita ang kaugnay na impormasyon. Mangyaring magtanong ng mas tiyak o mag-upload ng ibang dokumento."
+      "insufficientContext": "Hindi nakita ang kaugnay na impormasyon. Mangyaring magtanong ng mas tiyak o mag-upload ng ibang dokumento.",
+      "checklistNameRequired": "Kinakailangan ang pangalan ng checklist",
+      "checklistNameTooShort": "Ang pangalan ng checklist ay dapat na hindi bababa sa 3 character",
+      "atLeastOneQuestionRequired": "Kinakailangan ang hindi bababa sa isang tanong"
     }
   },
   "settings": {
@@ -464,7 +467,10 @@
     "addSectionPlaceholder": "Magdagdag ng seksyon",
     "cancel": "Kanselahin",
     "createOutline": "Gumawa ng Outline",
-    "updateOutline": "I-update ang Outline"
+    "updateOutline": "I-update ang Outline",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "I-edit ang Checklist",
@@ -483,7 +489,8 @@
     "copyAllQuestions": "Kopyahin ang lahat ng tanong bilang text",
     "cancel": "Kanselahin",
     "createChecklist": "Gumawa ng Checklist",
-    "updateChecklist": "I-update ang Checklist"
+    "updateChecklist": "I-update ang Checklist",
+    "questionsSuggested": "Iminungkahi ang {{count}} tanong mula sa paglalarawan{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "I-edit ang Listahan ng Paksa",
@@ -505,7 +512,13 @@
     "copyAllTopics": "Kopyahin ang lahat ng paksa bilang text",
     "cancel": "Kanselahin",
     "createTopicList": "Gumawa ng Listahan ng Paksa",
-    "updateTopicList": "I-update ang Listahan ng Paksa"
+    "updateTopicList": "I-update ang Listahan ng Paksa",
+    "descriptionNeedsMoreCharacters": "Ang paglalarawan ay nangangailangan ng hindi bababa sa {{count}} karagdagang character upang magmungkahi ng mga paksa",
+    "descriptionTooShort": "Ang paglalarawan ay dapat magkaroon ng hindi bababa sa 10 character upang magmungkahi ng mga paksa",
+  "topicsSuggested": "Iminungkahi ang {{count}} paksa mula sa paglalarawan{{referenceText}}",
+  "topicsCopied": "Na-kopya ang mga paksa sa clipboard!",
+  "referenceExampleFiles": " at {{count}} halimbawa ng file",
+  "referenceKnowledgeBase": " gamit ang knowledge base \"{{title}}\" ({{searchMode}})"
   },
   "knowledgeBases": {
     "title": "Pamamahala ng Knowledge Base",
@@ -960,6 +973,9 @@
     "suggest": "Imungkahi",
     "fieldPlaceholder": "Magdagdag ng pangalan ng field...",
     "cancel": "Kanselahin",
-    "updateFormTemplate": "I-update ang Form Template"
+    "updateFormTemplate": "I-update ang Form Template",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   }
 }

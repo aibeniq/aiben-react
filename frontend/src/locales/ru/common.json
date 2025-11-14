@@ -93,7 +93,10 @@
       "largeFileTimeout": "Обработка большого файла завершилась по таймауту. Попробуйте переключиться в режим 'Полного поиска по тексту' для лучшей производительности с большими файлами.",
       "fileSize": "Файл слишком большой. Пожалуйста, выберите файлы меньшего размера.",
       "serverError": "Произошла ошибка сервера. Пожалуйста, попробуйте еще раз позже.",
-      "insufficientContext": "В базе знаний не найдено релевантной информации для ответа на этот вопрос."
+      "insufficientContext": "В базе знаний не найдено релевантной информации для ответа на этот вопрос.",
+      "checklistNameRequired": "Название контрольного списка обязательно",
+      "checklistNameTooShort": "Название контрольного списка должно содержать не менее 3 символов",
+      "atLeastOneQuestionRequired": "Требуется хотя бы один вопрос"
     }
   },
   "settings": {
@@ -440,7 +443,10 @@
     "fieldPlaceholder": "Добавьте название поля (например, Имя, Адрес, ИНН) или предложите из описания",
     "cancel": "Отмена",
     "updateFormTemplate": "Обновить Шаблон Формы",
-    "pleaseWait": "Пожалуйста, подождите, пока мы проверяем ваши документы"
+    "pleaseWait": "Пожалуйста, подождите, пока мы проверяем ваши документы",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "knowledgeBases": {
     "title": "Управление базами знаний",
@@ -616,7 +622,21 @@
       "addSectionPlaceholder": "Добавить раздел",
       "cancel": "Отмена",
       "createOutline": "Создать схему",
-      "updateOutline": "Обновить схему"
+      "updateOutline": "Обновить схему",
+      "descriptionTooShort": "Описание должно содержать не менее 10 символов для предложения разделов",
+      "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+      "sectionsCopied": "Sections copied to clipboard!",
+      "nameRequired": "Название схемы обязательно",
+      "nameTooShort": "Название схемы должно содержать не менее 3 символов",
+      "atLeastOneSectionRequired": "Требуется хотя бы один раздел",
+      "enterDescription": "Пожалуйста, сначала введите описание схемы",
+      "noSectionsSuggested": "Разделы не были предложены. Попробуйте с более подробным описанием.",
+      "invalidRequest": "Неверный запрос. Проверьте, соответствует ли ваше описание требованиям.",
+      "loginRequired": "Вы должны быть авторизованы для предложения разделов.",
+      "serverError": "Ошибка сервера. Попробуйте позже или обратитесь в поддержку.",
+      "failedToSuggest": "Не удалось предложить разделы: {{error}}",
+      "noSectionsToCopy": "Нет разделов для копирования",
+      "copyFailed": "Не удалось скопировать разделы в буфер обмена"
     },
     "editChecklistModal": {
       "title": "Редактировать контрольный список",
@@ -635,7 +655,8 @@
       "copyAllQuestions": "Скопировать все вопросы как текст",
       "cancel": "Отмена",
       "createChecklist": "Создать контрольный список",
-      "updateChecklist": "Обновить контрольный список"
+    "updateChecklist": "Обновить контрольный список",
+    "questionsSuggested": "Suggested {{count}} questions from description{{referenceText}}"
     },
     "editTopicListModal": {
       "title": "Редактировать список тем",
@@ -657,7 +678,26 @@
       "copyAllTopics": "Скопировать все темы как текст",
       "cancel": "Отмена",
       "createTopicList": "Создать список тем",
-      "updateTopicList": "Обновить список тем"
+      "updateTopicList": "Обновить список тем",
+      "descriptionNeedsMoreCharacters": "Описанию нужно еще как минимум {{count}} символов для предложения тем",
+      "descriptionTooShort": "Описание должно содержать не менее 10 символов для предложения тем",
+      "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+      "topicsCopied": "Topics copied to clipboard!",
+      "referenceExampleFiles": " и {{count}} пример(ов) файла",
+      "referenceKnowledgeBase": " используя базу знаний \"{{title}}\" ({{searchMode}})"
+      ,
+        "nameRequired": "Название списка тем обязательно",
+        "nameTooShort": "Название списка тем должно содержать не менее 3 символов",
+        "atLeastOneTopicRequired": "Требуется хотя бы одна тема",
+        "enterDescription": "Пожалуйста, сначала введите описание списка тем",
+        "noTopicsSuggested": "Темы не были предложены. Попробуйте с более подробным описанием.",
+        "invalidRequest": "Неверный запрос. Проверьте, соответствует ли ваше описание требованиям.",
+        "loginRequired": "Вы должны быть авторизованы для предложения тем.",
+        "featureUnavailable": "Функция предложения тем недоступна. Обратитесь в поддержку.",
+        "serverError": "Ошибка сервера. Попробуйте позже или обратитесь в поддержку.",
+        "failedToSuggest": "Не удалось предложить темы: {{error}}",
+        "noTopicsToCopy": "Нет тем для копирования",
+        "copyFailed": "Не удалось скопировать темы в буфер обмена"
     },
     "optimizeChecklistModal": {
       "title": "Оптимизировать контрольный список",
@@ -998,7 +1038,10 @@
     "addSectionPlaceholder": "Добавить раздел",
     "cancel": "Отмена",
     "createOutline": "Создать структуру",
-    "updateOutline": "Обновить структуру"
+    "updateOutline": "Обновить структуру",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Редактировать контрольный список",
@@ -1017,7 +1060,8 @@
     "copyAllQuestions": "Скопировать все вопросы как текст",
     "cancel": "Отмена",
     "createChecklist": "Создать контрольный список",
-    "updateChecklist": "Обновить контрольный список"
+    "updateChecklist": "Обновить контрольный список",
+    "questionsSuggested": "Предложено {{count}} вопросов из описания{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Редактировать список тем",
@@ -1039,7 +1083,13 @@
     "copyAllTopics": "Скопировать все темы как текст",
     "cancel": "Отмена",
     "createTopicList": "Создать список тем",
-    "updateTopicList": "Обновить список тем"
+    "updateTopicList": "Обновить список тем",
+    "descriptionNeedsMoreCharacters": "Для предложения тем описанию требуется как минимум на {{count}} символов больше",
+    "descriptionTooShort": "Описание должно содержать не менее 10 символов для предложения тем",
+  "topicsSuggested": "Предложено {{count}} тем на основе описания{{referenceText}}",
+  "topicsCopied": "Темы скопированы в буфер обмена!",
+  "referenceExampleFiles": " и {{count}} пример(ов) файлов",
+  "referenceKnowledgeBase": " с использованием базы знаний \"{{title}}\" ({{searchMode}})"
   },
   "optimizeChecklistModal": {
     "title": "Оптимизировать контрольный список",

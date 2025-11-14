@@ -80,9 +80,9 @@ const OutlineModal = ({
     const errors: { [key: string]: string } = {}
 
     if (!outlineName.trim()) {
-      errors.name = "Outline name is required"
+      errors.name = t("editOutlineModal.nameRequired")
     } else if (outlineName.trim().length < 3) {
-      errors.name = "Outline name must be at least 3 characters long"
+      errors.name = t("editOutlineModal.nameTooShort")
     }
 
     // Description is optional - no validation required
@@ -102,7 +102,7 @@ const OutlineModal = ({
     }
 
     if (!hasSections) {
-      errors.sections = "At least one section is required"
+      errors.sections = t("editOutlineModal.atLeastOneSectionRequired")
     }
 
     setValidationErrors(errors)
@@ -161,13 +161,13 @@ const OutlineModal = ({
 
   const handleSuggestOutline = async () => {
     if (!outlineDescription.trim()) {
-      showErrorToast("Please enter an outline description first")
+      showErrorToast(t("editOutlineModal.enterDescription"))
       return
     }
 
     // Validate minimum length requirement
     if (outlineDescription.trim().length < 10) {
-      showErrorToast("Please enter a more detailed description (at least 10 characters)")
+      showErrorToast(t("editOutlineModal.descriptionTooShort"))
       return
     }
 
@@ -230,32 +230,37 @@ const OutlineModal = ({
           setValidationErrors((prev) => ({ ...prev, sections: "" }))
         }
 
-        let successMessage = `Suggested ${suggestedSections.length} sections from description`
+        let referenceText = ""
         if (referenceMode === "files" && exampleFiles.length > 0) {
-          successMessage += ` and ${exampleFiles.length} example file(s)`
+          referenceText += ` and ${exampleFiles.length} example file(s)`
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
-          successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
+          referenceText += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
         }
-        successMessage += ` (${processingSettings.searchMode === "vector" ? "fast search" : "deep search"})`
+        referenceText += ` (${processingSettings.searchMode === "vector" ? "fast search" : "deep search"})`
 
-        showSuccessToast(successMessage)
+        showSuccessToast(
+          t("editOutlineModal.sectionsSuggested", {
+            count: suggestedSections.length,
+            referenceText,
+          }),
+        )
       } else {
-        showErrorToast("No sections were suggested. Please try with a more detailed description.")
+        showErrorToast(t("editOutlineModal.noSectionsSuggested"))
       }
     } catch (error: any) {
       console.error("Error generating outline:", error)
 
       // Handle specific error types
       if (error.status === 422) {
-        showErrorToast(
-          "Invalid request. Please check that your description meets the requirements.",
-        )
+        showErrorToast(t("editOutlineModal.invalidRequest"))
       } else if (error.status === 401) {
-        showErrorToast("You need to be logged in to suggest sections.")
+        showErrorToast(t("editOutlineModal.loginRequired"))
       } else if (error.status === 500) {
-        showErrorToast("Server error. Please try again later or contact support.")
+        showErrorToast(t("editOutlineModal.serverError"))
       } else {
-        showErrorToast(`Failed to suggest sections: ${error.message || "Unknown error"}`)
+        showErrorToast(
+          t("editOutlineModal.failedToSuggest", { error: error.message || "Unknown error" }),
+        )
       }
     } finally {
       setSuggesting(false)
@@ -323,15 +328,15 @@ const OutlineModal = ({
       }
 
       if (sectionTexts.length === 0) {
-        showErrorToast("No sections to copy")
+        showErrorToast(t("editOutlineModal.noSectionsToCopy"))
         return
       }
 
       await copyToClipboard(sectionTexts.join("\n"))
-      showSuccessToast("Sections copied to clipboard!")
+      showSuccessToast(t("editOutlineModal.sectionsCopied"))
     } catch (error) {
       console.error("Error copying sections:", error)
-      showErrorToast("Failed to copy sections to clipboard")
+      showErrorToast(t("editOutlineModal.copyFailed"))
     }
   }
 
@@ -508,7 +513,7 @@ const OutlineModal = ({
                               colorPalette="green"
                               title={
                                 outlineDescription.trim().length < 10
-                                  ? "Description must be at least 10 characters to suggest sections"
+                                  ? t("editOutlineModal.descriptionTooShort")
                                   : "Suggest sections based on the description"
                               }
                             >

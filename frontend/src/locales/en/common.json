@@ -106,7 +106,10 @@
       "noQuestionsSuggested": "No questions were suggested. Please try a different description.",
       "failedToSuggestQuestions": "Failed to suggest questions: {{error}}",
       "unknownError": "Unknown error",
-      "noKnowledgeBasesAvailable": "No Knowledge Bases available. Create one first to use this feature."
+      "noKnowledgeBasesAvailable": "No Knowledge Bases available. Create one first to use this feature.",
+      "checklistNameRequired": "Checklist name is required",
+      "checklistNameTooShort": "Checklist name must be at least 3 characters long",
+      "atLeastOneQuestionRequired": "At least one question is required"
     }
   },
   "settings": {
@@ -719,6 +722,7 @@
     "formTemplateNamePlaceholder": "Enter form template name",
     "formTemplateDescription": "Form Template Description",
     "descriptionPlaceholder": "Enter form template description to auto-suggest fields (minimum 10 characters)...",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
     "referenceDocuments": "Reference Documents (Optional)",
     "uploadFiles": "Upload Files",
     "pleaseWait": "Please wait while we review your documents",
@@ -727,7 +731,9 @@
     "suggest": "Suggest",
     "fieldPlaceholder": "Add a field name...",
     "cancel": "Cancel",
-    "updateFormTemplate": "Update Form Template"
+    "updateFormTemplate": "Update Form Template",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Edit Outline",
@@ -736,6 +742,7 @@
     "outlineNamePlaceholder": "Enter outline name",
     "description": "Description",
     "descriptionPlaceholder": "Enter outline description to auto-suggest sections (minimum 10 characters)...",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
     "referenceDocuments": "Reference Documents (Optional)",
     "uploadFiles": "Upload Files",
     "knowledgeBase": "Knowledge Base",
@@ -746,7 +753,20 @@
     "addSectionPlaceholder": "Add section",
     "cancel": "Cancel",
     "createOutline": "Create Outline",
-    "updateOutline": "Update Outline"
+    "updateOutline": "Update Outline",
+  "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+  "sectionsCopied": "Sections copied to clipboard!",
+  "nameRequired": "Outline name is required",
+  "nameTooShort": "Outline name must be at least 3 characters long",
+  "atLeastOneSectionRequired": "At least one section is required",
+  "enterDescription": "Please enter an outline description first",
+  "noSectionsSuggested": "No sections were suggested. Please try with a more detailed description.",
+  "invalidRequest": "Invalid request. Please check that your description meets the requirements.",
+  "loginRequired": "You need to be logged in to suggest sections.",
+  "serverError": "Server error. Please try again later or contact support.",
+  "failedToSuggest": "Failed to suggest sections: {{error}}",
+  "noSectionsToCopy": "No sections to copy",
+  "copyFailed": "Failed to copy sections to clipboard"
   },
   "editChecklistModal": {
     "title": "Edit Checklist",
@@ -767,6 +787,7 @@
     "cancel": "Cancel",
     "createChecklist": "Create Checklist",
     "updateChecklist": "Update Checklist"
+    ,"questionsSuggested": "Suggested {{count}} questions from description{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Edit Topic List",
@@ -775,6 +796,8 @@
     "topicListNamePlaceholder": "Enter topic list name",
     "description": "Topic List Description",
     "descriptionPlaceholder": "Enter topic list description to auto-suggest topics (minimum 10 characters)...",
+    "descriptionNeedsMoreCharacters": "Description needs at least {{count}} more characters to suggest topics",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest topics",
     "referenceDocuments": "Reference Documents (Optional)",
     "uploadFiles": "Upload Files",
     "knowledgeBase": "Knowledge Base",
@@ -788,7 +811,22 @@
     "copyAllTopics": "Copy all topics as text",
     "cancel": "Cancel",
     "createTopicList": "Create Topic List",
-    "updateTopicList": "Update Topic List"
+    "updateTopicList": "Update Topic List",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
+  ,
+    "nameRequired": "Topic list name is required",
+    "nameTooShort": "Topic list name must be at least 3 characters long",
+    "atLeastOneTopicRequired": "At least one topic is required",
+    "enterDescription": "Please enter a topic list description first",
+    "noTopicsSuggested": "No topics were suggested. Please try with a more detailed description.",
+    "invalidRequest": "Invalid request. Please check that your description meets the requirements.",
+    "loginRequired": "You need to be logged in to suggest topics.",
+    "featureUnavailable": "Suggest topics feature is not available. Please contact support.",
+    "serverError": "Server error. Please try again later or contact support.",
+    "failedToSuggest": "Failed to suggest topics: {{error}}",
+    "noTopicsToCopy": "No topics to copy",
+    "copyFailed": "Failed to copy topics to clipboard"
   },
   "optimizeChecklistModal": {
     "title": "Optimize Checklist",
@@ -853,6 +891,7 @@
     "sectionWellOptimized": "Section Well Optimized",
     "groundTruthContent": "Ground Truth Content"
   },
+ 
   "feedback": {
     "modalTitlePositive": "What was helpful?",
     "modalTitleNegative": "What could be improved?",

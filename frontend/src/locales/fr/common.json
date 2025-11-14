@@ -96,7 +96,20 @@
       "largeFileTimeout": "Délai de traitement des gros fichiers dépassé. Essayez de passer au mode 'Analyse Complète du Texte' pour de meilleures performances avec les gros fichiers.",
       "fileSize": "Le fichier est trop volumineux. Veuillez choisir des fichiers plus petits.",
       "serverError": "Une erreur serveur s'est produite. Veuillez réessayer plus tard.",
-      "insufficientContext": "Aucune information pertinente trouvée dans la base de connaissances pour répondre à cette question."
+      "insufficientContext": "Aucune information pertinente trouvée dans la base de connaissances pour répondre à cette question.",
+      "noQuestionsToCopy": "Aucune question à copier",
+      "failedToCopyQuestions": "Échec de la copie des questions dans le presse-papiers",
+      "selectKnowledgeBaseFirst": "Veuillez d'abord sélectionner une base de connaissances pour optimiser la liste de contrôle.",
+      "addQuestionsBeforeOptimizing": "Veuillez ajouter des questions à la liste de contrôle avant d'optimiser.",
+      "enterDescription": "Veuillez saisir une description",
+      "descriptionTooShort": "La description doit contenir au moins 10 caractères",
+      "noQuestionsSuggested": "Aucune question suggérée. Veuillez essayer une autre description.",
+      "failedToSuggestQuestions": "Échec de la suggestion de questions : {{error}}",
+      "unknownError": "Erreur inconnue",
+      "noKnowledgeBasesAvailable": "Aucune Base de Connaissances disponible. Créez-en une d'abord pour utiliser cette fonctionnalité.",
+      "checklistNameRequired": "Le nom de la liste de contrôle est requis",
+      "checklistNameTooShort": "Le nom de la liste de contrôle doit contenir au moins 3 caractères",
+      "atLeastOneQuestionRequired": "Au moins une question est requise"
     }
   },
   "settings": {
@@ -729,7 +742,10 @@
     "fieldPlaceholder": "Ajoutez un nom de champ (ex., Prénom, Adresse, Numéro de Sécurité Sociale) ou suggérez à partir de la description",
     "cancel": "Annuler",
     "updateFormTemplate": "Mettre à Jour le Modèle de Formulaire",
-    "pleaseWait": "Veuillez patienter pendant que nous examinons vos documents"
+    "pleaseWait": "Veuillez patienter pendant que nous examinons vos documents",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Modifier le Plan",
@@ -748,7 +764,21 @@
     "addSectionPlaceholder": "Ajouter une section",
     "cancel": "Annuler",
     "createOutline": "Créer un Plan",
-    "updateOutline": "Mettre à Jour le Plan"
+    "updateOutline": "Mettre à Jour le Plan",
+    "descriptionTooShort": "La description doit contenir au moins 10 caractères pour suggérer des sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Le nom du plan est requis",
+    "nameTooShort": "Le nom du plan doit contenir au moins 3 caractères",
+    "atLeastOneSectionRequired": "Au moins une section est requise",
+    "enterDescription": "Veuillez d'abord entrer une description du plan",
+    "noSectionsSuggested": "Aucune section n'a été suggérée. Veuillez essayer avec une description plus détaillée.",
+    "invalidRequest": "Requête invalide. Veuillez vérifier que votre description répond aux exigences.",
+    "loginRequired": "Vous devez être connecté pour suggérer des sections.",
+    "serverError": "Erreur du serveur. Veuillez réessayer plus tard ou contacter le support.",
+    "failedToSuggest": "Échec de la suggestion des sections : {{error}}",
+    "noSectionsToCopy": "Aucune section à copier",
+    "copyFailed": "Échec de la copie des sections dans le presse-papiers"
   },
   "editChecklistModal": {
     "title": "Modifier la Liste de Contrôle",
@@ -767,7 +797,8 @@
     "copyAllQuestions": "Copier toutes les questions en texte",
     "cancel": "Annuler",
     "createChecklist": "Créer une Liste de Contrôle",
-    "updateChecklist": "Mettre à Jour la Liste de Contrôle"
+    "updateChecklist": "Mettre à Jour la Liste de Contrôle",
+    "questionsSuggested": "Suggéré {{count}} questions à partir de la description{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Modifier la Liste de Sujets",
@@ -776,6 +807,7 @@
     "topicListNamePlaceholder": "Entrez le nom de la liste de sujets",
     "description": "Description de la Liste de Sujets",
     "descriptionPlaceholder": "Entrez la description de la liste de sujets pour suggérer automatiquement les sujets (minimum 10 caractères)...",
+    "descriptionNeedsMoreCharacters": "La description nécessite au moins {{count}} caractères supplémentaires pour suggérer des sujets",
     "referenceDocuments": "Documents de Référence (Optionnel)",
     "uploadFiles": "Télécharger des Fichiers",
     "knowledgeBase": "Base de Connaissances",
@@ -789,7 +821,23 @@
     "copyAllTopics": "Copier tous les sujets en texte",
     "cancel": "Annuler",
     "createTopicList": "Créer une Liste de Sujets",
-    "updateTopicList": "Mettre à Jour la Liste de Sujets"
+    "updateTopicList": "Mettre à Jour la Liste de Sujets",
+    "descriptionTooShort": "La description doit contenir au moins 10 caractères pour suggérer des sujets",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
+  ,
+    "nameRequired": "Le nom de la liste de sujets est requis",
+    "nameTooShort": "Le nom de la liste de sujets doit contenir au moins 3 caractères",
+    "atLeastOneTopicRequired": "Au moins un sujet est requis",
+    "enterDescription": "Veuillez d'abord entrer une description de la liste de sujets",
+    "noTopicsSuggested": "Aucun sujet n'a été suggéré. Veuillez essayer avec une description plus détaillée.",
+    "invalidRequest": "Requête invalide. Veuillez vérifier que votre description répond aux exigences.",
+    "loginRequired": "Vous devez être connecté pour suggérer des sujets.",
+    "featureUnavailable": "La fonctionnalité de suggestion de sujets n'est pas disponible. Veuillez contacter le support.",
+    "serverError": "Erreur du serveur. Veuillez réessayer plus tard ou contacter le support.",
+    "failedToSuggest": "Échec de la suggestion des sujets : {{error}}",
+    "noTopicsToCopy": "Aucun sujet à copier",
+    "copyFailed": "Échec de la copie des sujets dans le presse-papiers"
   },
   "editCustom": {
     "title": "Modifier les Instructions Personnalisées",

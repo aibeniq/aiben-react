@@ -96,7 +96,10 @@
       "largeFileTimeout": "Nagy fájl feldolgozása időtúllépés miatt megszakadt. Nagy fájlok esetén váltson a „Teljes szöveg átvizsgálás” módra a jobb teljesítmény érdekében.",
       "fileSize": "A fájl túl nagy. Kérjük, válasszon kisebb fájlokat.",
       "serverError": "Szerverhiba történt. Kérjük, próbálkozzon később újra.",
-      "insufficientContext": "Nem található releváns információ a tudásbázisban ennek a kérdésnek a megválaszolásához."
+      "insufficientContext": "Nem található releváns információ a tudásbázisban ennek a kérdésnek a megválaszolásához.",
+      "checklistNameRequired": "Az ellenőrző lista neve kötelező",
+      "checklistNameTooShort": "Az ellenőrző lista neve legalább 3 karakter hosszú kell legyen",
+      "atLeastOneQuestionRequired": "Legalább egy kérdés szükséges"
     }
   },
   "settings": {
@@ -461,7 +464,10 @@
     "suggest": "Javasol",
     "fieldPlaceholder": "Mezőnév hozzáadása...",
     "cancel": "Mégse",
-    "updateFormTemplate": "Űrlapsablon frissítése"
+    "updateFormTemplate": "Űrlapsablon frissítése",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Vázlat szerkesztése",
@@ -480,7 +486,10 @@
     "addSectionPlaceholder": "Szakasz hozzáadása",
     "cancel": "Mégse",
     "createOutline": "Vázlat létrehozása",
-    "updateOutline": "Vázlat frissítése"
+    "updateOutline": "Vázlat frissítése",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Ellenőrzőlista szerkesztése",
@@ -499,7 +508,8 @@
     "copyAllQuestions": "Összes kérdés másolása szövegként",
     "cancel": "Mégse",
     "createChecklist": "Ellenőrzőlista létrehozása",
-    "updateChecklist": "Ellenőrzőlista frissítése"
+    "updateChecklist": "Ellenőrzőlista frissítése",
+    "questionsSuggested": "Javasolt {{count}} kérdés a leírásból{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Témalista szerkesztése",
@@ -521,7 +531,11 @@
     "copyAllTopics": "Összes téma másolása szövegként",
     "cancel": "Mégse",
     "createTopicList": "Témalista létrehozása",
-    "updateTopicList": "Témalista frissítése"
+    "updateTopicList": "Témalista frissítése",
+    "descriptionNeedsMoreCharacters": "A leírásnak legalább {{count}} karakterrel többnek kell lennie a témák javasolásához",
+    "descriptionTooShort": "A leírásnak legalább 10 karakter hosszúnak kell lennie a témák javasolásához",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
   },
   "knowledgeBases": {
     "title": "Tudásbázisok kezelése",

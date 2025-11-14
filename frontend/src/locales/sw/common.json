@@ -96,7 +96,10 @@
       "largeFileTimeout": "Usindikaji wa faili kubwa umepitwa na wakati. Jaribu kubadili kwenye hali ya 'Skansio ya Maandishi Kamili' kwa utendaji bora na faili kubwa.",
       "fileSize": "Faili ni kubwa sana. Tafadhali chagua faili ndogo.",
       "serverError": "Hitilafu ya seva imetokea. Tafadhali jaribu tena baadaye.",
-      "insufficientContext": "Habari zinazohusiana hazijapatikana. Tafadhali uliza swali mahususi zaidi au pakia hati nyingine."
+      "insufficientContext": "Habari zinazohusiana hazijapatikana. Tafadhali uliza swali mahususi zaidi au pakia hati nyingine.",
+      "checklistNameRequired": "Jina la orodha ya ukaguzi linahitajika",
+      "checklistNameTooShort": "Jina la orodha ya ukaguzi lazima liwe angalau vibambo 3",
+      "atLeastOneQuestionRequired": "Swali moja angalau linahitajika"
     }
   },
   "settings": {
@@ -464,7 +467,10 @@
     "addSectionPlaceholder": "Ongeza sehemu",
     "cancel": "Ghairi",
     "createOutline": "Tengeneza Muhtasari",
-    "updateOutline": "Sasisha Muhtasari"
+    "updateOutline": "Sasisha Muhtasari",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Hariri Orodha ya Ukaguzi",
@@ -483,7 +489,8 @@
     "copyAllQuestions": "Nakili maswali yote kama maandishi",
     "cancel": "Ghairi",
     "createChecklist": "Tengeneza Orodha ya Ukaguzi",
-    "updateChecklist": "Sasisha Orodha ya Ukaguzi"
+    "updateChecklist": "Sasisha Orodha ya Ukaguzi",
+    "questionsSuggested": "Imependekezwa {{count}} maswali kutoka kwa maelezo{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Hariri Orodha ya Mada",
@@ -505,7 +512,13 @@
     "copyAllTopics": "Nakili mada zote kama maandishi",
     "cancel": "Ghairi",
     "createTopicList": "Tengeneza Orodha ya Mada",
-    "updateTopicList": "Sasisha Orodha ya Mada"
+    "updateTopicList": "Sasisha Orodha ya Mada",
+    "descriptionNeedsMoreCharacters": "Maelezo yanahitaji angalau herufi {{count}} zaidi kupendekeza mada",
+    "descriptionTooShort": "Maelezo yanapaswa kuwa na angalau herufi 10 ili kupendekeza mada",
+  "topicsSuggested": "Imependekezwa {{count}} mada kutoka kwa maelezo{{referenceText}}",
+  "topicsCopied": "Mada imekopiwa kwenye clipboard!",
+  "referenceExampleFiles": " na faili za mfano {{count}}",
+  "referenceKnowledgeBase": " kwa kutumia hifadhidata ya maarifa \"{{title}}\" ({{searchMode}})"
   },
   "knowledgeBases": {
     "title": "Usimamizi wa Misingi ya Maarifa",
@@ -960,6 +973,9 @@
     "suggest": "Pendekeza",
     "fieldPlaceholder": "Ongeza jina la sehemu...",
     "cancel": "Ghairi",
-    "updateFormTemplate": "Sasisha Kiolezo cha Fomu"
+    "updateFormTemplate": "Sasisha Kiolezo cha Fomu",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   }
 }

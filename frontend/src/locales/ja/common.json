@@ -96,7 +96,10 @@
       "largeFileTimeout": "大きなファイルの処理がタイムアウトしました。大きなファイルでより良いパフォーマンスを得るために「全文スキャン」モードに切り替えてください。",
       "fileSize": "ファイルが大きすぎます。小さいファイルを選択してください。",
       "serverError": "サーバーエラーが発生しました。後でもう一度お試しください。",
-      "insufficientContext": "この質問に答えるための関連情報が知識ベースで見つかりませんでした。"
+      "insufficientContext": "この質問に答えるための関連情報が知識ベースで見つかりませんでした。",
+      "checklistNameRequired": "チェックリスト名は必須です",
+      "checklistNameTooShort": "チェックリスト名は少なくとも3文字である必要があります",
+      "atLeastOneQuestionRequired": "少なくとも1つの質問が必要です"
     }
   },
   "settings": {
@@ -443,7 +446,10 @@
     "fieldPlaceholder": "フィールド名を追加（例：氏名、住所、社会保障番号）または説明から提案",
     "cancel": "キャンセル",
     "updateFormTemplate": "フォームテンプレートを更新",
-    "pleaseWait": "ドキュメントを確認しています。しばらくお待ちください。"
+    "pleaseWait": "ドキュメントを確認しています。しばらくお待ちください。",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "アウトラインを編集",
@@ -462,7 +468,21 @@
     "addSectionPlaceholder": "セクションを追加",
     "cancel": "キャンセル",
     "createOutline": "アウトラインを作成",
-    "updateOutline": "アウトラインを更新"
+    "updateOutline": "アウトラインを更新",
+    "descriptionTooShort": "セクションを提案するには、説明が少なくとも10文字以上である必要があります",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "アウトライン名は必須です",
+    "nameTooShort": "アウトライン名は少なくとも3文字以上である必要があります",
+    "atLeastOneSectionRequired": "少なくとも1つのセクションが必要です",
+    "enterDescription": "まずアウトラインの説明を入力してください",
+    "noSectionsSuggested": "セクションが提案されませんでした。より詳細な説明でお試しください。",
+    "invalidRequest": "無効なリクエストです。説明が要件を満たしているか確認してください。",
+    "loginRequired": "セクションを提案するにはログインが必要です。",
+    "serverError": "サーバーエラーです。後でもう一度試すか、サポートにお問い合わせください。",
+    "failedToSuggest": "セクションの提案に失敗しました：{{error}}",
+    "noSectionsToCopy": "コピーするセクションがありません",
+    "copyFailed": "クリップボードへのセクションのコピーに失敗しました"
   },
   "editChecklistModal": {
     "title": "チェックリストを編集",
@@ -481,7 +501,8 @@
     "copyAllQuestions": "すべての質問をテキストとしてコピー",
     "cancel": "キャンセル",
     "createChecklist": "チェックリストを作成",
-    "updateChecklist": "チェックリストを更新"
+    "updateChecklist": "チェックリストを更新",
+    "questionsSuggested": "説明から {{count}} 件の質問を提案{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "トピックリストを編集",
@@ -503,7 +524,24 @@
     "copyAllTopics": "すべてのトピックをテキストとしてコピー",
     "cancel": "キャンセル",
     "createTopicList": "トピックリストを作成",
-    "updateTopicList": "トピックリストを更新"
+    "updateTopicList": "トピックリストを更新",
+    "descriptionNeedsMoreCharacters": "トピックを提案するには、説明に少なくとも{{count}}文字以上必要です",
+    "descriptionTooShort": "トピックを提案するには、説明が少なくとも10文字必要です",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
+  ,
+    "nameRequired": "トピックリスト名は必須です",
+    "nameTooShort": "トピックリスト名は少なくとも3文字以上である必要があります",
+    "atLeastOneTopicRequired": "少なくとも1つのトピックが必要です",
+    "enterDescription": "まずトピックリストの説明を入力してください",
+    "noTopicsSuggested": "トピックが提案されませんでした。より詳細な説明でお試しください。",
+    "invalidRequest": "無効なリクエストです。説明が要件を満たしているか確認してください。",
+    "loginRequired": "トピックを提案するにはログインが必要です。",
+    "featureUnavailable": "トピック提案機能は利用できません。サポートにお問い合わせください。",
+    "serverError": "サーバーエラーです。後でもう一度試すか、サポートにお問い合わせください。",
+    "failedToSuggest": "トピックの提案に失敗しました：{{error}}",
+    "noTopicsToCopy": "コピーするトピックがありません",
+    "copyFailed": "クリップボードへのトピックのコピーに失敗しました"
   },
   "optimizeChecklistModal": {
     "title": "チェックリストを最適化",

@@ -93,7 +93,10 @@
       "largeFileTimeout": "Обработката на голям файл изтече. Опитайте да превключите на режим 'Пълно сканиране на текста' за по-добра производителност с големи файлове.",
       "fileSize": "Файлът е твърде голям. Моля, изберете по-малки файлове.",
       "serverError": "Възникна грешка на сървъра. Моля, опитайте отново по-късно.",
-      "insufficientContext": "Не е намерена подходяща информация в базата знания за отговор на този въпрос."
+      "insufficientContext": "Не е намерена подходяща информация в базата знания за отговор на този въпрос.",
+      "checklistNameRequired": "Името на контролния списък е задължително",
+      "checklistNameTooShort": "Името на контролния списък трябва да е поне 3 знака",
+      "atLeastOneQuestionRequired": "Изисква се поне един въпрос"
     }
   },
   "settings": {
@@ -461,7 +464,21 @@
     "addSectionPlaceholder": "Добавяне на секция",
     "cancel": "Отказ",
     "createOutline": "Създаване на структура",
-    "updateOutline": "Актуализиране на структура"
+    "updateOutline": "Актуализиране на структура",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Името на структурата е задължително",
+    "nameTooShort": "Името на структурата трябва да съдържа поне 3 знака",
+    "atLeastOneSectionRequired": "Изисква се поне една секция",
+    "enterDescription": "Първо въведете описание на структурата",
+    "noSectionsSuggested": "Не са предложени секции. Опитайте с по-подробно описание.",
+    "invalidRequest": "Невалидна заявка. Моля, проверете дали описанието ви отговаря на изискванията.",
+    "loginRequired": "Трябва да сте влезли в системата, за да предлагате секции.",
+    "serverError": "Грешка на сървъра. Моля, опитайте отново по-късно или се свържете с поддръжката.",
+    "failedToSuggest": "Неуспешно предлагане на секции: {{error}}",
+    "noSectionsToCopy": "Няма секции за копиране",
+    "copyFailed": "Неуспешно копиране на секции в клипборда"
   },
   "editChecklistModal": {
     "title": "Редактиране на списък за проверка",
@@ -480,7 +497,8 @@
     "copyAllQuestions": "Копиране на всички въпроси като текст",
     "cancel": "Отказ",
     "createChecklist": "Създаване на списък за проверка",
-    "updateChecklist": "Актуализиране на списък за проверка"
+    "updateChecklist": "Актуализиране на списък за проверка",
+    "questionsSuggested": "Предложени {{count}} въпроса от описанието{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Редактиране на списък с теми",
@@ -502,7 +520,22 @@
     "copyAllTopics": "Копиране на всички теми като текст",
     "cancel": "Отказ",
     "createTopicList": "Създаване на списък с теми",
-    "updateTopicList": "Актуализиране на списък с теми"
+    "updateTopicList": "Актуализиране на списък с теми",
+    "descriptionNeedsMoreCharacters": "Описанието се нуждае от поне {{count}} допълнителни знака, за да предложи теми",
+    "descriptionTooShort": "Описанието трябва да съдържа поне 10 знака, за да предложи теми",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!",
+    "nameRequired": "Името на списъка с теми е задължително",
+    "nameTooShort": "Името на списъка с теми трябва да съдържа поне 3 знака",
+    "atLeastOneTopicRequired": "Изисква се поне една тема",
+    "enterDescription": "Първо въведете описание на списъка с теми",
+    "noTopicsSuggested": "Не са предложени теми. Опитайте с по-подробно описание.",
+    "invalidRequest": "Невалидна заявка. Моля, проверете дали описанието ви отговаря на изискванията.",
+    "loginRequired": "Трябва да сте влезли в системата, за да предлагате теми.",
+    "serverError": "Грешка на сървъра. Моля, опитайте отново по-късно или се свържете с поддръжката.",
+    "failedToSuggest": "Неуспешно предлагане на теми: {{error}}",
+    "noTopicsToCopy": "Няма теми за копиране",
+    "copyFailed": "Неуспешно копиране на теми в клипборда"
   },
   "knowledgeBases": {
     "title": "Управление на бази знания",
@@ -960,6 +993,9 @@
     "suggest": "Предложи",
     "fieldPlaceholder": "Добавете име на поле...",
     "cancel": "Отказ",
-    "updateFormTemplate": "Актуализирай шаблон на формуляр"
+    "updateFormTemplate": "Актуализирай шаблон на формуляр",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   }
 }

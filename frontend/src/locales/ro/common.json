@@ -91,7 +91,10 @@
       "largeFileTimeout": "Procesarea fișierului mare a expirat. Încercați să comutați la modul 'Scanare text complet' pentru performanță mai bună cu fișiere mari.",
       "fileSize": "Fișierul este prea mare. Vă rugăm să alegeți fișiere mai mici.",
       "serverError": "A apărut o eroare de server. Încercați din nou mai târziu.",
-      "insufficientContext": "Nu s-a găsit informație relevantă în baza de cunoștințe pentru a răspunde la această întrebare."
+      "insufficientContext": "Nu s-a găsit informație relevantă în baza de cunoștințe pentru a răspunde la această întrebare.",
+      "checklistNameRequired": "Numele listei de verificare este obligatoriu",
+      "checklistNameTooShort": "Numele listei de verificare trebuie să aibă cel puțin 3 caractere",
+      "atLeastOneQuestionRequired": "Este necesară cel puțin o întrebare"
     }
   },
   "settings": {
@@ -406,7 +409,10 @@
     "suggest": "Sugerați",
     "fieldPlaceholder": "Adăugați un nume de câmp...",
     "cancel": "Anulare",
-    "updateFormTemplate": "Actualizați Șablonul de Formular"
+    "updateFormTemplate": "Actualizați Șablonul de Formular",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Editare Schemă",
@@ -425,7 +431,10 @@
     "addSectionPlaceholder": "Adăugați secțiune",
     "cancel": "Anulare",
     "createOutline": "Creați Schemă",
-    "updateOutline": "Actualizați Schemă"
+    "updateOutline": "Actualizați Schemă",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Editare Listă de Verificare",
@@ -444,7 +453,8 @@
     "copyAllQuestions": "Copiați toate întrebările ca text",
     "cancel": "Anulare",
     "createChecklist": "Creați Listă de Verificare",
-    "updateChecklist": "Actualizați Listă de Verificare"
+    "updateChecklist": "Actualizați Listă de Verificare",
+    "questionsSuggested": "Sugerate {{count}} întrebări din descriere{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Editare Listă de Subiecte",
@@ -466,7 +476,13 @@
     "copyAllTopics": "Copiați toate subiectele ca text",
     "cancel": "Anulare",
     "createTopicList": "Creați Listă de Subiecte",
-    "updateTopicList": "Actualizați Listă de Subiecte"
+    "updateTopicList": "Actualizați Listă de Subiecte",
+    "descriptionNeedsMoreCharacters": "Descrierea are nevoie de cel puțin {{count}} caractere în plus pentru a sugera subiecte",
+    "descriptionTooShort": "Descrierea trebuie să conțină cel puțin 10 caractere pentru a sugera subiecte",
+  "topicsSuggested": "S-au sugerat {{count}} subiecte din descriere{{referenceText}}",
+  "topicsCopied": "Subiectele au fost copiate în clipboard!",
+  "referenceExampleFiles": " și {{count}} fișier(e) exemplu",
+  "referenceKnowledgeBase": " folosind baza de cunoștințe \"{{title}}\" ({{searchMode}})"
   },
   "knowledgeBases": {
     "title": "Gestionarea bazelor de cunoștințe",

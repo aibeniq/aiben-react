@@ -483,7 +483,10 @@
     "fieldPlaceholder": "Voeg een veldnaam toe (bijv. Voornaam, Adres, BSN) of stel voor uit beschrijving",
     "cancel": "Annuleren",
     "updateFormTemplate": "Formuliersjabloon Bijwerken",
-    "pleaseWait": "Wacht alstublieft terwijl we uw documenten controleren"
+    "pleaseWait": "Wacht alstublieft terwijl we uw documenten controleren",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Overzicht Bewerken",
@@ -502,7 +505,21 @@
     "addSectionPlaceholder": "Sectie toevoegen",
     "cancel": "Annuleren",
     "createOutline": "Overzicht Aanmaken",
-    "updateOutline": "Overzicht Bijwerken"
+    "updateOutline": "Overzicht Bijwerken",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Overzichtsnaam is verplicht",
+    "nameTooShort": "Overzichtsnaam moet minimaal 3 tekens bevatten",
+    "atLeastOneSectionRequired": "Minimaal één sectie is verplicht",
+    "enterDescription": "Voer eerst een overzichtsbeschrijving in",
+    "noSectionsSuggested": "Geen secties voorgesteld. Probeer een gedetailleerdere beschrijving.",
+    "invalidRequest": "Ongeldige aanvraag. Controleer of uw beschrijving aan de vereisten voldoet.",
+    "loginRequired": "U moet ingelogd zijn om secties voor te stellen.",
+    "serverError": "Serverfout. Probeer het later opnieuw of neem contact op met ondersteuning.",
+    "failedToSuggest": "Secties voorstellen mislukt: {{error}}",
+    "noSectionsToCopy": "Geen secties om te kopiëren",
+    "copyFailed": "Secties naar klembord kopiëren mislukt"
   },
   "editChecklistModal": {
     "title": "Checklist Bewerken",
@@ -521,7 +538,8 @@
     "copyAllQuestions": "Alle vragen als tekst kopiëren",
     "cancel": "Annuleren",
     "createChecklist": "Checklist Aanmaken",
-    "updateChecklist": "Checklist Bijwerken"
+    "updateChecklist": "Checklist Bijwerken",
+    "questionsSuggested": "Voorgesteld {{count}} vragen uit beschrijving{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Onderwerpenlijst Bewerken",
@@ -543,7 +561,22 @@
     "copyAllTopics": "Alle onderwerpen als tekst kopiëren",
     "cancel": "Annuleren",
     "createTopicList": "Onderwerpenlijst Aanmaken",
-    "updateTopicList": "Onderwerpenlijst Bijwerken"
+    "updateTopicList": "Onderwerpenlijst Bijwerken",
+    "descriptionNeedsMoreCharacters": "Beschrijving heeft minimaal {{count}} tekens meer nodig om onderwerpen voor te stellen",
+    "descriptionTooShort": "Beschrijving moet minimaal 10 tekens bevatten om onderwerpen voor te stellen",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!",
+    "nameRequired": "Onderwerpenlijstnaam is verplicht",
+    "nameTooShort": "Onderwerpenlijstnaam moet minimaal 3 tekens bevatten",
+    "atLeastOneTopicRequired": "Minimaal één onderwerp is verplicht",
+    "enterDescription": "Voer eerst een onderwerpenlijstbeschrijving in",
+    "noTopicsSuggested": "Geen onderwerpen voorgesteld. Probeer een gedetailleerdere beschrijving.",
+    "invalidRequest": "Ongeldige aanvraag. Controleer of uw beschrijving aan de vereisten voldoet.",
+    "loginRequired": "U moet ingelogd zijn om onderwerpen voor te stellen.",
+    "serverError": "Serverfout. Probeer het later opnieuw of neem contact op met ondersteuning.",
+    "failedToSuggest": "Onderwerpen voorstellen mislukt: {{error}}",
+    "noTopicsToCopy": "Geen onderwerpen om te kopiëren",
+    "copyFailed": "Onderwerpen naar klembord kopiëren mislukt"
   },
   "optimizeChecklistModal": {
     "title": "Checklist Optimaliseren",

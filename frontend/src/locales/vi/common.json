@@ -96,7 +96,10 @@
       "largeFileTimeout": "Xử lý tệp lớn đã hết thời gian chờ. Hãy thử chuyển sang chế độ 'Quét toàn văn bản' để có hiệu suất tốt hơn với tệp lớn.",
       "fileSize": "Tệp quá lớn. Vui lòng chọn tệp nhỏ hơn.",
       "serverError": "Đã xảy ra lỗi máy chủ. Vui lòng thử lại sau.",
-      "insufficientContext": "Không tìm thấy thông tin liên quan. Vui lòng đặt câu hỏi cụ thể hơn hoặc tải lên tài liệu khác."
+      "insufficientContext": "Không tìm thấy thông tin liên quan. Vui lòng đặt câu hỏi cụ thể hơn hoặc tải lên tài liệu khác.",
+      "checklistNameRequired": "Tên danh sách kiểm tra là bắt buộc",
+      "checklistNameTooShort": "Tên danh sách kiểm tra phải có ít nhất 3 ký tự",
+      "atLeastOneQuestionRequired": "Cần ít nhất một câu hỏi"
     }
   },
   "settings": {
@@ -653,7 +656,21 @@
     "consultDocs": "Tham khảo tài liệu",
     "cancel": "Hủy",
     "createOutline": "Tạo Phác thảo",
-    "updateOutline": "Cập nhật Phác thảo"
+    "updateOutline": "Cập nhật Phác thảo",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Tên phác thảo là bắt buộc",
+    "nameTooShort": "Tên phác thảo phải chứa ít nhất 3 ký tự",
+    "atLeastOneSectionRequired": "Cần ít nhất một phần",
+    "enterDescription": "Trước tiên hãy nhập mô tả phác thảo",
+    "noSectionsSuggested": "Không có phần nào được đề xuất. Hãy thử mô tả chi tiết hơn.",
+    "invalidRequest": "Yêu cầu không hợp lệ. Vui lòng kiểm tra mô tả của bạn có đáp ứng yêu cầu không.",
+    "loginRequired": "Bạn phải đăng nhập để đề xuất phần.",
+    "serverError": "Lỗi máy chủ. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
+    "failedToSuggest": "Không thể đề xuất phần: {{error}}",
+    "noSectionsToCopy": "Không có phần nào để sao chép",
+    "copyFailed": "Không thể sao chép phần vào clipboard"
   },
   "editChecklistModal": {
     "title": "Chỉnh sửa Danh sách Kiểm tra",
@@ -672,7 +689,8 @@
     "copyAllQuestions": "Sao chép tất cả câu hỏi dưới dạng văn bản",
     "cancel": "Hủy",
     "createChecklist": "Tạo Danh sách Kiểm tra",
-    "updateChecklist": "Cập nhật Danh sách Kiểm tra"
+    "updateChecklist": "Cập nhật Danh sách Kiểm tra",
+    "questionsSuggested": "Đã đề xuất {{count}} câu hỏi từ mô tả{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Chỉnh sửa Danh sách Chủ đề",
@@ -694,7 +712,24 @@
     "copyAllTopics": "Sao chép tất cả chủ đề dưới dạng văn bản",
     "cancel": "Hủy",
     "createTopicList": "Tạo Danh sách Chủ đề",
-    "updateTopicList": "Cập nhật Danh sách Chủ đề"
+    "updateTopicList": "Cập nhật Danh sách Chủ đề",
+    "descriptionNeedsMoreCharacters": "Mô tả cần ít nhất {{count}} ký tự nữa để đề xuất chủ đề",
+    "descriptionTooShort": "Mô tả phải có ít nhất 10 ký tự để đề xuất chủ đề",
+  "topicsSuggested": "Đã gợi ý {{count}} chủ đề từ mô tả{{referenceText}}",
+  "topicsCopied": "Đã sao chép các chủ đề vào bảng tạm!",
+  "referenceExampleFiles": " và {{count}} tệp ví dụ",
+  "referenceKnowledgeBase": " sử dụng cơ sở tri thức \"{{title}}\" ({{searchMode}})",
+  "nameRequired": "Tên danh sách chủ đề là bắt buộc",
+  "nameTooShort": "Tên danh sách chủ đề phải chứa ít nhất 3 ký tự",
+  "atLeastOneTopicRequired": "Cần ít nhất một chủ đề",
+  "enterDescription": "Trước tiên hãy nhập mô tả danh sách chủ đề",
+  "noTopicsSuggested": "Không có chủ đề nào được đề xuất. Hãy thử mô tả chi tiết hơn.",
+  "invalidRequest": "Yêu cầu không hợp lệ. Vui lòng kiểm tra mô tả của bạn có đáp ứng yêu cầu không.",
+  "loginRequired": "Bạn phải đăng nhập để đề xuất chủ đề.",
+  "serverError": "Lỗi máy chủ. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
+  "failedToSuggest": "Không thể đề xuất chủ đề: {{error}}",
+  "noTopicsToCopy": "Không có chủ đề nào để sao chép",
+  "copyFailed": "Không thể sao chép chủ đề vào clipboard"
   },
   "optimizeChecklistModal": {
     "title": "Tối ưu hóa Danh sách Kiểm tra",
@@ -975,6 +1010,9 @@
     "suggest": "Đề xuất",
     "fieldPlaceholder": "Thêm tên trường...",
     "cancel": "Hủy",
-    "updateFormTemplate": "Cập nhật Mẫu biểu mẫu"
+    "updateFormTemplate": "Cập nhật Mẫu biểu mẫu",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   }
 }

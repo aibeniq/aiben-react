@@ -96,7 +96,10 @@
       "largeFileTimeout": "Pemrosesan file besar waktu habis. Coba beralih ke mode 'Pemindaian Teks Lengkap' untuk performa yang lebih baik dengan file besar.",
       "fileSize": "File terlalu besar. Silakan pilih file yang lebih kecil.",
       "serverError": "Terjadi kesalahan server. Silakan coba lagi nanti.",
-      "insufficientContext": "Informasi yang relevan tidak ditemukan. Silakan ajukan pertanyaan yang lebih spesifik atau unggah dokumen lain."
+      "insufficientContext": "Informasi yang relevan tidak ditemukan. Silakan ajukan pertanyaan yang lebih spesifik atau unggah dokumen lain.",
+      "checklistNameRequired": "Nama daftar periksa diperlukan",
+      "checklistNameTooShort": "Nama daftar periksa harus minimal 3 karakter",
+      "atLeastOneQuestionRequired": "Setidaknya satu pertanyaan diperlukan"
     }
   },
   "settings": {
@@ -461,7 +464,10 @@
     "suggest": "Sarankan",
     "fieldPlaceholder": "Tambahkan nama bidang...",
     "cancel": "Batal",
-    "updateFormTemplate": "Perbarui Template Formulir"
+    "updateFormTemplate": "Perbarui Template Formulir",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Edit Outline",
@@ -480,7 +486,10 @@
     "addSectionPlaceholder": "Tambahkan bagian",
     "cancel": "Batal",
     "createOutline": "Buat Outline",
-    "updateOutline": "Perbarui Outline"
+    "updateOutline": "Perbarui Outline",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Edit Daftar Periksa",
@@ -499,7 +508,8 @@
     "copyAllQuestions": "Salin semua pertanyaan sebagai teks",
     "cancel": "Batal",
     "createChecklist": "Buat Daftar Periksa",
-    "updateChecklist": "Perbarui Daftar Periksa"
+    "updateChecklist": "Perbarui Daftar Periksa",
+    "questionsSuggested": "Disarankan {{count}} pertanyaan dari deskripsi{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Edit Daftar Topik",
@@ -521,7 +531,11 @@
     "copyAllTopics": "Salin semua topik sebagai teks",
     "cancel": "Batal",
     "createTopicList": "Buat Daftar Topik",
-    "updateTopicList": "Perbarui Daftar Topik"
+    "updateTopicList": "Perbarui Daftar Topik",
+    "descriptionNeedsMoreCharacters": "Deskripsi memerlukan setidaknya {{count}} karakter lagi untuk menyarankan topik",
+    "descriptionTooShort": "Deskripsi harus memiliki setidaknya 10 karakter untuk menyarankan topik",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
   },
   "knowledgeBases": {
     "title": "Kelola Basis Pengetahuan",

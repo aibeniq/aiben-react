@@ -96,7 +96,10 @@
       "largeFileTimeout": "Behandling av store filer tidsavbrudd. Prøv 'Fulltekst-skanning'-modus for bedre ytelse med store filer.",
       "fileSize": "Filen er for stor. Velg mindre filer.",
       "serverError": "En serverfeil oppstod. Prøv igjen senere.",
-      "insufficientContext": "Ingen relevant informasjon funnet i kunnskapsbasen for å svare på dette spørsmålet."
+      "insufficientContext": "Ingen relevant informasjon funnet i kunnskapsbasen for å svare på dette spørsmålet.",
+      "checklistNameRequired": "Sjekklistenavn er påkrevd",
+      "checklistNameTooShort": "Sjekklistenavn må være minst 3 tegn langt",
+      "atLeastOneQuestionRequired": "Minst ett spørsmål er påkrevd"
     }
   },
   "settings": {
@@ -500,7 +503,10 @@
     "fieldPlaceholder": "Legg til feltnavn...",
     "cancel": "Avbryt",
     "updateFormTemplate": "Oppdater skjemamal",
-    "pleaseWait": "Vennligst vent mens vi gjennomgår dokumentene dine"
+    "pleaseWait": "Vennligst vent mens vi gjennomgår dokumentene dine",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Rediger disposisjon",
@@ -519,7 +525,10 @@
     "addSectionPlaceholder": "Legg til seksjon",
     "cancel": "Avbryt",
     "createOutline": "Opprett disposisjon",
-    "updateOutline": "Oppdater disposisjon"
+    "updateOutline": "Oppdater disposisjon",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Rediger sjekkliste",
@@ -538,7 +547,8 @@
     "copyAllQuestions": "Kopier alle spørsmål som tekst",
     "cancel": "Avbryt",
     "createChecklist": "Opprett sjekkliste",
-    "updateChecklist": "Oppdater sjekkliste"
+    "updateChecklist": "Oppdater sjekkliste",
+    "questionsSuggested": "Foreslått {{count}} spørsmål fra beskrivelsen{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Rediger emneliste",
@@ -547,6 +557,8 @@
     "topicListNamePlaceholder": "Skriv inn emnelistenavn",
     "description": "Emnelistebeskrivelse",
     "descriptionPlaceholder": "Skriv inn emnelistebeskrivelse for automatiske emneforslag (minimum 10 tegn)...",
+    "descriptionNeedsMoreCharacters": "Beskrivelsen trenger minst {{count}} flere tegn for å foreslå emner",
+    "descriptionTooShort": "Beskrivelsen må være minst 10 tegn lang for å foreslå emner",
     "referenceDocuments": "Referansedokumenter (valgfritt)",
     "uploadFiles": "Last opp filer",
     "knowledgeBase": "Kunnskapsbase",
@@ -560,7 +572,11 @@
     "copyAllTopics": "Kopier alle emner som tekst",
     "cancel": "Avbryt",
     "createTopicList": "Opprett emneliste",
-    "updateTopicList": "Oppdater emneliste"
+    "updateTopicList": "Oppdater emneliste",
+    "topicsSuggested": "Foreslått {{count}} emner fra beskrivelsen{{referenceText}}",
+    "topicsCopied": "Emner kopiert til utklippstavlen!",
+    "referenceExampleFiles": " og {{count}} eksempelfil(er)",
+    "referenceKnowledgeBase": " ved bruk av kunnskapsbasen \"{{title}}\" ({{searchMode}})"
   },
   "optimizeChecklistModal": {
     "title": "Optimaliser sjekkliste",
