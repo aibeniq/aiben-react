@@ -96,7 +96,10 @@
       "largeFileTimeout": "O processamento de arquivo grande expirou. Tente alternar para o modo 'Varredura de Texto Completo' para melhor desempenho com arquivos grandes.",
       "fileSize": "O arquivo é muito grande. Escolha arquivos menores.",
       "serverError": "Ocorreu um erro no servidor. Tente novamente mais tarde.",
-      "insufficientContext": "Nenhuma informação relevante encontrada na base de conhecimento para responder a esta pergunta."
+      "insufficientContext": "Nenhuma informação relevante encontrada na base de conhecimento para responder a esta pergunta.",
+      "checklistNameRequired": "O nome da lista de verificação é obrigatório",
+      "checklistNameTooShort": "O nome da lista de verificação deve ter pelo menos 3 caracteres",
+      "atLeastOneQuestionRequired": "Pelo menos uma pergunta é obrigatória"
     }
   },
   "settings": {
@@ -685,7 +688,10 @@
     "fieldPlaceholder": "Adicione um nome de campo (ex. Nome, Endereço, CPF) ou sugira da descrição",
     "cancel": "Cancelar",
     "updateFormTemplate": "Atualizar Modelo de Formulário",
-    "pleaseWait": "Aguarde enquanto analisamos os seus documentos"
+    "pleaseWait": "Aguarde enquanto analisamos os seus documentos",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editCustom": {
     "title": "Editar Instruções Personalizadas",
@@ -710,7 +716,21 @@
     "addSectionPlaceholder": "Adicionar uma seção",
     "cancel": "Cancelar",
     "createOutline": "Criar Esquema",
-    "updateOutline": "Atualizar Esquema"
+    "updateOutline": "Atualizar Esquema",
+    "descriptionTooShort": "A descrição deve ter pelo menos 10 caracteres para sugerir seções",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "O nome do esquema é obrigatório",
+    "nameTooShort": "O nome do esquema deve ter pelo menos 3 caracteres",
+    "atLeastOneSectionRequired": "Pelo menos uma seção é obrigatória",
+    "enterDescription": "Por favor, digite primeiro uma descrição do esquema",
+    "noSectionsSuggested": "Nenhuma seção foi sugerida. Tente com uma descrição mais detalhada.",
+    "invalidRequest": "Solicitação inválida. Verifique se sua descrição atende aos requisitos.",
+    "loginRequired": "Você deve estar logado para sugerir seções.",
+    "serverError": "Erro do servidor. Tente novamente mais tarde ou entre em contato com o suporte.",
+    "failedToSuggest": "Falha ao sugerir seções: {{error}}",
+    "noSectionsToCopy": "Nenhuma seção para copiar",
+    "copyFailed": "Falha ao copiar as seções para a área de transferência"
   },
   "editChecklistModal": {
     "title": "Editar Lista de Verificação",
@@ -729,7 +749,8 @@
     "copyAllQuestions": "Copiar todas as perguntas como texto",
     "cancel": "Cancelar",
     "createChecklist": "Criar Lista de Verificação",
-    "updateChecklist": "Atualizar Lista de Verificação"
+    "updateChecklist": "Atualizar Lista de Verificação",
+    "questionsSuggested": "Sugeridas {{count}} perguntas a partir da descrição{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Editar Lista de Tópicos",
@@ -751,7 +772,26 @@
     "copyAllTopics": "Copiar todos os tópicos como texto",
     "cancel": "Cancelar",
     "createTopicList": "Criar Lista de Tópicos",
-    "updateTopicList": "Atualizar Lista de Tópicos"
+    "updateTopicList": "Atualizar Lista de Tópicos",
+    "descriptionNeedsMoreCharacters": "A descrição precisa de pelo menos {{count}} caracteres a mais para sugerir tópicos",
+    "descriptionTooShort": "A descrição deve ter pelo menos 10 caracteres para sugerir tópicos",
+  "topicsSuggested": "Sugeridos {{count}} tópicos a partir da descrição{{referenceText}}",
+  "topicsCopied": "Tópicos copiados para a área de transferência!",
+  "referenceExampleFiles": " e {{count}} arquivo(s) de exemplo",
+  "referenceKnowledgeBase": " usando a base de conhecimento \"{{title}}\" ({{searchMode}})"
+  ,
+    "nameRequired": "O nome da lista de tópicos é obrigatório",
+    "nameTooShort": "O nome da lista de tópicos deve ter pelo menos 3 caracteres",
+    "atLeastOneTopicRequired": "Pelo menos um tópico é obrigatório",
+    "enterDescription": "Por favor, digite primeiro uma descrição da lista de tópicos",
+    "noTopicsSuggested": "Nenhum tópico foi sugerido. Tente com uma descrição mais detalhada.",
+    "invalidRequest": "Solicitação inválida. Verifique se sua descrição atende aos requisitos.",
+    "loginRequired": "Você deve estar logado para sugerir tópicos.",
+    "featureUnavailable": "O recurso de sugestão de tópicos não está disponível. Entre em contato com o suporte.",
+    "serverError": "Erro do servidor. Tente novamente mais tarde ou entre em contato com o suporte.",
+    "failedToSuggest": "Falha ao sugerir tópicos: {{error}}",
+    "noTopicsToCopy": "Nenhum tópico para copiar",
+    "copyFailed": "Falha ao copiar os tópicos para a área de transferência"
   },
   "optimizeChecklistModal": {
     "title": "Otimizar Lista de Verificação",

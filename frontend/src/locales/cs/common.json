@@ -93,7 +93,10 @@
       "largeFileTimeout": "Zpracování velkého souboru vypršelo. Zkuste přepnout do režimu 'Kompletní sken textu' pro lepší výkon s velkými soubory.",
       "fileSize": "Soubor je příliš velký. Vyberte prosím menší soubory.",
       "serverError": "Došlo k chybě serveru. Zkuste to prosím znovu později.",
-      "insufficientContext": "V databázi znalostí nebyla nalezena žádná relevantní informace pro odpověď na tuto otázku."
+      "insufficientContext": "V databázi znalostí nebyla nalezena žádná relevantní informace pro odpověď na tuto otázku.",
+      "checklistNameRequired": "Název kontrolního seznamu je povinný",
+      "checklistNameTooShort": "Název kontrolního seznamu musí mít alespoň 3 znaky",
+      "atLeastOneQuestionRequired": "Je vyžadována alespoň jedna otázka"
     }
   },
   "settings": {
@@ -410,7 +413,10 @@
     "suggest": "Navrhnout",
     "fieldPlaceholder": "Přidat název pole...",
     "cancel": "Zrušit",
-    "updateFormTemplate": "Aktualizovat šablonu formuláře"
+    "updateFormTemplate": "Aktualizovat šablonu formuláře",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Upravit osnovu",
@@ -429,7 +435,21 @@
     "addSectionPlaceholder": "Přidat sekci",
     "cancel": "Zrušit",
     "createOutline": "Vytvořit osnovu",
-    "updateOutline": "Aktualizovat osnovu"
+    "updateOutline": "Aktualizovat osnovu",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Název osnovy je povinný",
+    "nameTooShort": "Název osnovy musí obsahovat alespoň 3 znaky",
+    "atLeastOneSectionRequired": "Je vyžadována alespoň jedna sekce",
+    "enterDescription": "Nejprve zadejte popis osnovy",
+    "noSectionsSuggested": "Nebyly navrženy žádné sekce. Zkuste podrobnější popis.",
+    "invalidRequest": "Neplatná žádost. Zkontrolujte, zda váš popis splňuje požadavky.",
+    "loginRequired": "Pro navrhování sekcí musíte být přihlášeni.",
+    "serverError": "Chyba serveru. Zkuste to znovu později nebo kontaktujte podporu.",
+    "failedToSuggest": "Nepodařilo se navrhnout sekce: {{error}}",
+    "noSectionsToCopy": "Žádné sekce ke kopírování",
+    "copyFailed": "Nepodařilo se zkopírovat sekce do schránky"
   },
   "editChecklistModal": {
     "title": "Upravit kontrolní seznam",
@@ -448,7 +468,8 @@
     "copyAllQuestions": "Kopírovat všechny otázky jako text",
     "cancel": "Zrušit",
     "createChecklist": "Vytvořit kontrolní seznam",
-    "updateChecklist": "Aktualizovat kontrolní seznam"
+    "updateChecklist": "Aktualizovat kontrolní seznam",
+    "questionsSuggested": "Navrženo {{count}} otázek z popisu{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Upravit seznam témat",
@@ -470,7 +491,22 @@
     "copyAllTopics": "Kopírovat všechna témata jako text",
     "cancel": "Zrušit",
     "createTopicList": "Vytvořit seznam témat",
-    "updateTopicList": "Aktualizovat seznam témat"
+    "updateTopicList": "Aktualizovat seznam témat",
+    "descriptionNeedsMoreCharacters": "Popis potřebuje alespoň {{count}} dalších znaků pro návrh témat",
+    "descriptionTooShort": "Popis musí obsahovat alespoň 10 znaků pro návrh témat",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!",
+    "nameRequired": "Název seznamu témat je povinný",
+    "nameTooShort": "Název seznamu témat musí obsahovat alespoň 3 znaky",
+    "atLeastOneTopicRequired": "Je vyžadováno alespoň jedno téma",
+    "enterDescription": "Nejprve zadejte popis seznamu témat",
+    "noTopicsSuggested": "Nebyly navrženy žádné témata. Zkuste podrobnější popis.",
+    "invalidRequest": "Neplatná žádost. Zkontrolujte, zda váš popis splňuje požadavky.",
+    "loginRequired": "Pro navrhování témat musíte být přihlášeni.",
+    "serverError": "Chyba serveru. Zkuste to znovu později nebo kontaktujte podporu.",
+    "failedToSuggest": "Nepodařilo se navrhnout témata: {{error}}",
+    "noTopicsToCopy": "Žádná témata ke kopírování",
+    "copyFailed": "Nepodařilo se zkopírovat témata do schránky"
   },
   "knowledgeBases": {
     "title": "Správa znalostních bází",

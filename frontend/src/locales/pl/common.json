@@ -93,7 +93,10 @@
       "largeFileTimeout": "Przetwarzanie dużego pliku przekroczyło limit czasu. Spróbuj przełączyć na tryb 'Pełne skanowanie tekstu' dla lepszej wydajności z dużymi plikami.",
       "fileSize": "Plik jest zbyt duży. Wybierz mniejsze pliki.",
       "serverError": "Wystąpił błąd serwera. Spróbuj ponownie później.",
-      "insufficientContext": "Nie znaleziono odpowiednich informacji w bazie wiedzy, aby odpowiedzieć na to pytanie."
+      "insufficientContext": "Nie znaleziono odpowiednich informacji w bazie wiedzy, aby odpowiedzieć na to pytanie.",
+      "checklistNameRequired": "Nazwa listy kontrolnej jest wymagana",
+      "checklistNameTooShort": "Nazwa listy kontrolnej musi mieć co najmniej 3 znaki",
+      "atLeastOneQuestionRequired": "Wymagane jest co najmniej jedno pytanie"
     }
   },
   "settings": {
@@ -487,7 +490,10 @@
     "fieldPlaceholder": "Dodaj nazwę pola (np. Imię, Adres, PESEL) lub sugeruj z opisu",
     "cancel": "Anuluj",
     "updateFormTemplate": "Aktualizuj Szablon Formularza",
-    "pleaseWait": "Proszę czekać, sprawdzamy twoje dokumenty"
+    "pleaseWait": "Proszę czekać, sprawdzamy twoje dokumenty",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Edytuj Konspekt",
@@ -506,7 +512,21 @@
     "addSectionPlaceholder": "Dodaj sekcję",
     "cancel": "Anuluj",
     "createOutline": "Utwórz Konspekt",
-    "updateOutline": "Aktualizuj Konspekt"
+    "updateOutline": "Aktualizuj Konspekt",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Nazwa konspektu jest wymagana",
+    "nameTooShort": "Nazwa konspektu musi zawierać co najmniej 3 znaki",
+    "atLeastOneSectionRequired": "Wymagana jest co najmniej jedna sekcja",
+    "enterDescription": "Najpierw wprowadź opis konspektu",
+    "noSectionsSuggested": "Nie zasugerowano sekcji. Spróbuj bardziej szczegółowego opisu.",
+    "invalidRequest": "Nieprawidłowe żądanie. Sprawdź, czy opis spełnia wymagania.",
+    "loginRequired": "Musisz być zalogowany, aby sugerować sekcje.",
+    "serverError": "Błąd serwera. Spróbuj ponownie później lub skontaktuj się z pomocą techniczną.",
+    "failedToSuggest": "Nie udało się zasugerować sekcji: {{error}}",
+    "noSectionsToCopy": "Brak sekcji do skopiowania",
+    "copyFailed": "Nie udało się skopiować sekcji do schowka"
   },
   "editChecklistModal": {
     "title": "Edytuj Listę Kontrolną",
@@ -525,7 +545,8 @@
     "copyAllQuestions": "Skopiuj wszystkie pytania jako tekst",
     "cancel": "Anuluj",
     "createChecklist": "Utwórz Listę Kontrolną",
-    "updateChecklist": "Aktualizuj Listę Kontrolną"
+    "updateChecklist": "Aktualizuj Listę Kontrolną",
+    "questionsSuggested": "Zasugerowano {{count}} pytań z opisu{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Edytuj Listę Tematów",
@@ -547,7 +568,24 @@
     "copyAllTopics": "Skopiuj wszystkie tematy jako tekst",
     "cancel": "Anuluj",
     "createTopicList": "Utwórz Listę Tematów",
-    "updateTopicList": "Aktualizuj Listę Tematów"
+    "updateTopicList": "Aktualizuj Listę Tematów",
+    "descriptionNeedsMoreCharacters": "Opis wymaga co najmniej {{count}} dodatkowych znaków, aby zasugerować tematy",
+  "descriptionTooShort": "Opis musi zawierać co najmniej 10 znaków, aby zasugerować tematy",
+  "topicsSuggested": "Zasugerowano {{count}} tematów na podstawie opisu{{referenceText}}",
+  "topicsCopied": "Tematy skopiowane do schowka!",
+  "referenceExampleFiles": " oraz {{count}} plik(ów) przykładowych",
+  "referenceKnowledgeBase": " używając bazy wiedzy \"{{title}}\" ({{searchMode}})",
+  "nameRequired": "Nazwa listy tematów jest wymagana",
+  "nameTooShort": "Nazwa listy tematów musi zawierać co najmniej 3 znaki",
+  "atLeastOneTopicRequired": "Wymagany jest co najmniej jeden temat",
+  "enterDescription": "Najpierw wprowadź opis listy tematów",
+  "noTopicsSuggested": "Nie zasugerowano tematów. Spróbuj bardziej szczegółowego opisu.",
+  "invalidRequest": "Nieprawidłowe żądanie. Sprawdź, czy opis spełnia wymagania.",
+  "loginRequired": "Musisz być zalogowany, aby sugerować tematy.",
+  "serverError": "Błąd serwera. Spróbuj ponownie później lub skontaktuj się z pomocą techniczną.",
+  "failedToSuggest": "Nie udało się zasugerować tematów: {{error}}",
+  "noTopicsToCopy": "Brak tematów do skopiowania",
+  "copyFailed": "Nie udało się skopiować tematów do schowka"
   },
   "optimizeChecklistModal": {
     "title": "Optymalizuj Listę Kontrolną",

@@ -96,7 +96,10 @@
       "largeFileTimeout": "Bearbetning av stora filer timade ut. Prova 'Fulltext-skanning'-läge för bättre prestanda med stora filer.",
       "fileSize": "Filen är för stor. Välj mindre filer.",
       "serverError": "Ett serverfel inträffade. Försök igen senare.",
-      "insufficientContext": "Ingen relevant information hittades i kunskapsbanken för att besvara denna fråga."
+      "insufficientContext": "Ingen relevant information hittades i kunskapsbanken för att besvara denna fråga.",
+      "checklistNameRequired": "Checklistans namn krävs",
+      "checklistNameTooShort": "Checklistans namn måste vara minst 3 tecken långt",
+      "atLeastOneQuestionRequired": "Minst en fråga krävs"
     }
   },
   "settings": {
@@ -510,7 +513,10 @@
     "fieldPlaceholder": "Lägg till fältnamn...",
     "cancel": "Avbryt",
     "updateFormTemplate": "Uppdatera formulärmall",
-    "pleaseWait": "Vänligen vänta medan vi granskar dina dokument"
+    "pleaseWait": "Vänligen vänta medan vi granskar dina dokument",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Redigera disposition",
@@ -529,7 +535,21 @@
     "addSectionPlaceholder": "Lägg till avsnitt",
     "cancel": "Avbryt",
     "createOutline": "Skapa disposition",
-    "updateOutline": "Uppdatera disposition"
+    "updateOutline": "Uppdatera disposition",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Dispositionsnamn är obligatoriskt",
+    "nameTooShort": "Dispositionsnamn måste innehålla minst 3 tecken",
+    "atLeastOneSectionRequired": "Minst ett avsnitt krävs",
+    "enterDescription": "Ange först en dispositionsbeskrivning",
+    "noSectionsSuggested": "Inga avsnitt föreslagna. Försök med en mer detaljerad beskrivning.",
+    "invalidRequest": "Ogiltig förfrågan. Kontrollera att din beskrivning uppfyller kraven.",
+    "loginRequired": "Du måste vara inloggad för att föreslå avsnitt.",
+    "serverError": "Serverfel. Försök igen senare eller kontakta support.",
+    "failedToSuggest": "Misslyckades att föreslå avsnitt: {{error}}",
+    "noSectionsToCopy": "Inga avsnitt att kopiera",
+    "copyFailed": "Misslyckades att kopiera avsnitt till urklipp"
   },
   "editChecklistModal": {
     "title": "Redigera checklista",
@@ -548,7 +568,8 @@
     "copyAllQuestions": "Kopiera alla frågor som text",
     "cancel": "Avbryt",
     "createChecklist": "Skapa checklista",
-    "updateChecklist": "Uppdatera checklista"
+    "updateChecklist": "Uppdatera checklista",
+    "questionsSuggested": "Föreslagna {{count}} frågor från beskrivningen{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Redigera ämneslista",
@@ -570,7 +591,24 @@
     "copyAllTopics": "Kopiera alla ämnen som text",
     "cancel": "Avbryt",
     "createTopicList": "Skapa ämneslista",
-    "updateTopicList": "Uppdatera ämneslista"
+    "updateTopicList": "Uppdatera ämneslista",
+    "descriptionNeedsMoreCharacters": "Beskrivningen behöver minst {{count}} fler tecken för att föreslå ämnen",
+    "descriptionTooShort": "Beskrivningen måste vara minst 10 tecken lång för att föreslå ämnen",
+  "topicsSuggested": "Föreslagna {{count}} ämnen från beskrivningen{{referenceText}}",
+  "topicsCopied": "Ämnen kopierades till urklipp!",
+  "referenceExampleFiles": " och {{count}} exempel-fil(er)",
+  "referenceKnowledgeBase": " med kunskapsdatabasen \"{{title}}\" ({{searchMode}})",
+  "nameRequired": "Ämneslistnamn är obligatoriskt",
+  "nameTooShort": "Ämneslistnamn måste innehålla minst 3 tecken",
+  "atLeastOneTopicRequired": "Minst ett ämne krävs",
+  "enterDescription": "Ange först en ämneslistbeskrivning",
+  "noTopicsSuggested": "Inga ämnen föreslagna. Försök med en mer detaljerad beskrivning.",
+  "invalidRequest": "Ogiltig förfrågan. Kontrollera att din beskrivning uppfyller kraven.",
+  "loginRequired": "Du måste vara inloggad för att föreslå ämnen.",
+  "serverError": "Serverfel. Försök igen senare eller kontakta support.",
+  "failedToSuggest": "Misslyckades att föreslå ämnen: {{error}}",
+  "noTopicsToCopy": "Inga ämnen att kopiera",
+  "copyFailed": "Misslyckades att kopiera ämnen till urklipp"
   },
   "optimizeChecklistModal": {
     "title": "Optimera checklista",

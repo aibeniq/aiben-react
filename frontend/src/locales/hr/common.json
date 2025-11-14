@@ -93,7 +93,10 @@
       "largeFileTimeout": "Obrada velike datoteke je istekla. Pokušajte se prebaciti na način 'Potpuno skeniranje teksta' za bolje performanse s velikim datotekama.",
       "fileSize": "Datoteka je prevelika. Molimo odaberite manje datoteke.",
       "serverError": "Došlo je do pogreške poslužitelja. Molimo pokušajte ponovno kasnije.",
-      "insufficientContext": "Nije pronađena relevantna informacija u bazi znanja za odgovor na ovo pitanje."
+      "insufficientContext": "Nije pronađena relevantna informacija u bazi znanja za odgovor na ovo pitanje.",
+      "checklistNameRequired": "Naziv kontrolne liste je obavezan",
+      "checklistNameTooShort": "Naziv kontrolne liste mora imati najmanje 3 znaka",
+      "atLeastOneQuestionRequired": "Potrebno je barem jedno pitanje"
     }
   },
   "settings": {
@@ -461,7 +464,10 @@
     "addSectionPlaceholder": "Dodaj odjeljak",
     "cancel": "Odustani",
     "createOutline": "Stvori strukturu",
-    "updateOutline": "Ažuriraj strukturu"
+    "updateOutline": "Ažuriraj strukturu",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Uredi listu provjere",
@@ -480,7 +486,8 @@
     "copyAllQuestions": "Kopiraj sva pitanja kao tekst",
     "cancel": "Odustani",
     "createChecklist": "Stvori listu provjere",
-    "updateChecklist": "Ažuriraj listu provjere"
+    "updateChecklist": "Ažuriraj listu provjere",
+    "questionsSuggested": "Predloženo {{count}} pitanja iz opisa{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Uredi popis tema",
@@ -502,7 +509,11 @@
     "copyAllTopics": "Kopiraj sve teme kao tekst",
     "cancel": "Odustani",
     "createTopicList": "Stvori popis tema",
-    "updateTopicList": "Ažuriraj popis tema"
+    "updateTopicList": "Ažuriraj popis tema",
+    "descriptionNeedsMoreCharacters": "Opis treba imati najmanje {{count}} znakova više za predlaganje tema",
+    "descriptionTooShort": "Opis mora sadržavati najmanje 10 znakova za predlaganje tema",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
   },
   "knowledgeBases": {
     "title": "Upravljanje bazama znanja",
@@ -960,6 +971,9 @@
     "suggest": "Predloži",
     "fieldPlaceholder": "Dodaj naziv polja...",
     "cancel": "Odustani",
-    "updateFormTemplate": "Ažuriraj Predložak Obrasca"
+    "updateFormTemplate": "Ažuriraj Predložak Obrasca",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   }
 }

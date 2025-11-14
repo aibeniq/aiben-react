@@ -96,7 +96,10 @@
       "largeFileTimeout": "Suurte failide töötlemine aegus. Proovi lülituda 'Täisteksti skaneerimine' režiimi parema jõudluse saavutamiseks suurte failidega.",
       "fileSize": "Fail on liiga suur. Palun vali väiksemad failid.",
       "serverError": "Tekkis serveri viga. Palun proovi hiljem uuesti.",
-      "insufficientContext": "Teadmistebaasist ei leitud küsimusele vastamiseks asjakohast teavet."
+      "insufficientContext": "Teadmistebaasist ei leitud küsimusele vastamiseks asjakohast teavet.",
+      "checklistNameRequired": "Kontrollnimekirja nimi on kohustuslik",
+      "checklistNameTooShort": "Kontrollnimekirja nimi peab olema vähemalt 3 tähemärki pikk",
+      "atLeastOneQuestionRequired": "Vähemalt üks küsimus on nõutav"
     }
   },
   "settings": {
@@ -461,7 +464,10 @@
     "suggest": "Soovita",
     "fieldPlaceholder": "Lisa välja nimi...",
     "cancel": "Tühista",
-    "updateFormTemplate": "Uuenda vormimall"
+    "updateFormTemplate": "Uuenda vormimall",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Kontuuri redigeerimine",
@@ -480,7 +486,10 @@
     "addSectionPlaceholder": "Lisa jaotis",
     "cancel": "Tühista",
     "createOutline": "Loo kontuur",
-    "updateOutline": "Uuenda kontuur"
+    "updateOutline": "Uuenda kontuur",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Kontrollnimekirja redigeerimine",
@@ -499,7 +508,8 @@
     "copyAllQuestions": "Kopeeri kõik küsimused tekstina",
     "cancel": "Tühista",
     "createChecklist": "Loo kontrollnimekiri",
-    "updateChecklist": "Uuenda kontrollnimekiri"
+    "updateChecklist": "Uuenda kontrollnimekiri",
+    "questionsSuggested": "Soovitatud {{count}} küsimust kirjeldusest{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Teemade loendi redigeerimine",
@@ -521,7 +531,11 @@
     "copyAllTopics": "Kopeeri kõik teemad tekstina",
     "cancel": "Tühista",
     "createTopicList": "Loo teemade loend",
-    "updateTopicList": "Uuenda teemade loend"
+    "updateTopicList": "Uuenda teemade loend",
+    "descriptionNeedsMoreCharacters": "Kirjeldus vajab vähemalt {{count}} tähemärki rohkem, et teemasid soovitada",
+    "descriptionTooShort": "Kirjeldus peab olema vähemalt 10 tähemärki pikk, et teemasid soovitada",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
   },
   "knowledgeBases": {
     "title": "Teadmusbaaside haldamine",

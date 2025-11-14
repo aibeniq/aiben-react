@@ -96,7 +96,10 @@
       "largeFileTimeout": "Liela faila apstrāde beidzās ar noildzi. Mēģiniet pārslēgties uz 'Pilna teksta skenēšana' režīmu labākai veiktspējai ar lieliem failiem.",
       "fileSize": "Fails ir pārāk liels. Lūdzu, izvēlieties mazākus failus.",
       "serverError": "Radās servera kļūda. Lūdzu, mēģiniet vēlāk.",
-      "insufficientContext": "Zināšanu bāzē netika atrasta atbilstoša informācija, lai atbildētu uz šo jautājumu."
+      "insufficientContext": "Zināšanu bāzē netika atrasta atbilstoša informācija, lai atbildētu uz šo jautājumu.",
+      "checklistNameRequired": "Kontrolsaraksta nosaukums ir obligāts",
+      "checklistNameTooShort": "Kontrolsaraksta nosaukumam jābūt vismaz 3 rakstzīmēm",
+      "atLeastOneQuestionRequired": "Nepieciešams vismaz viens jautājums"
     }
   },
   "settings": {
@@ -461,7 +464,10 @@
     "suggest": "Ieteikt",
     "fieldPlaceholder": "Pievienot lauka nosaukumu...",
     "cancel": "Atcelt",
-    "updateFormTemplate": "Atjaunināt formas veidni"
+    "updateFormTemplate": "Atjaunināt formas veidni",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Kontūras rediģēšana",
@@ -480,7 +486,10 @@
     "addSectionPlaceholder": "Pievienot sadaļu",
     "cancel": "Atcelt",
     "createOutline": "Izveidot kontūru",
-    "updateOutline": "Atjaunināt kontūru"
+    "updateOutline": "Atjaunināt kontūru",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Kontrolsaraksta rediģēšana",
@@ -499,7 +508,8 @@
     "copyAllQuestions": "Kopēt visus jautājumus kā tekstu",
     "cancel": "Atcelt",
     "createChecklist": "Izveidot kontrolsarakstu",
-    "updateChecklist": "Atjaunināt kontrolsarakstu"
+    "updateChecklist": "Atjaunināt kontrolsarakstu",
+    "questionsSuggested": "Ieteikts {{count}} jautājumi no apraksta{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Tēmu saraksta rediģēšana",
@@ -521,7 +531,11 @@
     "copyAllTopics": "Kopēt visas tēmas kā tekstu",
     "cancel": "Atcelt",
     "createTopicList": "Izveidot tēmu sarakstu",
-    "updateTopicList": "Atjaunināt tēmu sarakstu"
+    "updateTopicList": "Atjaunināt tēmu sarakstu",
+    "descriptionNeedsMoreCharacters": "Aprakstam nepieciešami vismaz {{count}} papildu rakstzīmes, lai ieteiktu tēmas",
+    "descriptionTooShort": "Aprakstam jābūt vismaz 10 rakstzīmēm, lai ieteiktu tēmas",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
   },
   "knowledgeBases": {
     "title": "Zināšanu bāzu pārvaldība",

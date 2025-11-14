@@ -96,7 +96,10 @@
       "largeFileTimeout": "Behandling af store filer timeout. Prøv 'Fuldtekst-scanning'-tilstand for bedre ydeevne med store filer.",
       "fileSize": "Filen er for stor. Vælg mindre filer.",
       "serverError": "En serverfejl opstod. Prøv igen senere.",
-      "insufficientContext": "Ingen relevant information fundet i vidensbasen til at besvare dette spørgsmål."
+      "insufficientContext": "Ingen relevant information fundet i vidensbasen til at besvare dette spørgsmål.",
+      "checklistNameRequired": "Tjeklistens navn er påkrævet",
+      "checklistNameTooShort": "Tjeklistens navn skal være mindst 3 tegn langt",
+      "atLeastOneQuestionRequired": "Mindst ét spørgsmål er påkrævet"
     }
   },
   "settings": {
@@ -491,7 +494,10 @@
     "fieldPlaceholder": "Tilføj feltnavn...",
     "cancel": "Annuller",
     "updateFormTemplate": "Opdater formularskabelon",
-    "pleaseWait": "Vent venligst mens vi gennemgår dine dokumenter"
+    "pleaseWait": "Vent venligst mens vi gennemgår dine dokumenter",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Rediger disposition",
@@ -510,7 +516,21 @@
     "addSectionPlaceholder": "Tilføj afsnit",
     "cancel": "Annuller",
     "createOutline": "Opret disposition",
-    "updateOutline": "Opdater disposition"
+    "updateOutline": "Opdater disposition",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Dispositionsnavn er påkrævet",
+    "nameTooShort": "Dispositionsnavn skal indeholde mindst 3 tegn",
+    "atLeastOneSectionRequired": "Mindst ét afsnit er påkrævet",
+    "enterDescription": "Indtast først en dispositionsbeskrivelse",
+    "noSectionsSuggested": "Ingen afsnit foreslået. Prøv en mere detaljeret beskrivelse.",
+    "invalidRequest": "Ugyldig anmodning. Kontroller, at din beskrivelse opfylder kravene.",
+    "loginRequired": "Du skal være logget ind for at foreslå afsnit.",
+    "serverError": "Serverfejl. Prøv igen senere eller kontakt support.",
+    "failedToSuggest": "Kunne ikke foreslå afsnit: {{error}}",
+    "noSectionsToCopy": "Ingen afsnit at kopiere",
+    "copyFailed": "Kunne ikke kopiere afsnit til udklipsholder"
   },
   "editChecklistModal": {
     "title": "Rediger tjekliste",
@@ -529,7 +549,8 @@
     "copyAllQuestions": "Kopier alle spørgsmål som tekst",
     "cancel": "Annuller",
     "createChecklist": "Opret tjekliste",
-    "updateChecklist": "Opdater tjekliste"
+    "updateChecklist": "Opdater tjekliste",
+    "questionsSuggested": "Foreslået {{count}} spørgsmål fra beskrivelsen{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Rediger emneliste",
@@ -551,7 +572,11 @@
     "copyAllTopics": "Kopier alle emner som tekst",
     "cancel": "Annuller",
     "createTopicList": "Opret emneliste",
-    "updateTopicList": "Opdater emneliste"
+    "updateTopicList": "Opdater emneliste",
+    "descriptionNeedsMoreCharacters": "Beskrivelsen skal bruge mindst {{count}} flere tegn for at foreslå emner",
+    "descriptionTooShort": "Beskrivelsen skal være på mindst 10 tegn for at foreslå emner",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!"
   },
   "optimizeChecklistModal": {
     "title": "Optimer tjekliste",

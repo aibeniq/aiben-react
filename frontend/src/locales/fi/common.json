@@ -107,7 +107,10 @@
       "noQuestionsSuggested": "Kysymyksiä ei ehdotettu. Kokeile eri kuvausta.",
       "failedToSuggestQuestions": "Kysymysten ehdottaminen epäonnistui: {{error}}",
       "unknownError": "Tuntematon virhe",
-      "noKnowledgeBasesAvailable": "Tietokantoja ei ole saatavilla. Luo ensin yksi käyttääksesi tätä ominaisuutta."
+      "noKnowledgeBasesAvailable": "Tietokantoja ei ole saatavilla. Luo ensin yksi käyttääksesi tätä ominaisuutta.",
+      "checklistNameRequired": "Tarkistuslistan nimi vaaditaan",
+      "checklistNameTooShort": "Tarkistuslistan nimen on oltava vähintään 3 merkkiä pitkä",
+      "atLeastOneQuestionRequired": "Vähintään yksi kysymys vaaditaan"
     }
   },
   "settings": {
@@ -552,7 +555,10 @@
     "fieldPlaceholder": "Lisää kentän nimi...",
     "cancel": "Peruuta",
     "updateFormTemplate": "Päivitä lomakemalli",
-    "pleaseWait": "Odota hetki, kun tarkistamme asiakirjasi"
+    "pleaseWait": "Odota hetki, kun tarkistamme asiakirjasi",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Muokkaa jäsentelyä",
@@ -571,7 +577,10 @@
     "addSectionPlaceholder": "Lisää osio",
     "cancel": "Peruuta",
     "createOutline": "Luo jäsentely",
-    "updateOutline": "Päivitä jäsentely"
+    "updateOutline": "Päivitä jäsentely",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Muokkaa checklistiä",
@@ -591,6 +600,7 @@
     "cancel": "Peruuta",
     "createChecklist": "Luo checklist",
     "updateChecklist": "Päivitä checklist"
+    ,"questionsSuggested": "Ehdotettiin {{count}} kysymystä kuvauksen perusteella{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Muokkaa aiheluetteloa",
@@ -612,7 +622,13 @@
     "copyAllTopics": "Kopioi kaikki aiheet tekstinä",
     "cancel": "Peruuta",
     "createTopicList": "Luo aiheluettelo",
-    "updateTopicList": "Päivitä aiheluettelo"
+    "updateTopicList": "Päivitä aiheluettelo",
+    "descriptionNeedsMoreCharacters": "Kuvaus tarvitsee vähintään {{count}} merkkiä lisää aiheiden ehdottamiseen",
+    "descriptionTooShort": "Kuvauksen tulee olla vähintään 10 merkkiä pitkä aiheiden ehdottamiseksi",
+    "topicsSuggested": "Ehdotettiin {{count}} aihetta kuvauksen perusteella{{referenceText}}",
+    "topicsCopied": "Aiheet kopioitiin leikepöydälle!",
+    "referenceExampleFiles": " ja {{count}} esimerkkitiedostoa",
+    "referenceKnowledgeBase": " käyttäen tietokantaa \"{{title}}\" ({{searchMode}})"
   },
   "optimizeChecklistModal": {
     "title": "Optimoi checklist",

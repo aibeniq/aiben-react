@@ -93,7 +93,10 @@
       "largeFileTimeout": "대용량 파일 처리 시간이 초과되었습니다. 대용량 파일의 성능 향상을 위해 '전체 텍스트 스캔' 모드로 전환해 보세요.",
       "fileSize": "파일이 너무 큽니다. 더 작은 파일을 선택해 주세요.",
       "serverError": "서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
-      "insufficientContext": "관련 정보를 찾을 수 없습니다. 더 구체적인 질문을 해주시거나 다른 문서를 업로드해 보세요."
+      "insufficientContext": "관련 정보를 찾을 수 없습니다. 더 구체적인 질문을 해주시거나 다른 문서를 업로드해 보세요.",
+      "checklistNameRequired": "체크리스트 이름이 필요합니다",
+      "checklistNameTooShort": "체크리스트 이름은 최소 3자여야 합니다",
+      "atLeastOneQuestionRequired": "최소 하나의 질문이 필요합니다"
     }
   },
   "settings": {
@@ -486,7 +489,10 @@
     "fieldPlaceholder": "필드 이름 추가...",
     "cancel": "취소",
     "updateFormTemplate": "양식 템플릿 업데이트",
-    "pleaseWait": "문서를 검토하는 동안 기다려주세요"
+    "pleaseWait": "문서를 검토하는 동안 기다려주세요",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "개요 편집",
@@ -505,7 +511,21 @@
     "addSectionPlaceholder": "섹션 추가",
     "cancel": "취소",
     "createOutline": "개요 만들기",
-    "updateOutline": "개요 업데이트"
+    "updateOutline": "개요 업데이트",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "개요 이름은 필수입니다",
+    "nameTooShort": "개요 이름은 최소 3자 이상이어야 합니다",
+    "atLeastOneSectionRequired": "최소 하나의 섹션이 필요합니다",
+    "enterDescription": "먼저 개요 설명을 입력하세요",
+    "noSectionsSuggested": "제안된 섹션이 없습니다. 더 자세한 설명을 시도하세요.",
+    "invalidRequest": "잘못된 요청입니다. 설명이 요구사항을 충족하는지 확인하세요.",
+    "loginRequired": "섹션을 제안하려면 로그인해야 합니다.",
+    "serverError": "서버 오류입니다. 나중에 다시 시도하거나 지원팀에 문의하세요.",
+    "failedToSuggest": "섹션 제안 실패: {{error}}",
+    "noSectionsToCopy": "복사할 섹션이 없습니다",
+    "copyFailed": "섹션을 클립보드로 복사하지 못했습니다"
   },
   "editChecklistModal": {
     "title": "체크리스트 편집",
@@ -524,7 +544,8 @@
     "copyAllQuestions": "모든 질문을 텍스트로 복사",
     "cancel": "취소",
     "createChecklist": "체크리스트 만들기",
-    "updateChecklist": "체크리스트 업데이트"
+    "updateChecklist": "체크리스트 업데이트",
+    "questionsSuggested": "설명에서 {{count}}개의 질문 제안{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "주제 목록 편집",
@@ -546,7 +567,22 @@
     "copyAllTopics": "모든 주제를 텍스트로 복사",
     "cancel": "취소",
     "createTopicList": "주제 목록 만들기",
-    "updateTopicList": "주제 목록 업데이트"
+    "updateTopicList": "주제 목록 업데이트",
+    "descriptionNeedsMoreCharacters": "주제를 제안하려면 설명에 최소 {{count}}자 이상 더 필요합니다",
+    "descriptionTooShort": "주제를 제안하려면 설명이 최소 10자 이상이어야 합니다",
+    "topicsSuggested": "Suggested {{count}} topics from description{{referenceText}}",
+    "topicsCopied": "Topics copied to clipboard!",
+    "nameRequired": "주제 목록 이름은 필수입니다",
+    "nameTooShort": "주제 목록 이름은 최소 3자 이상이어야 합니다",
+    "atLeastOneTopicRequired": "최소 하나의 주제가 필요합니다",
+    "enterDescription": "먼저 주제 목록 설명을 입력하세요",
+    "noTopicsSuggested": "제안된 주제가 없습니다. 더 자세한 설명을 시도하세요.",
+    "invalidRequest": "잘못된 요청입니다. 설명이 요구사항을 충족하는지 확인하세요.",
+    "loginRequired": "주제를 제안하려면 로그인해야 합니다.",
+    "serverError": "서버 오류입니다. 나중에 다시 시도하거나 지원팀에 문의하세요.",
+    "failedToSuggest": "주제 제안 실패: {{error}}",
+    "noTopicsToCopy": "복사할 주제가 없습니다",
+    "copyFailed": "주제를 클립보드로 복사하지 못했습니다"
   },
   "optimizeChecklistModal": {
     "title": "체크리스트 최적화",

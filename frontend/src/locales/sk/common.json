@@ -93,7 +93,10 @@
       "largeFileTimeout": "Spracovanie veľkého súboru vypršalo. Skúste prepnúť na režim 'Úplné skenovanie textu' pre lepší výkon s veľkými súbormi.",
       "fileSize": "Súbor je príliš veľký. Vyberte menšie súbory.",
       "serverError": "Došlo k chybe servera. Skúste to neskôr.",
-      "insufficientContext": "V databáze znalostí sa nenašla žiadna relevantná informácia na odpoveď na túto otázku."
+      "insufficientContext": "V databáze znalostí sa nenašla žiadna relevantná informácia na odpoveď na túto otázku.",
+      "checklistNameRequired": "Názov kontrolného zoznamu je povinný",
+      "checklistNameTooShort": "Názov kontrolného zoznamu musí mať aspoň 3 znaky",
+      "atLeastOneQuestionRequired": "Vyžaduje sa aspoň jedna otázka"
     }
   },
   "settings": {
@@ -410,7 +413,10 @@
     "suggest": "Navrhnúť",
     "fieldPlaceholder": "Pridať názov poľa...",
     "cancel": "Zrušiť",
-    "updateFormTemplate": "Aktualizovať šablónu formulára"
+    "updateFormTemplate": "Aktualizovať šablónu formulára",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Upraviť osnovu",
@@ -429,7 +435,10 @@
     "addSectionPlaceholder": "Pridať sekciu",
     "cancel": "Zrušiť",
     "createOutline": "Vytvoriť osnovu",
-    "updateOutline": "Aktualizovať osnovu"
+    "updateOutline": "Aktualizovať osnovu",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!"
   },
   "editChecklistModal": {
     "title": "Upraviť kontrolný zoznam",
@@ -448,7 +457,8 @@
     "copyAllQuestions": "Kopírovať všetky otázky ako text",
     "cancel": "Zrušiť",
     "createChecklist": "Vytvoriť kontrolný zoznam",
-    "updateChecklist": "Aktualizovať kontrolný zoznam"
+    "updateChecklist": "Aktualizovať kontrolný zoznam",
+    "questionsSuggested": "Navrhnutých {{count}} otázok z popisu{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Upraviť zoznam tém",
@@ -470,7 +480,13 @@
     "copyAllTopics": "Kopírovať všetky témy ako text",
     "cancel": "Zrušiť",
     "createTopicList": "Vytvoriť zoznam tém",
-    "updateTopicList": "Aktualizovať zoznam tém"
+    "updateTopicList": "Aktualizovať zoznam tém",
+    "descriptionNeedsMoreCharacters": "Popis potrebuje aspoň {{count}} ďalších znakov na navrhnutie tém",
+    "descriptionTooShort": "Popis musí obsahovať aspoň 10 znakov na návrh tém",
+  "topicsSuggested": "Navrhnutých {{count}} tém z popisu{{referenceText}}",
+  "topicsCopied": "Témy boli skopírované do schránky!",
+  "referenceExampleFiles": " a {{count}} ukážkový súbor",
+  "referenceKnowledgeBase": " použitím znalostnej databázy \"{{title}}\" ({{searchMode}})"
   },
   "knowledgeBases": {
     "title": "Správa znalostných bází",

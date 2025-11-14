@@ -99,15 +99,15 @@ const ChecklistModal = ({
     const errors: { [key: string]: string } = {}
 
     if (!checklistName.trim()) {
-      errors.name = "Checklist name is required"
+      errors.name = t("errors.checklistNameRequired")
     } else if (checklistName.trim().length < 3) {
-      errors.name = "Checklist name must be at least 3 characters long"
+      errors.name = t("errors.checklistNameTooShort")
     }
 
     // Description is optional - no validation required
 
     if (questionsList.length === 0 || questionsList.every((q) => !q.trim())) {
-      errors.questions = "At least one question is required"
+      errors.questions = t("errors.atLeastOneQuestionRequired")
     }
 
     setValidationErrors(errors)
@@ -317,14 +317,26 @@ const ChecklistModal = ({
         // Force re-render of question items
         setQuestionsKey((prev) => prev + 1)
 
-        let successMessage = `Suggested ${suggestedQuestions.length} questions from description`
+        // Build a localized reference text (example files or knowledge base)
+        let referenceText = ""
         if (referenceMode === "files" && referenceFiles.length > 0) {
-          successMessage += ` and ${referenceFiles.length} reference file(s)`
+          referenceText += t("referenceExampleFiles", { count: referenceFiles.length })
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
-          successMessage += ` using Knowledge Base: ${referenceKnowledgeBase.title}`
+          const searchModeLabel =
+            processingSettings.searchMode === "vector" ? t("vectorSearch") : t("fullScanTitle")
+
+          referenceText += t("referenceKnowledgeBase", {
+            title: referenceKnowledgeBase.title,
+            searchMode: searchModeLabel,
+          })
         }
 
-        showSuccessToast(successMessage)
+        showSuccessToast(
+          t("editChecklistModal.questionsSuggested", {
+            count: suggestedQuestions.length,
+            referenceText,
+          }),
+        )
       } else {
         showErrorToast(t("errors.noQuestionsSuggested"))
       }

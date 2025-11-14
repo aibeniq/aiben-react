@@ -96,7 +96,20 @@
       "largeFileTimeout": "انتهت مهلة معالجة ملف كبير. جرّب التحويل إلى وضع 'مسح النص الكامل' لأداء أفضل مع الملفات الكبيرة.",
       "fileSize": "حجم الملف كبير جداً. يرجى اختيار ملفات أصغر.",
       "serverError": "حدث خطأ في الخادم. يرجى المحاولة لاحقاً.",
-      "insufficientContext": "لم يتم العثور على معلومات ذات صلة. يرجى طرح سؤال أكثر تحديداً أو تحميل وثيقة أخرى."
+      "insufficientContext": "لم يتم العثور على معلومات ذات صلة. يرجى طرح سؤال أكثر تحديداً أو تحميل وثيقة أخرى.",
+      "noQuestionsToCopy": "لا توجد أسئلة للنسخ",
+      "failedToCopyQuestions": "فشل في نسخ الأسئلة إلى الحافظة",
+      "selectKnowledgeBaseFirst": "يرجى اختيار قاعدة معرفة أولاً لتحسين قائمة المراجعة.",
+      "addQuestionsBeforeOptimizing": "يرجى إضافة أسئلة إلى قائمة المراجعة قبل التحسين.",
+      "enterDescription": "يرجى إدخال وصف",
+      "descriptionTooShort": "يجب أن يحتوي الوصف على 10 أحرف على الأقل",
+      "noQuestionsSuggested": "لم يتم اقتراح أسئلة. يرجى المحاولة بوصف مختلف.",
+      "failedToSuggestQuestions": "فشل في اقتراح الأسئلة: {{error}}",
+      "unknownError": "خطأ غير معروف",
+      "noKnowledgeBasesAvailable": "لا توجد قواعد معرفة متاحة. أنشئ واحدة أولاً لاستخدام هذه الميزة.",
+      "checklistNameRequired": "اسم قائمة المراجعة مطلوب",
+      "checklistNameTooShort": "يجب أن يحتوي اسم قائمة المراجعة على 3 أحرف على الأقل",
+      "atLeastOneQuestionRequired": "مطلوب سؤال واحد على الأقل"
     }
   },
   "settings": {
@@ -213,7 +226,7 @@
     "minimumDescriptionLength": "يجب أن تكون الأوصاف على الأقل 10 أحرف لتوفير سياق كافٍ لاقتراحات الذكاء الاصطناعي"
   },
   "common": {
-    "user": "User",
+    "user": "المستخدم",
     "loading": "جارٍ التحميل...",
     "noData": "لا توجد بيانات متاحة",
     "success": "نجح!",
@@ -389,7 +402,10 @@
     "fieldPlaceholder": "أضف اسم حقل...",
     "cancel": "إلغاء",
     "updateFormTemplate": "تحديث قالب النموذج",
-    "pleaseWait": "الرجاء الانتظار بينما نراجع مستنداتك"
+    "pleaseWait": "الرجاء الانتظار بينما نراجع مستنداتك",
+    "descriptionTooShort": "يجب أن يحتوي الوصف على 10 أحرف على الأقل لاقتراح الحقول",
+    "fieldsSuggested": "تم اقتراح {{count}} حقلاً من الوصف{{referenceText}}",
+    "fieldsCopied": "تم نسخ الحقول إلى الحافظة!"
   },
   "editOutlineModal": {
     "title": "تحرير المخطط",
@@ -408,7 +424,21 @@
     "addSectionPlaceholder": "إضافة قسم",
     "cancel": "إلغاء",
     "createOutline": "إنشاء المخطط",
-    "updateOutline": "تحديث المخطط"
+    "updateOutline": "تحديث المخطط",
+    "descriptionTooShort": "يجب أن يحتوي الوصف على 10 أحرف على الأقل لاقتراح الأقسام",
+    "sectionsSuggested": "تم اقتراح {{count}} قسماً من الوصف{{referenceText}}",
+    "sectionsCopied": "تم نسخ الأقسام إلى الحافظة!",
+    "nameRequired": "اسم المخطط مطلوب",
+    "nameTooShort": "يجب أن يحتوي اسم المخطط على 3 أحرف على الأقل",
+    "atLeastOneSectionRequired": "مطلوب قسم واحد على الأقل",
+    "enterDescription": "يرجى إدخال وصف المخطط أولاً",
+    "noSectionsSuggested": "لم يتم اقتراح أقسام. يرجى المحاولة بوصف أكثر تفصيلاً.",
+    "invalidRequest": "طلب غير صالح. يرجى التحقق من أن الوصف يفي بالمتطلبات.",
+    "loginRequired": "تحتاج إلى تسجيل الدخول لاقتراح الأقسام.",
+    "serverError": "خطأ في الخادم. يرجى المحاولة لاحقاً أو الاتصال بالدعم.",
+    "failedToSuggest": "فشل في اقتراح الأقسام: {{error}}",
+    "noSectionsToCopy": "لا توجد أقسام للنسخ",
+    "copyFailed": "فشل في نسخ الأقسام إلى الحافظة"
   },
   "editChecklistModal": {
     "title": "تحرير قائمة المراجعة",
@@ -427,7 +457,8 @@
     "copyAllQuestions": "نسخ جميع الأسئلة كنص",
     "cancel": "إلغاء",
     "createChecklist": "إنشاء قائمة المراجعة",
-    "updateChecklist": "تحديث قائمة المراجعة"
+    "updateChecklist": "تحديث قائمة المراجعة",
+    "questionsSuggested": "اقترح {{count}} أسئلة من الوصف{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "تحرير قائمة المواضيع",
@@ -449,7 +480,23 @@
     "copyAllTopics": "نسخ جميع المواضيع كنص",
     "cancel": "إلغاء",
     "createTopicList": "إنشاء قائمة المواضيع",
-    "updateTopicList": "تحديث قائمة المواضيع"
+    "updateTopicList": "تحديث قائمة المواضيع",
+    "descriptionNeedsMoreCharacters": "الوصف يحتاج إلى {{count}} أحرف إضافية على الأقل لاقتراح المواضيع",
+    "descriptionTooShort": "يجب أن تحتوي الوصف على 10 أحرف على الأقل لاقتراح المواضيع",
+    "topicsSuggested": "تم اقتراح {{count}} موضوعًا من الوصف{{referenceText}}",
+    "topicsCopied": "تم نسخ المواضيع إلى الحافظة!",
+    "nameRequired": "اسم قائمة المواضيع مطلوب",
+    "nameTooShort": "يجب أن يحتوي اسم قائمة المواضيع على 3 أحرف على الأقل",
+    "atLeastOneTopicRequired": "مطلوب موضوع واحد على الأقل",
+    "enterDescription": "يرجى إدخال وصف قائمة المواضيع أولاً",
+    "noTopicsSuggested": "لم يتم اقتراح مواضيع. يرجى المحاولة بوصف أكثر تفصيلاً.",
+    "invalidRequest": "طلب غير صالح. يرجى التحقق من أن الوصف يفي بالمتطلبات.",
+    "loginRequired": "تحتاج إلى تسجيل الدخول لاقتراح مواضيع.",
+    "featureUnavailable": "ميزة اقتراح المواضيع غير متاحة. يرجى الاتصال بالدعم.",
+    "serverError": "خطأ في الخادم. يرجى المحاولة لاحقاً أو الاتصال بالدعم.",
+    "failedToSuggest": "فشل في اقتراح المواضيع: {{error}}",
+    "noTopicsToCopy": "لا توجد مواضيع للنسخ",
+    "copyFailed": "فشل في نسخ المواضيع إلى الحافظة"
   },
   "optimizeChecklistModal": {
     "title": "تحسين قائمة التحقق",
@@ -592,7 +639,7 @@
         "title": "إضافة قاعدة معرفة",
         "description": "أنشئ قاعدة معرفة جديدة بتقديم التفاصيل ورفع المستندات أدناه.",
         "validation": {
-          "atLeastOneFile": "Please select at least one file to create a knowledge base."
+          "atLeastOneFile": "يرجى اختيار ملف واحد على الأقل لإنشاء قاعدة معرفة."
         }
       },
       "edit": {

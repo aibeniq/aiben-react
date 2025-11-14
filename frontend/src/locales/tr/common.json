@@ -96,7 +96,10 @@
       "largeFileTimeout": "Büyük dosya işleme zaman aşımına uğradı. Daha iyi performans için 'Tam Metin Tarama' moduna geçmeyi deneyin.",
       "fileSize": "Dosya çok büyük. Lütfen daha küçük dosyalar seçin.",
       "serverError": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.",
-      "insufficientContext": "İlgili bilgi bulunamadı. Lütfen daha spesifik bir soru sorun veya başka bir belge yükleyin."
+      "insufficientContext": "İlgili bilgi bulunamadı. Lütfen daha spesifik bir soru sorun veya başka bir belge yükleyin.",
+      "checklistNameRequired": "Kontrol listesi adı gerekli",
+      "checklistNameTooShort": "Kontrol listesi adı en az 3 karakter olmalı",
+      "atLeastOneQuestionRequired": "En az bir soru gerekli"
     }
   },
   "settings": {
@@ -413,7 +416,10 @@
     "suggest": "Öner",
     "fieldPlaceholder": "Alan adı ekle...",
     "cancel": "İptal",
-    "updateFormTemplate": "Form Şablonunu Güncelle"
+    "updateFormTemplate": "Form Şablonunu Güncelle",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Taslağı Düzenle",
@@ -432,7 +438,21 @@
     "addSectionPlaceholder": "Bölüm ekle",
     "cancel": "İptal",
     "createOutline": "Taslak Oluştur",
-    "updateOutline": "Taslağı Güncelle"
+    "updateOutline": "Taslağı Güncelle",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Taslak adı zorunludur",
+    "nameTooShort": "Taslak adı en az 3 karakter içermelidir",
+    "atLeastOneSectionRequired": "En az bir bölüm gereklidir",
+    "enterDescription": "Öncelikle bir taslak açıklaması girin",
+    "noSectionsSuggested": "Hiç bölüm önerilmedi. Daha detaylı bir açıklama deneyin.",
+    "invalidRequest": "Geçersiz istek. Açıklamanızın gereksinimleri karşıladığından emin olun.",
+    "loginRequired": "Bölümleri önermek için giriş yapmalısınız.",
+    "serverError": "Sunucu hatası. Daha sonra tekrar deneyin veya destek ile iletişime geçin.",
+    "failedToSuggest": "Bölümleri önerme başarısız: {{error}}",
+    "noSectionsToCopy": "Kopyalanacak bölüm yok",
+    "copyFailed": "Bölümler panoya kopyalanamadı"
   },
   "editChecklistModal": {
     "title": "Kontrol Listesini Düzenle",
@@ -451,7 +471,8 @@
     "copyAllQuestions": "Tüm soruları metin olarak kopyala",
     "cancel": "İptal",
     "createChecklist": "Kontrol Listesi Oluştur",
-    "updateChecklist": "Kontrol Listesini Güncelle"
+    "updateChecklist": "Kontrol Listesini Güncelle",
+    "questionsSuggested": "Açıklama'dan {{count}} soru önerildi{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Konu Listesini Düzenle",
@@ -473,7 +494,24 @@
     "copyAllTopics": "Tüm konuları metin olarak kopyala",
     "cancel": "İptal",
     "createTopicList": "Konu Listesi Oluştur",
-    "updateTopicList": "Konu Listesini Güncelle"
+    "updateTopicList": "Konu Listesini Güncelle",
+    "descriptionNeedsMoreCharacters": "Konuları önermek için açıklamanın en az {{count}} karakter daha olması gerekir",
+    "descriptionTooShort": "Konuları önermek için açıklama en az 10 karakter uzunluğunda olmalıdır",
+  "topicsSuggested": "Açıklamadan {{count}} konu önerildi{{referenceText}}",
+  "topicsCopied": "Konular panoya kopyalandı!",
+  "referenceExampleFiles": " ve {{count}} örnek dosya",
+  "referenceKnowledgeBase": " \"{{title}}\" bilgi tabanını kullanarak ({{searchMode}})",
+  "nameRequired": "Konu listesi adı zorunludur",
+  "nameTooShort": "Konu listesi adı en az 3 karakter içermelidir",
+  "atLeastOneTopicRequired": "En az bir konu gereklidir",
+  "enterDescription": "Öncelikle bir konu listesi açıklaması girin",
+  "noTopicsSuggested": "Hiç konu önerilmedi. Daha detaylı bir açıklama deneyin.",
+  "invalidRequest": "Geçersiz istek. Açıklamanızın gereksinimleri karşıladığından emin olun.",
+  "loginRequired": "Konuları önermek için giriş yapmalısınız.",
+  "serverError": "Sunucu hatası. Daha sonra tekrar deneyin veya destek ile iletişime geçin.",
+  "failedToSuggest": "Konuları önerme başarısız: {{error}}",
+  "noTopicsToCopy": "Kopyalanacak konu yok",
+  "copyFailed": "Konular panoya kopyalanamadı"
   },
   "knowledgeBases": {
     "title": "Bilgi Tabanı Yönetimi",

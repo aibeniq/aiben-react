@@ -93,7 +93,10 @@
       "largeFileTimeout": "Обробка великого файлу завершилася тайм-аутом. Спробуйте перемкнутися на режим 'Повне сканування тексту' для кращої продуктивності з великими файлами.",
       "fileSize": "Файл занадто великий. Будь ласка, оберіть менші файли.",
       "serverError": "Сталася помилка сервера. Спробуйте ще раз пізніше.",
-      "insufficientContext": "У базі знань не знайдено релевантної інформації для відповіді на це питання."
+      "insufficientContext": "У базі знань не знайдено релевантної інформації для відповіді на це питання.",
+      "checklistNameRequired": "Назва контрольного списку обов'язкова",
+      "checklistNameTooShort": "Назва контрольного списку повинна містити принаймні 3 символи",
+      "atLeastOneQuestionRequired": "Потрібно принаймні одне питання"
     }
   },
   "settings": {
@@ -489,7 +492,10 @@
     "fieldPlaceholder": "Додайте назву поля (наприклад, Ім'я, Адреса, ІПН) або запропонуйте з опису",
     "cancel": "Скасувати",
     "updateFormTemplate": "Оновити Шаблон Форми",
-    "pleaseWait": "Будь ласка, зачекайте, поки ми перевіримо ваші документи"
+    "pleaseWait": "Будь ласка, зачекайте, поки ми перевіримо ваші документи",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest fields",
+    "fieldsSuggested": "Suggested {{count}} form fields from description{{referenceText}}",
+    "fieldsCopied": "Fields copied to clipboard!"
   },
   "editOutlineModal": {
     "title": "Редагувати Схему",
@@ -508,7 +514,21 @@
     "addSectionPlaceholder": "Додати розділ",
     "cancel": "Скасувати",
     "createOutline": "Створити Схему",
-    "updateOutline": "Оновити Схему"
+    "updateOutline": "Оновити Схему",
+    "descriptionTooShort": "Description must be at least 10 characters to suggest sections",
+    "sectionsSuggested": "Suggested {{count}} sections from description{{referenceText}}",
+    "sectionsCopied": "Sections copied to clipboard!",
+    "nameRequired": "Назва схеми обов'язкова",
+    "nameTooShort": "Назва схеми повинна містити принаймні 3 символи",
+    "atLeastOneSectionRequired": "Потрібен принаймні один розділ",
+    "enterDescription": "Спочатку введіть опис схеми",
+    "noSectionsSuggested": "Не запропоновано розділів. Спробуйте більш детальний опис.",
+    "invalidRequest": "Недійсний запит. Перевірте, чи ваш опис відповідає вимогам.",
+    "loginRequired": "Ви повинні увійти в систему, щоб пропонувати розділи.",
+    "serverError": "Помилка сервера. Спробуйте пізніше або зверніться до служби підтримки.",
+    "failedToSuggest": "Не вдалося запропонувати розділи: {{error}}",
+    "noSectionsToCopy": "Немає розділів для копіювання",
+    "copyFailed": "Не вдалося скопіювати розділи до буфера обміну"
   },
   "editChecklistModal": {
     "title": "Редагувати Контрольний Список",
@@ -527,7 +547,8 @@
     "copyAllQuestions": "Скопіювати всі питання як текст",
     "cancel": "Скасувати",
     "createChecklist": "Створити Контрольний Список",
-    "updateChecklist": "Оновити Контрольний Список"
+    "updateChecklist": "Оновити Контрольний Список",
+    "questionsSuggested": "Запропоновано {{count}} питань із опису{{referenceText}}"
   },
   "editTopicListModal": {
     "title": "Редагувати Список Тем",
@@ -549,7 +570,24 @@
     "copyAllTopics": "Скопіювати всі теми як текст",
     "cancel": "Скасувати",
     "createTopicList": "Створити Список Тем",
-    "updateTopicList": "Оновити Список Тем"
+    "updateTopicList": "Оновити Список Тем",
+    "descriptionNeedsMoreCharacters": "Для пропозиції тем опису потрібно принаймні на {{count}} символів більше",
+    "descriptionTooShort": "Опис має містити принаймні 10 символів для пропозиції тем",
+  "topicsSuggested": "Запропоновано {{count}} тем із опису{{referenceText}}",
+  "topicsCopied": "Тем було скопійовано в буфер обміну!",
+  "referenceExampleFiles": " і {{count}} приклад(ів) файлів",
+  "referenceKnowledgeBase": " використовуючи базу знань \"{{title}}\" ({{searchMode}})",
+  "nameRequired": "Назва списку тем обов'язкова",
+  "nameTooShort": "Назва списку тем повинна містити принаймні 3 символи",
+  "atLeastOneTopicRequired": "Потрібна принаймні одна тема",
+  "enterDescription": "Спочатку введіть опис списку тем",
+  "noTopicsSuggested": "Не запропоновано тем. Спробуйте більш детальний опис.",
+  "invalidRequest": "Недійсний запит. Перевірте, чи ваш опис відповідає вимогам.",
+  "loginRequired": "Ви повинні увійти в систему, щоб пропонувати теми.",
+  "serverError": "Помилка сервера. Спробуйте пізніше або зверніться до служби підтримки.",
+  "failedToSuggest": "Не вдалося запропонувати теми: {{error}}",
+  "noTopicsToCopy": "Немає тем для копіювання",
+  "copyFailed": "Не вдалося скопіювати теми до буфера обміну"
   },
   "optimizeChecklistModal": {
     "title": "Оптимізувати Чекліст",
