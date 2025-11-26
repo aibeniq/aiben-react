@@ -45,7 +45,8 @@ function KnowledgeBasesTable() {
   const { t } = useTranslation()
   const navigate = useNavigate({ from: Route.fullPath })
   const { page } = Route.useSearch()
-  const { knowledgeBases, isLoading, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
+  const { knowledgeBases, isLoading, showAllUsers, toggleShowAllUsers, canViewAllUsers } =
+    useKnowledgeBases()
 
   // Add sorting state
   const [sortBy, setSortBy] = useState<string | null>(null)
@@ -123,41 +124,43 @@ function KnowledgeBasesTable() {
   if (isLoading) {
     return (
       <>
-        {/* All Users Toggle - Always visible */}
-        <HStack justifyContent="flex-end" mb={4}>
-          <Tooltip
-            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
-          >
-            <HStack gap={2}>
-              <HStack gap={1} align="center">
-                <Text fontSize="xs" color="gray.500">
-                  {t("archive.allUsers")}
-                </Text>
-                <HelpTooltip helpKey="allUsersToggle" />
-              </HStack>
-              <Switch.Root
-                key={`switch-${showAllUsers}`}
-                size="sm"
-                colorPalette="blue"
-                checked={showAllUsers}
-              >
-                <Switch.HiddenInput
+        {/* All Users Toggle - Only visible to superusers */}
+        {canViewAllUsers && (
+          <HStack justifyContent="flex-end" mb={4}>
+            <Tooltip
+              content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+            >
+              <HStack gap={2}>
+                <HStack gap={1} align="center">
+                  <Text fontSize="xs" color="gray.500">
+                    {t("archive.allUsers")}
+                  </Text>
+                  <HelpTooltip helpKey="allUsersToggle" />
+                </HStack>
+                <Switch.Root
+                  key={`switch-${showAllUsers}`}
+                  size="sm"
+                  colorPalette="blue"
                   checked={showAllUsers}
-                  onChange={() => {
-                    console.log(
-                      "Knowledge Bases toggle clicked, current showAllUsers:",
-                      showAllUsers,
-                    )
-                    if (toggleShowAllUsers) toggleShowAllUsers()
-                  }}
-                />
-                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch.Root>
-            </HStack>
-          </Tooltip>
-        </HStack>
+                >
+                  <Switch.HiddenInput
+                    checked={showAllUsers}
+                    onChange={() => {
+                      console.log(
+                        "Knowledge Bases toggle clicked, current showAllUsers:",
+                        showAllUsers,
+                      )
+                      if (toggleShowAllUsers) toggleShowAllUsers()
+                    }}
+                  />
+                  <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+            </Tooltip>
+          </HStack>
+        )}
         <PendingKnowledgeBases />
       </>
     )
@@ -166,41 +169,43 @@ function KnowledgeBasesTable() {
   if (knowledgeBases.length === 0) {
     return (
       <>
-        {/* All Users Toggle - Always visible */}
-        <HStack justifyContent="flex-end" mb={4}>
-          <Tooltip
-            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
-          >
-            <HStack gap={2}>
-              <HStack gap={1} align="center">
-                <Text fontSize="xs" color="gray.500">
-                  {t("archive.allUsers")}
-                </Text>
-                <HelpTooltip helpKey="allUsersToggle" />
-              </HStack>
-              <Switch.Root
-                key={`switch-${showAllUsers}`}
-                size="sm"
-                colorPalette="blue"
-                checked={showAllUsers}
-              >
-                <Switch.HiddenInput
+        {/* All Users Toggle - Only visible to superusers */}
+        {canViewAllUsers && (
+          <HStack justifyContent="flex-end" mb={4}>
+            <Tooltip
+              content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+            >
+              <HStack gap={2}>
+                <HStack gap={1} align="center">
+                  <Text fontSize="xs" color="gray.500">
+                    {t("archive.allUsers")}
+                  </Text>
+                  <HelpTooltip helpKey="allUsersToggle" />
+                </HStack>
+                <Switch.Root
+                  key={`switch-${showAllUsers}`}
+                  size="sm"
+                  colorPalette="blue"
                   checked={showAllUsers}
-                  onChange={() => {
-                    console.log(
-                      "Knowledge Bases toggle clicked, current showAllUsers:",
-                      showAllUsers,
-                    )
-                    if (toggleShowAllUsers) toggleShowAllUsers()
-                  }}
-                />
-                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch.Root>
-            </HStack>
-          </Tooltip>
-        </HStack>
+                >
+                  <Switch.HiddenInput
+                    checked={showAllUsers}
+                    onChange={() => {
+                      console.log(
+                        "Knowledge Bases toggle clicked, current showAllUsers:",
+                        showAllUsers,
+                      )
+                      if (toggleShowAllUsers) toggleShowAllUsers()
+                    }}
+                  />
+                  <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+            </Tooltip>
+          </HStack>
+        )}
         <EmptyState.Root>
           <EmptyState.Content>
             <EmptyState.Indicator>
@@ -220,38 +225,43 @@ function KnowledgeBasesTable() {
 
   return (
     <>
-      {/* All Users Toggle - Always visible */}
-      <HStack justifyContent="flex-end" mb={4}>
-        <Tooltip
-          content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
-        >
-          <HStack gap={2}>
-            <HStack gap={1} align="center">
-              <Text fontSize="xs" color="gray.500">
-                {t("archive.allUsers")}
-              </Text>
-              <HelpTooltip helpKey="allUsersToggle" />
-            </HStack>
-            <Switch.Root
-              key={`switch-${showAllUsers}`}
-              size="sm"
-              colorPalette="blue"
-              checked={showAllUsers}
-            >
-              <Switch.HiddenInput
+      {/* All Users Toggle - Only visible to superusers */}
+      {canViewAllUsers && (
+        <HStack justifyContent="flex-end" mb={4}>
+          <Tooltip
+            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+          >
+            <HStack gap={2}>
+              <HStack gap={1} align="center">
+                <Text fontSize="xs" color="gray.500">
+                  {t("archive.allUsers")}
+                </Text>
+                <HelpTooltip helpKey="allUsersToggle" />
+              </HStack>
+              <Switch.Root
+                key={`switch-${showAllUsers}`}
+                size="sm"
+                colorPalette="blue"
                 checked={showAllUsers}
-                onChange={() => {
-                  console.log("Knowledge Bases toggle clicked, current showAllUsers:", showAllUsers)
-                  if (toggleShowAllUsers) toggleShowAllUsers()
-                }}
-              />
-              <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch.Root>
-          </HStack>
-        </Tooltip>
-      </HStack>
+              >
+                <Switch.HiddenInput
+                  checked={showAllUsers}
+                  onChange={() => {
+                    console.log(
+                      "Knowledge Bases toggle clicked, current showAllUsers:",
+                      showAllUsers,
+                    )
+                    if (toggleShowAllUsers) toggleShowAllUsers()
+                  }}
+                />
+                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Root>
+            </HStack>
+          </Tooltip>
+        </HStack>
+      )}
 
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>

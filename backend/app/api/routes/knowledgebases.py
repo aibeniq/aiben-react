@@ -728,6 +728,13 @@ def read_knowledge_bases(
         .group_by(KnowledgeBase.id)
     )
 
+    # Only superusers can view all users' knowledge bases
+    if show_all and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only superusers can view all users' knowledge bases",
+        )
+
     # Apply filters based on user permissions
     if show_all or current_user.is_superuser:
         count_statement = select(func.count()).select_from(KnowledgeBase)
@@ -2393,14 +2400,16 @@ def delete_knowledge_base(
             .select_from(Source)
             .where(
                 Source.source_data_id == source_data_id,
-                Source.knowledge_base_id != id  # Exclude current KB
+                Source.knowledge_base_id != id,  # Exclude current KB
             )
         ).one()
-        
+
         if other_kb_references == 0:
             # No other KBs use this source_data - safe to delete
             source_data_to_delete.append(source_data_id)
-            print(f"🧹 Marking SourceData {source_data_id} for cleanup (no other KB references)")
+            print(
+                f"🧹 Marking SourceData {source_data_id} for cleanup (no other KB references)"
+            )
 
     # Clean up file-based storage if it exists
     if knowledge_base.storage_type == "file" and knowledge_base.file_path:

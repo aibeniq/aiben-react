@@ -71,7 +71,7 @@ const ChatbotPanel = ({
   setProcessingSettings,
 }: ChatbotPanelProps) => {
   const { t } = useTranslation()
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers, canViewAllUsers } = useKnowledgeBases() // Respect All Users toggle state
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -268,6 +268,7 @@ const ChatbotPanel = ({
         }}
         showAllUsers={showAllUsers}
         toggleShowAllUsers={toggleShowAllUsers}
+        canViewAllUsers={canViewAllUsers}
       />
     </>
   )
