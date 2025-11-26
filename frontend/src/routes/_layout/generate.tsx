@@ -68,7 +68,7 @@ const ReportGenie = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     generateInputs?.selectedKnowledgeBase || null,
   )
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers, canViewAllUsers } = useKnowledgeBases() // Respect All Users toggle state
   const { registerOperation } = useOperationCancellation()
 
   // Outline content state
@@ -638,6 +638,7 @@ const ReportGenie = () => {
           onSelectionChange={setSelectedKnowledgeBase}
           showAllUsers={showAllUsers}
           toggleShowAllUsers={toggleShowAllUsers}
+          canViewAllUsers={canViewAllUsers}
         />
 
         <SelectionModal

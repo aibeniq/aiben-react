@@ -16,6 +16,7 @@ interface KnowledgeBaseSelectionModalProps {
   // Toggle props
   showAllUsers: boolean
   toggleShowAllUsers: () => void
+  canViewAllUsers?: boolean
 }
 
 /**
@@ -31,6 +32,7 @@ const KnowledgeBaseSelectionModal = ({
   onSelectionChange,
   showAllUsers,
   toggleShowAllUsers,
+  canViewAllUsers = false,
 }: KnowledgeBaseSelectionModalProps) => {
   const { t } = useTranslation()
 
@@ -47,35 +49,37 @@ const KnowledgeBaseSelectionModal = ({
                   <CloseButton size="sm" />
                 </Dialog.CloseTrigger>
               </HStack>
-              {/* All Users Toggle */}
-              <HStack justifyContent="flex-end" mt={2}>
-                <Tooltip
-                  content={
-                    showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")
-                  }
-                  contentProps={{ zIndex: 3200 }}
-                >
-                  <HStack gap={2}>
-                    <HStack gap={1} align="center">
-                      <Text fontSize="xs" color="gray.500">
-                        {t("archive.allUsers")}
-                      </Text>
-                      <HelpTooltip helpKey="allUsersToggle" />
+              {/* All Users Toggle - Only visible to superusers */}
+              {canViewAllUsers && (
+                <HStack justifyContent="flex-end" mt={2}>
+                  <Tooltip
+                    content={
+                      showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")
+                    }
+                    contentProps={{ zIndex: 3200 }}
+                  >
+                    <HStack gap={2}>
+                      <HStack gap={1} align="center">
+                        <Text fontSize="xs" color="gray.500">
+                          {t("archive.allUsers")}
+                        </Text>
+                        <HelpTooltip helpKey="allUsersToggle" />
+                      </HStack>
+                      <Switch.Root
+                        key={`switch-${showAllUsers}`}
+                        size="sm"
+                        colorPalette="blue"
+                        checked={showAllUsers}
+                      >
+                        <Switch.HiddenInput checked={showAllUsers} onChange={toggleShowAllUsers} />
+                        <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                      </Switch.Root>
                     </HStack>
-                    <Switch.Root
-                      key={`switch-${showAllUsers}`}
-                      size="sm"
-                      colorPalette="blue"
-                      checked={showAllUsers}
-                    >
-                      <Switch.HiddenInput checked={showAllUsers} onChange={toggleShowAllUsers} />
-                      <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                    </Switch.Root>
-                  </HStack>
-                </Tooltip>
-              </HStack>
+                  </Tooltip>
+                </HStack>
+              )}
             </Dialog.Header>
             <Dialog.Body>
               <KnowledgeBaseTable

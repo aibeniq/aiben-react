@@ -595,23 +595,38 @@ async def prefetch_knowledge_base_context(
                     combined_contexts = "\n\n".join(
                         [ctx for ctx in chunk_contexts if ctx]
                     )
-                    
+
                     # Check if combined contexts are too large and need hierarchical synthesis
                     from app.services.text_processing import estimate_tokens
-                    combined_tokens = estimate_tokens(combined_contexts, model=getattr(llm, "model_name", "gpt-4o"))
-                    max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
-                    
-                    print(f"📊 VeraDoc context combination: {combined_tokens:,} tokens (limit: {max_allowed:,})")
-                    
+
+                    combined_tokens = estimate_tokens(
+                        combined_contexts, model=getattr(llm, "model_name", "gpt-4o")
+                    )
+                    max_allowed = getattr(
+                        settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000
+                    )
+
+                    print(
+                        f"📊 VeraDoc context combination: {combined_tokens:,} tokens (limit: {max_allowed:,})"
+                    )
+
                     if combined_tokens > max_allowed:
                         # Use hierarchical synthesis to combine chunk contexts
-                        print(f"⚠️ Combined context too large ({combined_tokens:,} tokens) - using hierarchical synthesis")
+                        print(
+                            f"⚠️ Combined context too large ({combined_tokens:,} tokens) - using hierarchical synthesis"
+                        )
                         from app.services.synthesis import hierarchical_synthesis
-                        
-                        user_language = getattr(current_user, "preferred_language", None) or "en"
-                        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
-                        language_instruction = f"Respond in this language: {language_name}."
-                        
+
+                        user_language = (
+                            getattr(current_user, "preferred_language", None) or "en"
+                        )
+                        language_name = settings.SUPPORTED_LANGUAGES.get(
+                            user_language, "English"
+                        )
+                        language_instruction = (
+                            f"Respond in this language: {language_name}."
+                        )
+
                         question_context = hierarchical_synthesis(
                             chunk_analyses=chunk_contexts,
                             question=question_text,
@@ -1826,39 +1841,61 @@ async def process_rag_checklist(
                             )
 
                         # Check if document + prompt would exceed token limits
-                        from app.services.text_processing import estimate_tokens, chunk_text
-                        
+                        from app.services.text_processing import (
+                            estimate_tokens,
+                            chunk_text,
+                        )
+
                         # Estimate total tokens for the prompt
                         test_prompt = qa_prompt_template.format(
-                            document_text=document_text[:1000],  # Small sample for template estimation
+                            document_text=document_text[
+                                :1000
+                            ],  # Small sample for template estimation
                             question=question_text,
                             question_context=question_context,
                             custom_instructions_section=custom_instructions_section,
                             language_instruction=language_instruction,
                         )
-                        template_overhead = estimate_tokens(test_prompt, model=getattr(llm, "model_name", "gpt-4o")) - 250  # Subtract sample text tokens
-                        document_tokens = estimate_tokens(document_text, model=getattr(llm, "model_name", "gpt-4o"))
+                        template_overhead = (
+                            estimate_tokens(
+                                test_prompt, model=getattr(llm, "model_name", "gpt-4o")
+                            )
+                            - 250
+                        )  # Subtract sample text tokens
+                        document_tokens = estimate_tokens(
+                            document_text, model=getattr(llm, "model_name", "gpt-4o")
+                        )
                         total_estimated_tokens = template_overhead + document_tokens
-                        
+
                         # Get the per-request limit
-                        max_per_request = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 60000)
-                        
-                        print(f"📊 Document tokens: {document_tokens:,}, Template overhead: {template_overhead:,}, Total: {total_estimated_tokens:,}, Limit: {max_per_request:,}")
-                        
+                        max_per_request = getattr(
+                            settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 60000
+                        )
+
+                        print(
+                            f"📊 Document tokens: {document_tokens:,}, Template overhead: {template_overhead:,}, Total: {total_estimated_tokens:,}, Limit: {max_per_request:,}"
+                        )
+
                         # If document is too large, use chunking + synthesis approach
                         if total_estimated_tokens > max_per_request:
-                            print(f"⚠️ Document too large ({total_estimated_tokens:,} tokens), using chunking + synthesis approach")
-                            
+                            print(
+                                f"⚠️ Document too large ({total_estimated_tokens:,} tokens), using chunking + synthesis approach"
+                            )
+
                             # Chunk the document
-                            chunk_size = max_per_request - template_overhead - 5000  # Reserve for safety
+                            chunk_size = (
+                                max_per_request - template_overhead - 5000
+                            )  # Reserve for safety
                             chunks = chunk_text(document_text, max_tokens=chunk_size)
-                            print(f"📄 Split document into {len(chunks)} chunks for processing")
-                            
+                            print(
+                                f"📄 Split document into {len(chunks)} chunks for processing"
+                            )
+
                             # Process each chunk
                             chunk_answers = []
                             for chunk_idx, chunk in enumerate(chunks):
                                 print(f"Processing chunk {chunk_idx + 1}/{len(chunks)}")
-                                
+
                                 try:
                                     chunk_answer = await invoke_llm_async(
                                         llm,
@@ -1871,19 +1908,29 @@ async def process_rag_checklist(
                                             "language_instruction": language_instruction,
                                         },
                                     )
-                                    chunk_answers.append(f"[Chunk {chunk_idx + 1}]: {chunk_answer}")
-                                    
+                                    chunk_answers.append(
+                                        f"[Chunk {chunk_idx + 1}]: {chunk_answer}"
+                                    )
+
                                     # Check for cancellation
                                     if request and await request.is_disconnected():
-                                        print(f"❌ CLIENT DISCONNECTED - Stopping chunk processing")
-                                        raise HTTPException(status_code=408, detail="Request cancelled")
-                                    
+                                        print(
+                                            f"❌ CLIENT DISCONNECTED - Stopping chunk processing"
+                                        )
+                                        raise HTTPException(
+                                            status_code=408, detail="Request cancelled"
+                                        )
+
                                     await asyncio.sleep(0.05)
-                                    
+
                                 except Exception as chunk_error:
-                                    print(f"Error processing chunk {chunk_idx + 1}: {chunk_error}")
-                                    chunk_answers.append(f"[Chunk {chunk_idx + 1}]: Error - {str(chunk_error)}")
-                            
+                                    print(
+                                        f"Error processing chunk {chunk_idx + 1}: {chunk_error}"
+                                    )
+                                    chunk_answers.append(
+                                        f"[Chunk {chunk_idx + 1}]: Error - {str(chunk_error)}"
+                                    )
+
                             # Synthesize chunk answers
                             print(f"🔄 Synthesizing {len(chunk_answers)} chunk answers")
                             synthesis_prompt = f"""Based on the following analysis of different sections of a document, provide a comprehensive answer to the question.
@@ -1900,7 +1947,7 @@ Provide a unified, coherent answer that synthesizes the information from all sec
 {language_instruction}
 
 Unified Answer:"""
-                            
+
                             answer = await invoke_llm_async(
                                 llm,
                                 synthesis_prompt,
@@ -1908,9 +1955,11 @@ Unified Answer:"""
                             )
                         else:
                             # Document is small enough, process normally
-                            print(f"✅ Document size OK ({total_estimated_tokens:,} tokens), processing normally")
+                            print(
+                                f"✅ Document size OK ({total_estimated_tokens:,} tokens), processing normally"
+                            )
 
-                        # DEBUG: Print the full prompt sent to the LLM (only for non-chunked case)
+                            # DEBUG: Print the full prompt sent to the LLM (only for non-chunked case)
                             try:
                                 rendered_prompt = qa_prompt_template.format(
                                     document_text=document_text,
@@ -1922,7 +1971,9 @@ Unified Answer:"""
                             except Exception as e:
                                 rendered_prompt = f"[ERROR rendering prompt: {e}]"
                             # Clean surrogates from rendered_prompt before printing to avoid UnicodeEncodeError
-                            clean_prompt = re.sub(r"[\ud800-\udfff]", "", rendered_prompt)
+                            clean_prompt = re.sub(
+                                r"[\ud800-\udfff]", "", rendered_prompt
+                            )
                             # print(
                             #    "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
                             # )
@@ -1995,9 +2046,7 @@ Unified Answer:"""
                                     "filename": file.filename,
                                     "custom_instructions": (
                                         request_data.custom_instructions
-                                        if hasattr(
-                                            request_data, "custom_instructions"
-                                        )
+                                        if hasattr(request_data, "custom_instructions")
                                         else ""
                                     ),
                                     "language_instruction": language_instruction,
@@ -2424,6 +2473,12 @@ async def get_veradoc_history(
 ):
     """Retrieve past VeraDoc evaluation history for the current user or all users."""
     print("Retrieving VeraDoc history. Show all:", show_all)
+
+    # Only superusers can view all users' history
+    if show_all and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail="Only superusers can view all users' history"
+        )
 
     try:
         # Start with base query
@@ -3572,8 +3627,12 @@ async def generate_questions_with_files(
                 )
 
                 # Get user language and create language instruction
-                user_language = getattr(current_user, "preferred_language", None) or "en"
-                language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+                user_language = (
+                    getattr(current_user, "preferred_language", None) or "en"
+                )
+                language_name = settings.SUPPORTED_LANGUAGES.get(
+                    user_language, "English"
+                )
                 language_instruction = f"Respond in this language: {language_name}."
 
                 # Process each chunk to generate questions
@@ -3648,8 +3707,10 @@ async def generate_questions_with_files(
                     if len(unique_questions) > (num_questions or 50):
                         # Check if the synthesis prompt would exceed token limits
                         from app.services.text_processing import estimate_tokens
-                        
-                        questions_list_text = chr(10).join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)])
+
+                        questions_list_text = chr(10).join(
+                            [f"{i+1}. {q}" for i, q in enumerate(unique_questions)]
+                        )
                         synthesis_prompt_variables = {
                             "description": description,
                             "checklist_type": checklist_type,
@@ -3672,14 +3733,22 @@ Requirements:
 
 Return only the final selected questions, one per line, numbered."""
 
-                        estimated_tokens = estimate_tokens(synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o"))
-                        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
-                        
-                        print(f"📊 VeraDoc question synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
-                        
+                        estimated_tokens = estimate_tokens(
+                            synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o")
+                        )
+                        max_allowed = getattr(
+                            settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000
+                        )
+
+                        print(
+                            f"📊 VeraDoc question synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})"
+                        )
+
                         if estimated_tokens > max_allowed:
                             # Too many questions - just truncate to requested number instead of synthesis
-                            print(f"⚠️ Question synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation")
+                            print(
+                                f"⚠️ Question synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation"
+                            )
                             questions = unique_questions[: num_questions or 20]
                         else:
                             # Synthesis is safe

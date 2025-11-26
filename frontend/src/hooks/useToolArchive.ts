@@ -8,6 +8,7 @@ import {
   TwincheckService,
   VeradocService,
 } from "../client"
+import useAuth from "./useAuth"
 import useCustomToast from "./useCustomToast"
 
 // Types for each tool's data
@@ -39,11 +40,13 @@ interface UseToolArchiveReturn {
   setLoadingDownload: (loading: boolean) => void
   showAllUsers: boolean
   toggleShowAllUsers: () => void
+  canViewAllUsers: boolean
 }
 
 export const useToolArchive = (): UseToolArchiveReturn => {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { user: currentUser } = useAuth()
 
   // Veradoc (Review) state
   const [veradocHistory, setVeradocHistory] = useState<
@@ -87,6 +90,8 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const [loadingDownload, setLoadingDownload] = useState(false)
   const [activeTab, setActiveTabInternal] = useState("review")
   const [showAllUsers, setShowAllUsers] = useState(false)
+  
+  const canViewAllUsers = currentUser?.is_superuser ?? false
 
   // Wrapper for setActiveTab to log state changes
   const setActiveTab = (newTab: string) => {
@@ -448,5 +453,6 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     setLoadingDownload,
     showAllUsers,
     toggleShowAllUsers,
+    canViewAllUsers,
   }
 }

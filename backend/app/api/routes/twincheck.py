@@ -582,31 +582,40 @@ async def compare_documents(
                 # Check if synthesis is actually needed based on token count
                 # Format chunk results for token estimation
                 formatted_chunks = "\n\n".join(
-                    [f"CHUNK {r['chunk_index']} ANALYSIS:\n{r['analysis']}" 
-                     for r in chunk_results]
+                    [
+                        f"CHUNK {r['chunk_index']} ANALYSIS:\n{r['analysis']}"
+                        for r in chunk_results
+                    ]
                 )
-                
+
                 estimated_tokens = estimate_tokens(
-                    formatted_chunks, 
-                    model=getattr(llm, "model_name", "gpt-4")
+                    formatted_chunks, model=getattr(llm, "model_name", "gpt-4")
                 )
-                max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
-                
-                print(f"📊 Topic '{topic}': {len(chunk_results)} chunks = {estimated_tokens:,} tokens (limit: {max_allowed:,})")
-                
+                max_allowed = getattr(settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000)
+
+                print(
+                    f"📊 Topic '{topic}': {len(chunk_results)} chunks = {estimated_tokens:,} tokens (limit: {max_allowed:,})"
+                )
+
                 # Only synthesize if chunks are large OR there are many chunks
                 # Otherwise just concatenate them - they fit in context anyway
-                needs_synthesis = estimated_tokens > (max_allowed * 0.6) or len(chunk_results) > 5
-                
+                needs_synthesis = (
+                    estimated_tokens > (max_allowed * 0.6) or len(chunk_results) > 5
+                )
+
                 try:
                     if needs_synthesis:
-                        print(f"⚠️ Using LLM synthesis for {len(chunk_results)} chunks ({estimated_tokens:,} tokens)")
+                        print(
+                            f"⚠️ Using LLM synthesis for {len(chunk_results)} chunks ({estimated_tokens:,} tokens)"
+                        )
                         synthesis_prompt = create_synthesis_prompt(
                             chunk_results, document1.filename, document2.filename, topic
                         )
                         synthesized_result = invoke_llm(llm, synthesis_prompt, {})
                     else:
-                        print(f"✅ Skipping synthesis - chunks fit in context ({estimated_tokens:,} tokens, {len(chunk_results)} chunks)")
+                        print(
+                            f"✅ Skipping synthesis - chunks fit in context ({estimated_tokens:,} tokens, {len(chunk_results)} chunks)"
+                        )
                         # Just concatenate the chunk analyses - no LLM call needed
                         synthesized_result = formatted_chunks
 
@@ -871,19 +880,24 @@ async def compare_documents(
             # Check if the topic summaries are small enough to use directly
             # or if we need LLM synthesis
             summaries_tokens = estimate_tokens(
-                topic_summaries,
-                model=getattr(llm, "model_name", "gpt-4")
+                topic_summaries, model=getattr(llm, "model_name", "gpt-4")
             )
-            max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
-            
-            print(f"📊 Summary generation: {summaries_tokens:,} tokens in topic analyses (limit: {max_allowed:,})")
-            
+            max_allowed = getattr(settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000)
+
+            print(
+                f"📊 Summary generation: {summaries_tokens:,} tokens in topic analyses (limit: {max_allowed:,})"
+            )
+
             # Only synthesize if topic summaries are large enough to benefit from it
             # For small summaries, just use the topic analyses directly
-            needs_summary_synthesis = summaries_tokens > (max_allowed * 0.4) or len(topic_analysis) > 8
-            
+            needs_summary_synthesis = (
+                summaries_tokens > (max_allowed * 0.4) or len(topic_analysis) > 8
+            )
+
             if needs_summary_synthesis:
-                print(f"⚠️ Using LLM synthesis for summary ({summaries_tokens:,} tokens, {len(topic_analysis)} topics)")
+                print(
+                    f"⚠️ Using LLM synthesis for summary ({summaries_tokens:,} tokens, {len(topic_analysis)} topics)"
+                )
                 summary_prompt = f"""
                 You are creating a comprehensive summary of a document comparison that was processed in chunks due to size.
                 
@@ -918,7 +932,9 @@ async def compare_documents(
                 except Exception as e:
                     summary = f"Summary generation error: {str(e)}\n\nPlease refer to the individual topic analyses below for detailed insights."
             else:
-                print(f"✅ Skipping summary synthesis - topic analyses are concise ({summaries_tokens:,} tokens, {len(topic_analysis)} topics)")
+                print(
+                    f"✅ Skipping summary synthesis - topic analyses are concise ({summaries_tokens:,} tokens, {len(topic_analysis)} topics)"
+                )
                 # Just use the topic summaries directly - they're already comprehensive
                 summary = f"Comparison of {document1.filename} and {document2.filename}:\n\n{topic_summaries}"
         else:
@@ -1041,6 +1057,12 @@ async def get_comparison_history(
 ):
     """Retrieve past document comparison history for the current user or all users."""
     print("Retrieving TwinCheck history. Show all:", show_all)
+
+    # Only superusers can view all users' history
+    if show_all and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail="Only superusers can view all users' history"
+        )
 
     try:
         # Start with base query
@@ -1881,8 +1903,10 @@ async def generate_topics(
                     if len(unique_topics) > (num_topics or 20):
                         # Check if the synthesis prompt would exceed token limits
                         from app.services.text_processing import estimate_tokens
-                        
-                        topics_list_text = chr(10).join([f"{i+1}. {t}" for i, t in enumerate(unique_topics)])
+
+                        topics_list_text = chr(10).join(
+                            [f"{i+1}. {t}" for i, t in enumerate(unique_topics)]
+                        )
                         synthesis_prompt = f"""From the following list of comparison topics, select and refine the {num_topics or 10} most important and relevant topics for {comparison_type} comparison based on: {description}
 
 Topics to review:
@@ -1896,14 +1920,22 @@ Requirements:
 
 Return only the final selected topics, one per line, numbered."""
 
-                        estimated_tokens = estimate_tokens(synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o"))
-                        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
-                        
-                        print(f"📊 TwinCheck topic synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
-                        
+                        estimated_tokens = estimate_tokens(
+                            synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o")
+                        )
+                        max_allowed = getattr(
+                            settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000
+                        )
+
+                        print(
+                            f"📊 TwinCheck topic synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})"
+                        )
+
                         if estimated_tokens > max_allowed:
                             # Too many topics - just truncate to requested number instead of synthesis
-                            print(f"⚠️ Topic synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation")
+                            print(
+                                f"⚠️ Topic synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation"
+                            )
                             topics = unique_topics[: num_topics or 10]
                         else:
                             # Synthesis is safe

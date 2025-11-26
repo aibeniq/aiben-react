@@ -222,12 +222,12 @@ async def get_reportgenie_progress(
         raise HTTPException(status_code=404, detail="Task not found")
 
     # Debug logging to see what's actually being returned
-    #print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
-    #print(
+    # print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
+    # print(
     #    f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
-    #)
-    #print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
-    #print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+    # )
+    # print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    # print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
 
     # Check each stage completion status
     stages = progress_data.get("stages", {})
@@ -372,6 +372,7 @@ async def extract_text_from_file_async(file_content: bytes, filename: str) -> st
         raise HTTPException(
             status_code=400, detail=f"Error extracting text from {filename}: {str(e)}"
         )
+
 
 # Import hierarchical synthesis from shared utilities
 from app.services.synthesis import hierarchical_synthesis
@@ -743,7 +744,7 @@ async def generate_report(
                             # Initialize variables before try block to avoid UnboundLocalError
                             synthesized_answer = None
                             source_citations = []
-                            
+
                             try:
                                 user_language = current_user.preferred_language or "en"
                                 language_name = settings.SUPPORTED_LANGUAGES.get(
@@ -755,7 +756,7 @@ async def generate_report(
 
                                 # Check if synthesis prompt would exceed token limits
                                 chunk_analyses_text = "\n\n".join(chunk_analyses)
-                                
+
                                 # Build the synthesis prompt to estimate its size
                                 test_synthesis_prompt = settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE.format(
                                     chunk_analyses=chunk_analyses_text,
@@ -763,23 +764,29 @@ async def generate_report(
                                     language_instruction=language_instruction,
                                     insufficient_info_phrase=settings.LLM_INSUFFICIENT_INFO_PHRASE,
                                 )
-                                
+
                                 estimated_synthesis_tokens = estimate_tokens(
                                     test_synthesis_prompt,
-                                    model=getattr(llm, "model_name", "gpt-4o")
+                                    model=getattr(llm, "model_name", "gpt-4o"),
                                 )
-                                
-                                max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
+
+                                max_allowed = getattr(
+                                    settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000
+                                )
                                 # Add safety margin (15%) to account for actual token usage vs estimation
                                 # The actual request includes system messages, completion allocation, etc.
                                 safety_margin = 0.85
                                 effective_limit = int(max_allowed * safety_margin)
-                                
-                                print(f"📊 Synthesis prompt: {estimated_synthesis_tokens:,} tokens (limit: {max_allowed:,}, effective: {effective_limit:,})")
-                                
+
+                                print(
+                                    f"📊 Synthesis prompt: {estimated_synthesis_tokens:,} tokens (limit: {max_allowed:,}, effective: {effective_limit:,})"
+                                )
+
                                 if estimated_synthesis_tokens > effective_limit:
                                     # Use hierarchical synthesis for very large documents
-                                    print(f"⚠️ Synthesis prompt too large ({estimated_synthesis_tokens:,} tokens) - using hierarchical synthesis")
+                                    print(
+                                        f"⚠️ Synthesis prompt too large ({estimated_synthesis_tokens:,} tokens) - using hierarchical synthesis"
+                                    )
                                     synthesized_answer = hierarchical_synthesis(
                                         chunk_analyses=chunk_analyses,
                                         question=section_description,
@@ -871,12 +878,17 @@ async def generate_report(
                                 # Handle failed synthesis - provide error message
                                 if synthesized_answer is None:
                                     # LLM call failed, provide appropriate error message
-                                    user_language = current_user.preferred_language or "en"
+                                    user_language = (
+                                        current_user.preferred_language or "en"
+                                    )
                                     error_message = translate_frontend(
                                         "errors.processingError",
                                         language=user_language,
                                     )
-                                    section_content = error_message or "An error occurred during content generation. Please try again."
+                                    section_content = (
+                                        error_message
+                                        or "An error occurred during content generation. Please try again."
+                                    )
                                 else:
                                     section_content = synthesized_answer
 
@@ -1091,7 +1103,7 @@ async def generate_report(
             print(
                 f"🔍 Section {i+1}: '{section.get('title', 'No title')}' has {citations_count} citations"
             )
-            #if citations_count > 0:
+            # if citations_count > 0:
             #    print(f"🔍 Sample citation: {section['source_citations'][0]}")
 
         # Get outline name if outline_id is provided
@@ -1209,6 +1221,12 @@ async def get_report_history(
 ):
     """Retrieve past ReportGenie generation history for the current user or all users."""
     print("Retrieving ReportGenie history. Show all:", show_all)
+
+    # Only superusers can view all users' history
+    if show_all and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail="Only superusers can view all users' history"
+        )
 
     try:
         # Start with base query
@@ -2012,8 +2030,10 @@ async def generate_outline(
                     if len(unique_sections) > (num_sections or 15):
                         # Check if the synthesis prompt would exceed token limits
                         from app.services.text_processing import estimate_tokens
-                        
-                        sections_list_text = chr(10).join([f"{i+1}. {s}" for i, s in enumerate(unique_sections)])
+
+                        sections_list_text = chr(10).join(
+                            [f"{i+1}. {s}" for i, s in enumerate(unique_sections)]
+                        )
                         synthesis_prompt = f"""From the following list of outline sections, select and refine the {num_sections or 8} most important and relevant sections for a {report_type} report based on: {description}
 
 Sections to review:
@@ -2027,14 +2047,22 @@ Requirements:
 
 Return only the final selected sections, one per line, numbered."""
 
-                        estimated_tokens = estimate_tokens(synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o"))
-                        max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
-                        
-                        print(f"📊 ReportGenie outline synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})")
-                        
+                        estimated_tokens = estimate_tokens(
+                            synthesis_prompt, model=getattr(llm, "model_name", "gpt-4o")
+                        )
+                        max_allowed = getattr(
+                            settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000
+                        )
+
+                        print(
+                            f"📊 ReportGenie outline synthesis: {estimated_tokens:,} tokens (limit: {max_allowed:,})"
+                        )
+
                         if estimated_tokens > max_allowed:
                             # Too many sections - just truncate to requested number instead of synthesis
-                            print(f"⚠️ Outline synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation")
+                            print(
+                                f"⚠️ Outline synthesis prompt too large ({estimated_tokens:,} tokens) - using simple truncation"
+                            )
                             sections = unique_sections[: num_sections or 8]
                         else:
                             # Synthesis is safe
@@ -2593,9 +2621,9 @@ async def optimize_outline(
                                 if len(text_chunks[0]) > 200
                                 else text_chunks[0]
                             )
-                            #print(
+                            # print(
                             #    f"🔍 First chunk preview ({len(text_chunks[0])} chars): {first_chunk_preview}..."
-                            #)
+                            # )
 
                         # LLM-based relevance filtering for ReportGenie full text scan
                         # Filter chunks before analysis to avoid processing irrelevant content
@@ -2789,7 +2817,7 @@ async def optimize_outline(
                         else:
                             # Check if synthesis prompt would exceed token limits
                             chunk_analyses_text = "\n\n".join(chunk_analyses)
-                            
+
                             # Build the synthesis prompt to estimate its size
                             test_synthesis_prompt = settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE.format(
                                 chunk_analyses=chunk_analyses_text,
@@ -2797,19 +2825,25 @@ async def optimize_outline(
                                 language_instruction=language_instruction,
                                 insufficient_info_phrase=settings.LLM_INSUFFICIENT_INFO_PHRASE,
                             )
-                            
+
                             estimated_synthesis_tokens = estimate_tokens(
                                 test_synthesis_prompt,
-                                model=getattr(llm, "model_name", "gpt-4o")
+                                model=getattr(llm, "model_name", "gpt-4o"),
                             )
-                            
-                            max_allowed = getattr(settings, 'OPENAI_MAX_TOKENS_PER_REQUEST', 80000)
-                            
-                            print(f"📊 Synthesis prompt: {estimated_synthesis_tokens:,} tokens (limit: {max_allowed:,})")
-                            
+
+                            max_allowed = getattr(
+                                settings, "OPENAI_MAX_TOKENS_PER_REQUEST", 80000
+                            )
+
+                            print(
+                                f"📊 Synthesis prompt: {estimated_synthesis_tokens:,} tokens (limit: {max_allowed:,})"
+                            )
+
                             if estimated_synthesis_tokens > max_allowed:
                                 # Use hierarchical synthesis for very large documents
-                                print(f"⚠️ Synthesis prompt too large ({estimated_synthesis_tokens:,} tokens) - using hierarchical synthesis")
+                                print(
+                                    f"⚠️ Synthesis prompt too large ({estimated_synthesis_tokens:,} tokens) - using hierarchical synthesis"
+                                )
                                 synthesized_answer = hierarchical_synthesis(
                                     chunk_analyses=chunk_analyses,
                                     question=section_description,

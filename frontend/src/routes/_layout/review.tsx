@@ -78,7 +78,7 @@ const VeraDoc = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     reviewInputs?.selectedKnowledgeBase || null,
   )
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers, canViewAllUsers } = useKnowledgeBases() // Respect All Users toggle state
   const { registerOperation } = useOperationCancellation()
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
@@ -931,6 +931,7 @@ const VeraDoc = () => {
           onSelectionChange={setSelectedKnowledgeBase}
           showAllUsers={showAllUsers}
           toggleShowAllUsers={toggleShowAllUsers}
+          canViewAllUsers={canViewAllUsers}
         />
 
         <SelectionModal

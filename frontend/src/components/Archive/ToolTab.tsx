@@ -13,6 +13,7 @@ interface ToolTabProps {
   children: ReactNode
   showAllUsers?: boolean
   onToggleShowAllUsers?: () => void
+  canViewAllUsers?: boolean
 }
 
 const ToolTab: React.FC<ToolTabProps> = ({
@@ -25,6 +26,7 @@ const ToolTab: React.FC<ToolTabProps> = ({
   children,
   showAllUsers,
   onToggleShowAllUsers,
+  canViewAllUsers,
 }) => {
   // Log when the component renders with showAllUsers prop
   console.log(`ToolTab rendering with showAllUsers: ${showAllUsers}`)
@@ -41,6 +43,7 @@ const ToolTab: React.FC<ToolTabProps> = ({
           emptyMessage={emptyMessage}
           showAllUsers={showAllUsers}
           onToggleShowAllUsers={onToggleShowAllUsers}
+          canViewAllUsers={canViewAllUsers}
         />
       </Box>
       <Box flex={1}>{children}</Box>

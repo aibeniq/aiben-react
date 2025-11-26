@@ -160,7 +160,9 @@ async def extract_fields_from_digitized_document(
     Supports both full text processing and vector search modes.
     """
     # Log the search mode being used
-    print(f"🔍 FormConnect Match: search_mode='{search_mode}' for file '{file.filename}'")
+    print(
+        f"🔍 FormConnect Match: search_mode='{search_mode}' for file '{file.filename}'"
+    )
 
     # Read the file content
     content = await file.read()
@@ -1787,6 +1789,12 @@ async def get_form_history(
 ):
     """Retrieve past form processing history for the current user or all users."""
     print("Retrieving FormConnect history. Show all:", show_all)
+
+    # Only superusers can view all users' history
+    if show_all and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail="Only superusers can view all users' history"
+        )
 
     try:
         # Start with base query

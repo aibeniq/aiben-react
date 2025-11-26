@@ -45,6 +45,7 @@ function Archive() {
     setLoadingDownload,
     showAllUsers,
     toggleShowAllUsers,
+    canViewAllUsers,
   } = useToolArchive()
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -75,8 +76,7 @@ function Archive() {
           ""
       } else if (activeTab === "compare" && twincheck.selectedReport) {
         fullText = `# ${t("archive.docxHeaders.summary")}\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# ${t("archive.docxHeaders.topicAnalysis")}\n\n`
-        const topicResults =
-          twincheck.selectedReport.results?.topic_analysis || []
+        const topicResults = twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {
           fullText += `## ${t("archive.labels.topicLabel")}: ${topic.topic}\n\n${topic.analysis}\n\n`
         })
@@ -111,9 +111,7 @@ function Archive() {
         // Check if full qa_pairs are loaded; if not, fetch them
         let qaPairs = (veradoc.selectedReport.results as any)?.qa_pairs || []
         if (qaPairs.length === 0) {
-          console.log(
-            "QA pairs not loaded; fetching full report for DOCX download...",
-          )
+          console.log("QA pairs not loaded; fetching full report for DOCX download...")
           try {
             const fullReport = await VeradocService.getVeradocDetail({
               reportId: String(veradoc.selectedReport.id),
@@ -152,8 +150,7 @@ function Archive() {
       } else if (activeTab === "compare" && twincheck.selectedReport) {
         // Prepare combined text with summary and all topic analyses
         fullText = `# ${t("archive.docxHeaders.summary")}\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# ${t("archive.docxHeaders.topicAnalysis")}\n\n`
-        const topicResults =
-          twincheck.selectedReport.results?.topic_analysis || []
+        const topicResults = twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {
           fullText += `## ${t("archive.labels.topicLabel")}: ${topic.topic}\n\n${topic.analysis}\n\n`
         })
@@ -178,10 +175,7 @@ function Archive() {
       console.log("Received DOCX response:", response)
       console.log("Response type:", typeof response)
       console.log("Response instanceof Blob:", response instanceof Blob)
-      console.log(
-        "Response instanceof ArrayBuffer:",
-        response instanceof ArrayBuffer,
-      )
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
 
       // Handle the response blob
       let blob
@@ -283,23 +277,19 @@ function Archive() {
         // VeraDoc CSV download
         let qaPairs = (selectedReport.results as any)?.qa_pairs || []
         let finalEvaluation = selectedReport.results?.final_evaluation || ""
-        const qaPairsSummary =
-          (selectedReport.results as any)?.qa_pairs_summary || []
+        const qaPairsSummary = (selectedReport.results as any)?.qa_pairs_summary || []
 
         // Check if we only have qa_pairs_summary (lazy loading) and need to fetch full data
         // This happens when the report was loaded with include_qa_pairs=false
         if (qaPairs.length === 0 && qaPairsSummary.length > 0) {
-          console.log(
-            "📦 Only qa_pairs_summary available, fetching full QA pairs for CSV...",
-          )
+          console.log("📦 Only qa_pairs_summary available, fetching full QA pairs for CSV...")
           try {
             const fetchedReport = await VeradocService.getVeradocDetail({
               reportId: selectedReport.id,
               includeQaPairs: true,
             })
             qaPairs = (fetchedReport.results as any)?.qa_pairs || []
-            finalEvaluation =
-              (fetchedReport.results as any)?.final_evaluation || ""
+            finalEvaluation = (fetchedReport.results as any)?.final_evaluation || ""
             console.log(`Fetched ${qaPairs.length} QA pairs for CSV download`)
           } catch (error) {
             console.error("Failed to fetch full QA pairs for CSV:", error)
@@ -353,10 +343,7 @@ function Archive() {
       console.log("Received CSV response:", response)
       console.log("Response type:", typeof response)
       console.log("Response instanceof Blob:", response instanceof Blob)
-      console.log(
-        "Response instanceof ArrayBuffer:",
-        response instanceof ArrayBuffer,
-      )
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
 
       // Handle the response blob
       let blob
@@ -382,9 +369,7 @@ function Archive() {
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       const filename =
-        activeTab === "generate"
-          ? `report_${timestamp}.csv`
-          : `veradoc_review_${timestamp}.csv`
+        activeTab === "generate" ? `report_${timestamp}.csv` : `veradoc_review_${timestamp}.csv`
 
       a.href = url
       a.download = filename
@@ -456,40 +441,26 @@ function Archive() {
         {...props}
       />
     ),
-    td: (props: any) => (
-      <Box as="td" p={4} borderBottomWidth="1px" {...props} />
-    ),
+    td: (props: any) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }
 
   const renderToolResults = () => {
     switch (activeTab) {
       case "review":
         return veradoc.selectedReport ? (
-          <VeradocResults
-            selectedReport={veradoc.selectedReport}
-            components={components}
-          />
+          <VeradocResults selectedReport={veradoc.selectedReport} components={components} />
         ) : null
       case "generate":
         return reportgenie.selectedReport ? (
-          <ReportgenieResults
-            selectedReport={reportgenie.selectedReport}
-            components={components}
-          />
+          <ReportgenieResults selectedReport={reportgenie.selectedReport} components={components} />
         ) : null
       case "compare":
         return twincheck.selectedReport ? (
-          <TwincheckResults
-            selectedReport={twincheck.selectedReport}
-            components={components}
-          />
+          <TwincheckResults selectedReport={twincheck.selectedReport} components={components} />
         ) : null
       case "match":
         return formconnect.selectedReport ? (
-          <FormconnectResults
-            selectedReport={formconnect.selectedReport}
-            components={components}
-          />
+          <FormconnectResults selectedReport={formconnect.selectedReport} components={components} />
         ) : null
       default:
         return null
@@ -516,9 +487,7 @@ function Archive() {
           activeTab === "match"
         }
         onFeedbackSubmitted={(type) => {
-          console.log(
-            "Feedback submitted for archive item, invalidating query cache",
-          )
+          console.log("Feedback submitted for archive item, invalidating query cache")
 
           // Invalidate the history queries to refresh the archive list
           if (activeTab === "review") {
@@ -584,6 +553,7 @@ function Archive() {
               emptyMessage={t("archive.emptyMessages.review")}
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
+              canViewAllUsers={canViewAllUsers}
             >
               {renderResults()}
             </ToolTab>
@@ -592,18 +562,12 @@ function Archive() {
           <Tabs.Content value="generate">
             {(() => {
               console.log("🎯 GENERATE TAB: Rendering tab content")
-              console.log(
-                "📊 GENERATE TAB: reportgenie.history:",
-                reportgenie.history,
-              )
+              console.log("📊 GENERATE TAB: reportgenie.history:", reportgenie.history)
               console.log(
                 "📊 GENERATE TAB: reportgenie.history length:",
                 reportgenie.history?.length,
               )
-              console.log(
-                "📊 GENERATE TAB: reportgenie.isLoading:",
-                reportgenie.isLoading,
-              )
+              console.log("📊 GENERATE TAB: reportgenie.isLoading:", reportgenie.isLoading)
               console.log(
                 "📊 GENERATE TAB: reportgenie.selectedReport:",
                 reportgenie.selectedReport,
@@ -619,6 +583,7 @@ function Archive() {
               emptyMessage={t("archive.emptyMessages.generate")}
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
+              canViewAllUsers={canViewAllUsers}
             >
               {renderResults()}
             </ToolTab>
@@ -634,6 +599,7 @@ function Archive() {
               emptyMessage={t("archive.emptyMessages.compare")}
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
+              canViewAllUsers={canViewAllUsers}
             >
               {renderResults()}
             </ToolTab>
@@ -649,6 +615,7 @@ function Archive() {
               emptyMessage={t("archive.emptyMessages.match")}
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
+              canViewAllUsers={canViewAllUsers}
             >
               {renderResults()}
             </ToolTab>

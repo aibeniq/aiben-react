@@ -1,16 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { KnowledgeBasesService } from "../client"
+import useAuth from "./useAuth"
 
 interface UseKnowledgeBasesReturn {
   knowledgeBases: any[]
   isLoading: boolean
   showAllUsers: boolean
   toggleShowAllUsers: () => void
+  canViewAllUsers: boolean
 }
 
 export const useKnowledgeBases = (): UseKnowledgeBasesReturn => {
+  const { user: currentUser } = useAuth()
   const [showAllUsers, setShowAllUsers] = useState(false)
+  
+  const canViewAllUsers = currentUser?.is_superuser ?? false
 
   // Toggle handler for showing all users
   const toggleShowAllUsers = () => {
@@ -48,5 +53,6 @@ export const useKnowledgeBases = (): UseKnowledgeBasesReturn => {
     isLoading: knowledgeBasesQuery.isLoading,
     showAllUsers,
     toggleShowAllUsers,
+    canViewAllUsers,
   }
 }
