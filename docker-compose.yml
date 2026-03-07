@@ -188,7 +188,7 @@ services:
       - traefik.http.middlewares.backend-timeout.buffering.retryExpression=IsNetworkError() && Attempts() < 2
 
   frontend:
-    profiles: ["frontend"]
+    #profiles: ["frontend"]
     image: "${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}"
     restart: always
     networks:

@@ -22,6 +22,13 @@ class UserStatus(str, enum.Enum):
     SUSPENDED = "suspended"  # Temporarily disabled
 
 
+class TeamRole(str, enum.Enum):
+    OWNER = "owner"  # Can manage team, add/remove members, delete team
+    ADMIN = "admin"  # Can add/remove members (except owners)
+    MEMBER = "member"  # Can view all team data, create data for team
+    VIEWER = "viewer"  # Read-only access to team data
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -149,6 +156,12 @@ class User(UserBase, table=True):
     failed_login_attempts: int = Field(default=0)
     locked_until: Optional[datetime] = Field(default=None)
 
+    # Team membership
+    current_team_id: uuid.UUID | None = Field(default=None, foreign_key="teams.id")
+    team_memberships: list["TeamMembership"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
+
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
@@ -160,10 +173,111 @@ class UserPublic(UserBase):
     vision_analysis_enabled: bool
     pdf_parsing_preference: str
     default_processing_mode: str
+    current_team_id: uuid.UUID | None = None
 
 
 class UsersPublic(SQLModel):
     data: list[UserPublic]
+    count: int
+
+
+# Team models
+class TeamBase(SQLModel):
+    name: str = Field(max_length=255, min_length=1)
+    description: str | None = Field(default=None, max_length=1000)
+
+
+class TeamCreate(TeamBase):
+    pass
+
+
+class TeamUpdate(SQLModel):
+    name: str | None = Field(default=None, max_length=255, min_length=1)
+    description: str | None = Field(default=None, max_length=1000)
+
+
+class Team(TeamBase, table=True):
+    __tablename__ = "teams"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(max_length=255, unique=True, index=True)
+    description: str | None = Field(default=None, max_length=1000)
+
+    # Team ownership and administration
+    created_by: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    # Soft delete support
+    is_active: bool = Field(default=True)
+    deleted_at: datetime | None = Field(default=None)
+
+    # Relationships
+    members: list["TeamMembership"] = Relationship(back_populates="team", cascade_delete=True)
+
+
+class TeamMembership(SQLModel, table=True):
+    __tablename__ = "team_memberships"
+    __table_args__ = (
+        UniqueConstraint("team_id", "user_id", name="uq_team_user"),
+    )
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    team_id: uuid.UUID = Field(
+        foreign_key="teams.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+
+    role: TeamRole = Field(
+        default=TeamRole.MEMBER,
+        sa_column=Column(
+            SQLAlchemyEnum(
+                TeamRole,
+                native_enum=True,
+                values_callable=lambda x: [e.value for e in x],
+                name="teamrole",
+            ),
+            nullable=False,
+        ),
+    )
+
+    # Audit fields
+    joined_at: datetime = Field(default_factory=datetime.utcnow)
+    added_by: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+
+    # Relationships
+    team: Team | None = Relationship(back_populates="members")
+    user: "User" | None = Relationship(back_populates="team_memberships")
+
+
+# Team membership response models
+class TeamMemberPublic(SQLModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    role: TeamRole
+    joined_at: datetime
+    full_name: str | None = None
+    email: str | None = None
+
+
+class TeamPublic(TeamBase):
+    id: uuid.UUID
+    created_by: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+    is_active: bool
+    member_count: int = 0
+    current_user_role: TeamRole | None = None
+
+
+class TeamDetailPublic(TeamPublic):
+    members: list[TeamMemberPublic] = []
+
+
+class TeamsPublic(SQLModel):
+    data: list[TeamPublic]
     count: int
 
 
