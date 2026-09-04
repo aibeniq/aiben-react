@@ -98,14 +98,14 @@ jobs:
         if: always()
 
       - name: Upload test report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: test-report-py${{ matrix.python-version }}
           path: backend/report.html
         if: always()
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report-py${{ matrix.python-version }}
           path: backend/htmlcov/
