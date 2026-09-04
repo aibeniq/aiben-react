@@ -28,7 +28,7 @@
     "react-dropzone": "^14.3.8",
     "react-error-boundary": "^5.0.0",
     "react-hook-form": "7.49.3",
-    "react-i18next": "^15.7.3",
+    "react-i18next": "^17.0.13",
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
