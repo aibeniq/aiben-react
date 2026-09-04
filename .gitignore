@@ -12,3 +12,13 @@ docker-compose.override.yml
 docker-compose.traefik.yml
 docker-compose.yml
 ssl-certs/
+
+# Runtime data stores and uploaded customer content
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.jsonl
+chroma/
+data/knowledge_bases/
+uploads/
